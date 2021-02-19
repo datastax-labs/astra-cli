@@ -52,14 +52,33 @@ func main() {
 	}
 	confDir := path.Join(home, ".config", "astra")
 	confFile := path.Join(confDir, "sa.json")
+	showDBUsage := func() {
+		fmt.Println("db create")
+		createCmd.PrintDefaults()
+		fmt.Println("db delete <id>")
+		fmt.Println("db park <id>")
+		fmt.Println("db unpark <id>")
+		fmt.Println("db resize <id> <capacity unit>")
+		fmt.Println("db get <id>")
+		getCmd.PrintDefaults()
+		fmt.Println("db list")
+		listCmd.PrintDefaults()
+		fmt.Println("db tiers")
+		tiersCmd.PrintDefaults()
+	}
 	if len(os.Args) == 1 {
 		flag.Usage()
+		fmt.Println("login <json> note:json is optional")
+		loginCmd.PrintDefaults()
+		showDBUsage()
 		os.Exit(1)
 	}
 	switch os.Args[1] {
 	case "login":
 		if err := loginCmd.Parse(os.Args[2:]); err != nil {
-			fmt.Println(err)
+			fmt.Println("login <json> //note:json is optional")
+			loginCmd.PrintDefaults()
+			fmt.Printf("incorrect options with error %v\n", err)
 			os.Exit(2)
 		}
 		var clientJSON string
@@ -124,6 +143,11 @@ func main() {
 		if err != nil {
 			fmt.Printf("authenticate failed with error %v", err)
 			os.Exit(2)
+		}
+		if len(os.Args) == 2 {
+			flag.Usage()
+			showDBUsage()
+			os.Exit(1)
 		}
 		switch os.Args[2] {
 		case "create":
@@ -264,6 +288,11 @@ func ReadLogin(saJsonFile string) (astraops.ClientInfo, error) {
 	if err != nil {
 		return astraops.ClientInfo{}, fmt.Errorf("unable to read login file %s with error %s", saJsonFile, err)
 	}
+	defer func() {
+		if err := f.Close(); err != nil {
+			fmt.Printf("warning unable to close %v with error %v", saJsonFile, err)
+		}
+	}()
 	b, err := io.ReadAll(f)
 	if err != nil {
 		return astraops.ClientInfo{}, fmt.Errorf("unable to read login file %s with error %s", saJsonFile, err)
