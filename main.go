@@ -35,6 +35,14 @@ func main() {
 	clientSecretFlag := loginCmd.String("secret", "", "clientSecret from service account. Ignored if -json flag is used.")
 	clientJSONFlag := loginCmd.String("json", "", "copy the json for service account from the Astra page")
 	createCmd := flag.NewFlagSet("create", flag.ExitOnError)
+	createDbNameFlag := createCmd.String("name", "", "name to give to the Astra Database")
+	createDbKeyspaceFlag := createCmd.String("keyspace", "", "keyspace user to give to the Astra Database")
+	createDbUserFlag := createCmd.String("user", "", "user password to give to the Astra Database")
+	createDbPasswordFlag := createCmd.String("password", "", "db password to give to the Astra Database")
+	createDbRegionFlag := createCmd.String("region", "us-east1", "region to give to the Astra Database")
+	createDbTierFlag := createCmd.String("tier", "free", "tier to give to the Astra Database")
+	createDbCapacityUnitFlag := createCmd.Int("capacityUnit", 1, "capacityUnit flag to give to the Astra Database")
+	createDbCloudProviderFlag := createCmd.String("cloudProvider", "GCP", "cloud provider flag to give to the Astra Database")
 	getCmd := flag.NewFlagSet("get", flag.ExitOnError)
 	getFmt := getCmd.String("format", "text", "Output format for report default is json")
 	listCmd := flag.NewFlagSet("list", flag.ExitOnError)
@@ -155,6 +163,22 @@ func main() {
 				fmt.Println(err)
 				os.Exit(2)
 			}
+			createDb := astraops.CreateDb{
+				Name:          *createDbNameFlag,
+				Keyspace:      *createDbKeyspaceFlag,
+				CapacityUnits: *createDbCapacityUnitFlag,
+				Region:        *createDbRegionFlag,
+				User:          *createDbUserFlag,
+				Password:      *createDbPasswordFlag,
+				Tier:          *createDbTierFlag,
+				CloudProvider: *createDbCloudProviderFlag,
+			}
+			id, _, err := client.CreateDb(createDb)
+			if err != nil {
+				fmt.Printf("unable to create '%v' with error %v\n", createDb, err)
+				os.Exit(2)
+			}
+			fmt.Printf("database %v created\n", id)
 		case "delete":
 			id := os.Args[3]
 			fmt.Printf("starting to delete database %v\n", id)
