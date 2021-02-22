@@ -1,5 +1,5 @@
-module github.com/rsds143/acm
+module github.com/rsds143/astra-cli
 
 go 1.16
 
-require github.com/rsds143/astra-mgmt-go v0.1.2
+require github.com/rsds143/astra-devops-sdk-go v0.1.5

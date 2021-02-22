@@ -21,11 +21,13 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
-	"github.com/rsds143/astra-mgmt-go/astraops"
+	"github.com/rsds143/astra-cli/pkg"
+	"github.com/rsds143/astra-devops-sdk-go/astraops"
 	"io"
 	"os"
 	"path"
 	"strconv"
+	"strings"
 )
 
 func main() {
@@ -230,8 +232,12 @@ func main() {
 			}
 			switch *getFmt {
 			case "text":
-				fmt.Println("name\tid\tstatus")
-				fmt.Printf("%v\t%v\t%v\n", db.Info.Name, db.ID, db.Status)
+				var rows [][]string
+				rows = append(rows, []string{"name", "id", "status"})
+				rows = append(rows, []string{db.Info.Name, db.ID, db.Status})
+				for _, row := range pkg.PadColumns(rows) {
+					fmt.Println(strings.Join(row, " "))
+				}
 			case "json":
 				b, err := json.MarshalIndent(db, "", "  ")
 				if err != nil {
@@ -248,6 +254,7 @@ func main() {
 				fmt.Println(err)
 				os.Exit(2)
 			}
+			fmt.Println("montréal")
 			var dbs []astraops.DataBase
 			if dbs, err = client.ListDb(*includeFlag, *providerFlag, *startingAfterFlag, int32(*limitFlag)); err != nil {
 				fmt.Printf("unable to get list of dbs with error %v\n", err)
@@ -255,9 +262,13 @@ func main() {
 			}
 			switch *listFmt {
 			case "text":
-				fmt.Println("name\tid\tstatus")
+				var rows [][]string
+				rows = append(rows, []string{"name", "id", "status"})
 				for _, db := range dbs {
-					fmt.Printf("%v\t%v\t%v\n", db.Info.Name, db.ID, db.Status)
+					rows = append(rows, []string{db.Info.Name, db.ID, db.Status})
+				}
+				for _, row := range pkg.PadColumns(rows) {
+					fmt.Println(strings.Join(row, " "))
 				}
 			case "json":
 				b, err := json.MarshalIndent(dbs, "", "  ")
@@ -284,9 +295,30 @@ func main() {
 
 			switch *tiersFmt {
 			case "text":
-				fmt.Println("name\tcloud\tregion\tdb (used)/(limit)\tcap (used)/(limit)")
+				var rows [][]string
+				rows = append(rows, []string{"name", "cloud", "region", "db (used)/(limit)", "cap (used)/(limit)", "cost per month", "cost per minute"})
 				for _, tier := range tiers {
-					fmt.Printf("%v\t%v\t%v\t%v/%v\t%v/%v\n", tier.Tier, tier.CloudProvider, tier.RegionDisplay, tier.DatabaseCountUsed, tier.DatabaseCountLimit, tier.CapacityUnitsUsed, tier.CapacityUnitsLimit)
+					costMonthRaw := tier.Cost.CostPerMonthCents
+					var costMonth float64
+					if costMonthRaw > 0 {
+						costMonth = costMonthRaw / 100.0
+					}
+					costMinRaw := tier.Cost.CostPerMinCents
+					var costMin float64
+					if costMinRaw > 0 {
+						costMin = costMinRaw / 100.0
+					}
+					rows = append(rows, []string{
+						tier.Tier,
+						tier.CloudProvider,
+						tier.RegionDisplay,
+						fmt.Sprintf("%v/%v", tier.DatabaseCountUsed, tier.DatabaseCountLimit),
+						fmt.Sprintf("%v/%v", tier.CapacityUnitsUsed, tier.CapacityUnitsLimit),
+						fmt.Sprintf("$%.2f", costMonth),
+						fmt.Sprintf("$%.2f", costMin)})
+				}
+				for _, row := range pkg.PadColumns(rows) {
+					fmt.Println(strings.Join(row, " "))
 				}
 			case "json":
 				b, err := json.MarshalIndent(tiers, "", "  ")
