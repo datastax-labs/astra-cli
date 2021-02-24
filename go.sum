@@ -2,4 +2,5 @@ github.com/rsds143/astra-devops-sdk-go v0.1.4-0.20210222125150-d3960adebd40 h1:f
 github.com/rsds143/astra-devops-sdk-go v0.1.4-0.20210222125150-d3960adebd40/go.mod h1:LQaUwm75Ydy/z71nl466Xv0yw8ib5b9L6laTFXbvtHU=
 github.com/rsds143/astra-devops-sdk-go v0.1.4 h1:pcle2nixye+eIbq/FB0+Jy0cEJgz1CKjevPXyJI/M+A=
 github.com/rsds143/astra-devops-sdk-go v0.1.4/go.mod h1:LQaUwm75Ydy/z71nl466Xv0yw8ib5b9L6laTFXbvtHU=
+github.com/rsds143/astra-devops-sdk-go v0.1.5 h1:BwE7ApI5r9eMySK9fmOmWpE9vSWh6+nRKeBOCBsoHbE=
 github.com/rsds143/astra-devops-sdk-go v0.1.5/go.mod h1:LQaUwm75Ydy/z71nl466Xv0yw8ib5b9L6laTFXbvtHU=
