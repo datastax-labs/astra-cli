@@ -46,7 +46,7 @@ func CreateUsage() string {
 
 // ExecuteCreate submits a new database to astra
 func ExecuteCreate(args []string, client *astraops.AuthenticatedClient) error {
-	if err := createCmd.Parse(args[1:]); err != nil {
+	if err := createCmd.Parse(args); err != nil {
 		return &pkg.ParseError{
 			Args: args,
 			Err:  err,

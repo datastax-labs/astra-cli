@@ -47,13 +47,19 @@ func ExecuteGet(args []string, client *astraops.AuthenticatedClient) error {
 			Err:  fmt.Errorf("there is no id provided for parking the database"),
 		}
 	}
-
-	id := args[1]
+    if err := getCmd.Parse(args[1:]); err != nil {
+		return &pkg.ParseError{
+			Args: args,
+			Err:  err,
+		}
+	}
+	id := args[0]
 	var db astraops.DataBase
 	var err error
 	if db, err = client.FindDb(id); err != nil {
 		return fmt.Errorf("unable to get '%s' with error %v\n", id, err)
 	}
+	fmt.Println(*getFmt)
 	switch *getFmt {
 	case "text":
 		var rows [][]string
