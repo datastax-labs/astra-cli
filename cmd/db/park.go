@@ -36,7 +36,7 @@ func ExecutePark(args []string, client *astraops.AuthenticatedClient) error {
 			Err:  fmt.Errorf("there is no id provided for parking the database"),
 		}
 	}
-	id := args[1]
+	id := args[0]
 	fmt.Printf("starting to park database %v\n", id)
 	if err := client.Park(id); err != nil {
 		return fmt.Errorf("unable to park '%s' with error %v\n", id, err)
