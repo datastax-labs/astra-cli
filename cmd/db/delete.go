@@ -36,7 +36,7 @@ func ExecuteDelete(args []string, client *astraops.AuthenticatedClient) error {
 			Err:  fmt.Errorf("there is no id provided for deleting the database"),
 		}
 	}
-	id := args[1]
+	id := args[0]
 	fmt.Printf("starting to delete database %v\n", id)
 	if err := client.Terminate(id, false); err != nil {
 		return fmt.Errorf("unable to delete '%s' with error %v", id, err)
