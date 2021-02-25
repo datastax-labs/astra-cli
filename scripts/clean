@@ -1,0 +1,4 @@
+#!/bin/bash
+
+rm -fr ./bin
+mkdir ./bin
