@@ -84,7 +84,7 @@ func ExecuteLogin(args []string, confDir string, confFile string) error {
 		clientSecret := *clientSecretFlag
 		clientJSON = fmt.Sprintf("{\"clientId\":\"%v\",\"clientName\":\"%v\",\"clientSecret\":\"%v:\"}", clientID, clientName, clientSecret)
 	}
-	if err := os.MkdirAll(confDir, 0600); err != nil {
+	if err := os.MkdirAll(confDir, 0700); err != nil {
 		return fmt.Errorf("unable to get make config directory with error %s", err)
 	}
 	f, err := os.Create(confFile)
