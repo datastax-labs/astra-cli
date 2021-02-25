@@ -47,7 +47,7 @@ func ExecuteGet(args []string, client *astraops.AuthenticatedClient) error {
 			Err:  fmt.Errorf("there is no id provided for parking the database"),
 		}
 	}
-    if err := getCmd.Parse(args[1:]); err != nil {
+	if err := getCmd.Parse(args[1:]); err != nil {
 		return &pkg.ParseError{
 			Args: args,
 			Err:  err,
