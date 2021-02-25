@@ -23,6 +23,15 @@ After creating a service account on the Astra page
 
 ```
 ./bin/astra-cli login -id "changed" -name "changed" -secret "changed"
+Login information saved
+```
+
+## login with json
+
+```
+./bin/astra-cli login -json '{"clientId":"changed","clientName":"change@me.com","clientSecret":"changed"}'
+Login information saved
+
 ```
 
 ### creating database
