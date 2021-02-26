@@ -1,3 +1,4 @@
 #!/bin/bash
 
-go test -v ./...
+t="/tmp/go-cover.$$.tmp"
+go test -coverprofile=$t ./... && go tool cover -func=$t && unlink $t 

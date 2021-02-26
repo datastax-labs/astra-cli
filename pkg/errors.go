@@ -33,3 +33,23 @@ func (p *ParseError) Error() string {
 	}
 	return fmt.Sprintf("Unable to parse command line with args: %v. Nested error was '%v'", strings.Join(p.Args, ", "), p.Err)
 }
+
+//JSONParseError when unable to read JSON
+type JSONParseError struct {
+	Original string
+	Err      error
+}
+
+func (j *JSONParseError) Error() string {
+	return fmt.Sprintf("JSON parsing error: %s. Original file %s", j.Err, j.Original)
+}
+
+//FileNotFoundError when unable to read file
+type FileNotFoundError struct {
+	Path string
+	Err  error
+}
+
+func (j *FileNotFoundError) Error() string {
+	return fmt.Sprintf("Unable to find file error: %s. Path to file %s", j.Err, j.Path)
+}
