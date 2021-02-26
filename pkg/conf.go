@@ -39,24 +39,30 @@ func GetHome() (confDir string, confFile string, err error) {
 }
 
 // ReadLogin retrieves the login from the specified json file
-func ReadLogin(saJsonFile string) (astraops.ClientInfo, error) {
-	f, err := os.Open(saJsonFile)
+func ReadLogin(saJSONFile string) (astraops.ClientInfo, error) {
+	f, err := os.Open(saJSONFile)
 	if err != nil {
-		return astraops.ClientInfo{}, fmt.Errorf("unable to read login file %s with error %s", saJsonFile, err)
+		return astraops.ClientInfo{}, &FileNotFoundError{
+			Path: saJSONFile,
+			Err:  fmt.Errorf("unable to read login file with error %w", err),
+		}
 	}
 	defer func() {
 		if err := f.Close(); err != nil {
-			fmt.Printf("warning unable to close %v with error %v", saJsonFile, err)
+			fmt.Printf("warning unable to close %v with error %v", saJSONFile, err)
 		}
 	}()
 	b, err := io.ReadAll(f)
 	if err != nil {
-		return astraops.ClientInfo{}, fmt.Errorf("unable to read login file %s with error %s", saJsonFile, err)
+		return astraops.ClientInfo{}, fmt.Errorf("unable to read login file %s with error %w", saJSONFile, err)
 	}
 	var clientInfo astraops.ClientInfo
 	err = json.Unmarshal(b, &clientInfo)
 	if err != nil {
-		return astraops.ClientInfo{}, fmt.Errorf("unable to parse json from login file %s with error %s", saJsonFile, err)
+		return astraops.ClientInfo{}, &JSONParseError{
+			Original: string(b),
+			Err:      fmt.Errorf("unable to parse json from login file %s with error %s", saJSONFile, err),
+		}
 	}
 	return clientInfo, err
 }
