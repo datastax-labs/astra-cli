@@ -30,7 +30,7 @@ var createDbKeyspaceFlag = createCmd.String("keyspace", "", "keyspace user to gi
 var createDbUserFlag = createCmd.String("user", "", "user password to give to the Astra Database")
 var createDbPasswordFlag = createCmd.String("password", "", "db password to give to the Astra Database")
 var createDbRegionFlag = createCmd.String("region", "us-east1", "region to give to the Astra Database")
-var createDbTierFlag = createCmd.String("tier", "free", "tier to give to the Astra Database")
+var createDbTierFlag = createCmd.String("tier", "serverless", "tier to give to the Astra Database")
 var createDbCapacityUnitFlag = createCmd.Int("capacityUnit", 1, "capacityUnit flag to give to the Astra Database")
 var createDbCloudProviderFlag = createCmd.String("cloudProvider", "GCP", "cloud provider flag to give to the Astra Database")
 

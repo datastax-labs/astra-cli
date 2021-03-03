@@ -13,7 +13,9 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
-# script/lint: verify no obvious bugs or layout problems are found
+# script/update: Update application to run for its current checkout.
 
-gofmt -s -w . && \
-golangci-lint run
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
+$DIR/bootstrap
+go mod tidy
+
