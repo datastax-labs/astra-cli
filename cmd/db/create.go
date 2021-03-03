@@ -18,7 +18,6 @@ package db
 import (
 	"flag"
 	"fmt"
-	"strings"
 
 	"github.com/rsds143/astra-cli/pkg"
 	"github.com/rsds143/astra-devops-sdk-go/astraops"
@@ -36,12 +35,7 @@ var createDbCloudProviderFlag = createCmd.String("cloudProvider", "GCP", "cloud 
 
 // CreateUsage shows the help for the create command
 func CreateUsage() string {
-	var out strings.Builder
-	out.WriteString("\tcreate\n")
-	createCmd.VisitAll(func(f *flag.Flag) {
-		out.WriteString(fmt.Sprintf("\t\t%v\n", f.Usage))
-	})
-	return out.String()
+	return pkg.PrintFlags(createCmd, "create", "creates a database by id")
 }
 
 // ExecuteCreate submits a new database to astra

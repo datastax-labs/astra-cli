@@ -30,12 +30,7 @@ var getFmt = getCmd.String("format", "text", "Output format for report default i
 
 // GetUsage shows the help for the get command
 func GetUsage() string {
-	var out strings.Builder
-	out.WriteString("\tget <id>\n")
-	getCmd.VisitAll(func(f *flag.Flag) {
-		out.WriteString(fmt.Sprintf("\t\t%v\n", f.Usage))
-	})
-	return out.String()
+	return pkg.PrintFlags(getCmd, "get <id>", "get database by id")
 }
 
 // ExecuteGet get the database with the specified ID. If no ID is provided

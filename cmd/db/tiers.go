@@ -31,12 +31,7 @@ var tiersFmt = tiersCmd.String("format", "text", "Output format for report defau
 
 // TiersUsage shows the help for the Tiers command
 func TiersUsage() string {
-	var out strings.Builder
-	out.WriteString("\ttiers\n")
-	tiersCmd.VisitAll(func(f *flag.Flag) {
-		out.WriteString(fmt.Sprintf("\t\t%v\n", f.Usage))
-	})
-	return out.String()
+	return pkg.PrintFlags(tiersCmd, "tiers", "lists all tiers available")
 }
 
 // ExecuteTiers lists tiers available to this login in astra

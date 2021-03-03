@@ -24,7 +24,7 @@ import (
 
 // UnparkUsage shows the help for the unpark command
 func UnparkUsage() string {
-	return "\tunpark <id>\n\t\tparks a database by id\n"
+	return "\tunpark <id> #parks a database by id\n"
 }
 
 // ExecuteUnpark unparks the database with the specified ID. If no ID is provided
