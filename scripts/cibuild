@@ -12,8 +12,13 @@
 #   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 
-# script/lint: verify no obvious bugs or layout problems are found
+# script/cibuild: Setup environment for CI to run tests. This is primarily
+#                 designed to run on the continuous integration server.
 
-gofmt -s -w . && \
-golangci-lint run
+
+$DIR/setup && \
+$DIR/lint && \
+$DIR/test && \
+$DIR/build
