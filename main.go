@@ -18,35 +18,39 @@ package main
 
 import (
 	"errors"
+	"flag"
 	"fmt"
 	"github.com/rsds143/astra-cli/cmd"
 	"github.com/rsds143/astra-cli/pkg"
 	"os"
 )
 
+var verbose = flag.Bool("v", false, "turns on verbose logging")
+
 func usage() {
-	fmt.Println("usage: astra-cli <cmd>")
+	flag.Usage()
 	fmt.Println("commands:")
 	fmt.Println(cmd.LoginUsage())
 	fmt.Println(cmd.DBUsage())
 }
 func main() {
+	flag.Parse()
 	confDir, confFile, err := pkg.GetHome()
 	if err != nil {
 		fmt.Printf("%v\n", err)
 		os.Exit(3)
 	}
-	if len(os.Args) == 1 {
+	if flag.NArg() == 1 {
 		usage()
 		os.Exit(1)
 	}
-	switch os.Args[1] {
+	switch flag.Arg(0) {
 	case "login":
-		err = cmd.ExecuteLogin(os.Args[2:], confDir, confFile)
+		err = cmd.ExecuteLogin(flag.Args()[1:], confDir, confFile)
 	case "db":
-		err = cmd.ExecuteDB(os.Args[2:], confFile)
+		err = cmd.ExecuteDB(flag.Args()[1:], confFile, *verbose)
 	default:
-		fmt.Printf("%q is not valid command.\n", os.Args[1])
+		fmt.Printf("%q is not valid command.\n", flag.Arg(1))
 		os.Exit(1)
 	}
 	var e *pkg.ParseError

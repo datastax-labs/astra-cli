@@ -42,12 +42,12 @@ func DBUsage() string {
 
 // ExecuteDB launches several different subcommands and as of today is the main entry point
 // into automation of Astra
-func ExecuteDB(args []string, confFile string) error {
+func ExecuteDB(args []string, confFile string, verbose bool) error {
 	clientInfo, err := pkg.ReadLogin(confFile)
 	if err != nil {
 		return fmt.Errorf("%v", err)
 	}
-	client, err := astraops.Authenticate(clientInfo.ClientName, clientInfo.ClientID, clientInfo.ClientSecret)
+	client, err := astraops.Authenticate(clientInfo, verbose)
 	if err != nil {
 		return fmt.Errorf("authenticate failed with error %v", err)
 	}

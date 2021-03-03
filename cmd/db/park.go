@@ -24,7 +24,7 @@ import (
 
 // ParkUsage shows the help for the park command
 func ParkUsage() string {
-	return "\tpark <id>\n\t\tparks a database by id\n"
+	return "\tpark <id> #parks a database by id\n"
 }
 
 // ExecutePark parks the database with the specified ID. If no ID is provided

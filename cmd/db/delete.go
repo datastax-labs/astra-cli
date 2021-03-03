@@ -24,7 +24,7 @@ import (
 
 // DeleteUsage shows the help for the delete command
 func DeleteUsage() string {
-	return "\tdelete <id>\n\t\tdeletes a database by id\n"
+	return "\tdelete <id> #deletes a database by id\n"
 }
 
 // ExecuteDelete removes the database with the specified ID. If no ID is provided

@@ -23,7 +23,6 @@ import (
 	"github.com/rsds143/astra-cli/pkg"
 	"github.com/rsds143/astra-devops-sdk-go/astraops"
 	"os"
-	"strings"
 )
 
 var loginCmd = flag.NewFlagSet("login", flag.ExitOnError)
@@ -34,12 +33,7 @@ var clientJSONFlag = loginCmd.String("json", "", "copy the json for service acco
 
 //LoginUsage returns the usage text for login
 func LoginUsage() string {
-	var out strings.Builder
-	out.WriteString("\tastra-cli login\n")
-	loginCmd.VisitAll(func(f *flag.Flag) {
-		out.WriteString(fmt.Sprintf("\t\t%v\n", f.Usage))
-	})
-	return out.String()
+	return pkg.PrintFlags(loginCmd, "astra-cli login", "stores off login credentials for astra devops api")
 }
 
 //ExecuteLogin logs into Astra

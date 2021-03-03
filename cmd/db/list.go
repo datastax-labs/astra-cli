@@ -35,12 +35,7 @@ var listFmt = listCmd.String("format", "text", "Output format for report default
 
 // ListUsage shows the help for the List command
 func ListUsage() string {
-	var out strings.Builder
-	out.WriteString("\tlist\n")
-	listCmd.VisitAll(func(f *flag.Flag) {
-		out.WriteString(fmt.Sprintf("\t\t%v\n", f.Usage))
-	})
-	return out.String()
+	return pkg.PrintFlags(listCmd, "list", "lists all databases in account")
 }
 
 // ExecuteList lists databases in astra

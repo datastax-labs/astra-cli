@@ -25,7 +25,7 @@ import (
 
 // ResizeUsage shows the help for the delete command
 func ResizeUsage() string {
-	return "\tresize <id> <capacity unit>\n\t\tresizes a database by id with the specified capacity unit\n"
+	return "\tresize <id> <capacity unit> #resizes a database by id with the specified capacity unit\n"
 }
 
 // ExecuteResize resizes the database with the specified ID with the specified size. If no ID is provided
