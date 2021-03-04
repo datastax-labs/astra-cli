@@ -4,7 +4,8 @@ Apache 2.0 licensed Astra Cloud Management CLI
 
 [![.github/workflows/go.yaml](https://github.com/rsds143/astra-cli/actions/workflows/go.yaml/badge.svg)](https://github.com/rsds143/astra-cli/actions/workflows/go.yaml)
 [![Go Report Card](https://goreportcard.com/badge/github.com/rsds143/astra-cli)](https://goreportcard.com/report/github.com/rsds143/astra-cli)
-[![Latest Version](https://img.shields.io/github/v/tag/rsds143/astra-cli?label=version)
+[![Latest Version](https://img.shields.io/github/v/tag/rsds143/astra-cli?label=version)]
+
 ## status
 
 - Alpha
