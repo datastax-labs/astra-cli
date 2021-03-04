@@ -9,6 +9,13 @@ Apache 2.0 licensed Astra Cloud Management CLI
 
 - Alpha
 
+## How to install
+
+* download a [release](https://github.com/rsds143/astra-cli/releases)
+* tar zxvf <download>
+* cd <extracted folder>
+* ./astra-cli
+
 ## How to build
 
 * Install [Go 1.16](https://golang.org/dl/)
