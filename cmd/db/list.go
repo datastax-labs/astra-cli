@@ -46,7 +46,7 @@ func ExecuteList(args []string, client *astraops.AuthenticatedClient) error {
 			Err:  err,
 		}
 	}
-	var dbs []astraops.DataBase
+	var dbs []astraops.Database
 	var err error
 	if dbs, err = client.ListDb(*includeFlag, *providerFlag, *startingAfterFlag, int32(*limitFlag)); err != nil {
 		return fmt.Errorf("unable to get list of dbs with error %v", err)
@@ -56,7 +56,7 @@ func ExecuteList(args []string, client *astraops.AuthenticatedClient) error {
 		var rows [][]string
 		rows = append(rows, []string{"name", "id", "status"})
 		for _, db := range dbs {
-			rows = append(rows, []string{db.Info.Name, db.ID, db.Status})
+			rows = append(rows, []string{db.Info.Name, db.ID, string(db.Status)})
 		}
 		for _, row := range pkg.PadColumns(rows) {
 			fmt.Println(strings.Join(row, " "))
