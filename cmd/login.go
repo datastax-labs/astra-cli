@@ -29,7 +29,8 @@ var loginCmd = flag.NewFlagSet("login", flag.ExitOnError)
 var clientIDFlag = loginCmd.String("id", "", "clientId from service account. Ignored if -json flag is used.")
 var clientNameFlag = loginCmd.String("name", "", "clientName from service account. Ignored if -json flag is used.")
 var clientSecretFlag = loginCmd.String("secret", "", "clientSecret from service account. Ignored if -json flag is used.")
-var clientJSONFlag = loginCmd.String("json", "", "copy the json for service account from the Astra page")
+var clientJSONFlag = loginCmd.String("json", "", "copy the json for service account from the Astra site")
+var authTokenFlag = loginCmd.String("token", "", "authtoken generated with enough rights to perform the devops actions. Generated from the Astra site")
 
 //LoginUsage returns the usage text for login
 func LoginUsage() string {
@@ -37,12 +38,15 @@ func LoginUsage() string {
 }
 
 //ExecuteLogin logs into Astra
-func ExecuteLogin(args []string, confDir string, confFile string) error {
+func ExecuteLogin(args []string, confDir string, confFiles pkg.ConfFiles) error {
 	if err := loginCmd.Parse(args); err != nil {
 		return &pkg.ParseError{
 			Args: args,
 			Err:  fmt.Errorf("incorrect options with error %v", err),
 		}
+	}
+	if authTokenFlag != nil {
+		return makeConf(confDir, confFiles.TokenPath, *authTokenFlag)
 	}
 	var clientJSON string
 	if clientJSONFlag != nil {
@@ -71,13 +75,16 @@ func ExecuteLogin(args []string, confDir string, confFile string) error {
 				Err:  fmt.Errorf("clientSecret missing"),
 			}
 		}
-
 	} else {
 		clientID := *clientIDFlag
 		clientName := *clientNameFlag
 		clientSecret := *clientSecretFlag
 		clientJSON = fmt.Sprintf("{\"clientId\":\"%v\",\"clientName\":\"%v\",\"clientSecret\":\"%v:\"}", clientID, clientName, clientSecret)
 	}
+	return makeConf(confDir, confFiles.SaPath, clientJSON)
+}
+
+func makeConf(confDir, confFile, content string) error {
 	if err := os.MkdirAll(confDir, 0700); err != nil {
 		return fmt.Errorf("unable to get make config directory with error %s", err)
 	}
@@ -92,7 +99,7 @@ func ExecuteLogin(args []string, confDir string, confFile string) error {
 	}()
 	writer := bufio.NewWriter(f)
 	//safe to write after validation
-	_, err = writer.Write([]byte(clientJSON))
+	_, err = writer.Write([]byte(content))
 	if err != nil {
 		return fmt.Errorf("error writing file")
 	}

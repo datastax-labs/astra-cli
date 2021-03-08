@@ -23,19 +23,78 @@ import (
 	"io"
 	"os"
 	"path"
+	"strings"
 )
+
+//ConfFiles supports both formats of credentials and will say if the token one is present
+type ConfFiles struct {
+	TokenPath string
+	SaPath    string
+}
+
+//HasServiceAccount returns true if there is a service account file present and accessible
+func (c ConfFiles) HasServiceAccount() (bool, error) {
+	if _, err := os.Stat(c.SaPath); err != nil {
+		if os.IsNotExist(err) {
+			return false, nil
+		}
+		return false, fmt.Errorf("warning error of %v is unexpected", err)
+	}
+	return true, nil
+}
+
+//Hastoken returns true if there is a token file present and accessible
+func (c ConfFiles) HasToken() (bool, error) {
+	if _, err := os.Stat(c.TokenPath); err != nil {
+		if os.IsNotExist(err) {
+			return false, nil
+		}
+		return false, fmt.Errorf("warning error of %v is unexpected", err)
+	}
+	return true, nil
+}
 
 // GetHome returns the configuration directory and file
 // error will return if there is no user home folder
-func GetHome() (confDir string, confFile string, err error) {
+func GetHome() (confDir string, confFiles ConfFiles, err error) {
 	var home string
 	home, err = os.UserHomeDir()
 	if err != nil {
-		return "", "", fmt.Errorf("unable to get user home directory with error %s", err)
+		return "", ConfFiles{}, fmt.Errorf("unable to get user home directory with error %s", err)
 	}
 	confDir = path.Join(home, ".config", "astra")
-	confFile = path.Join(confDir, "sa.json")
-	return confDir, confFile, nil
+
+	tokenFile := path.Join(confDir, "token")
+	saFile := path.Join(confDir, "sa.json")
+	return confDir, ConfFiles{
+		TokenPath: tokenFile,
+		SaPath:    saFile,
+	}, nil
+}
+
+// ReadToken retrieves the login from the specified json file
+func ReadToken(tokenFile string) (string, error) {
+	f, err := os.Open(tokenFile)
+	if err != nil {
+		return "", &FileNotFoundError{
+			Path: tokenFile,
+			Err:  fmt.Errorf("unable to read login file with error %w", err),
+		}
+	}
+	defer func() {
+		if err := f.Close(); err != nil {
+			fmt.Printf("warning unable to close %v with error %v", tokenFile, err)
+		}
+	}()
+	b, err := io.ReadAll(f)
+	if err != nil {
+		return "", fmt.Errorf("unable to read login file %s with error %w", tokenFile, err)
+	}
+	token := strings.Trim(string(b), "\n")
+	if !strings.HasPrefix(token, "AstraCS") {
+		return "", fmt.Errorf("invalid token in login file %s with error %s", tokenFile, err)
+	}
+	return token, nil
 }
 
 // ReadLogin retrieves the login from the specified json file

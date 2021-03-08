@@ -66,7 +66,7 @@ func ExecuteTiers(args []string, client *astraops.AuthenticatedClient) error {
 			rows = append(rows, []string{
 				tier.Tier,
 				tier.CloudProvider,
-				tier.RegionDisplay,
+				tier.Region,
 				fmt.Sprintf("%v/%v", tier.DatabaseCountUsed, tier.DatabaseCountLimit),
 				fmt.Sprintf("%v/%v", tier.CapacityUnitsUsed, tier.CapacityUnitsLimit),
 				fmt.Sprintf("$%.2f", costMonth),

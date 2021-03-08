@@ -46,20 +46,22 @@ func ExecuteCreate(args []string, client *astraops.AuthenticatedClient) error {
 			Err:  err,
 		}
 	}
+	capacity := int32(*createDbCapacityUnitFlag)
 	createDb := astraops.CreateDb{
 		Name:          *createDbNameFlag,
 		Keyspace:      *createDbKeyspaceFlag,
-		CapacityUnits: *createDbCapacityUnitFlag,
+		CapacityUnits: capacity,
 		Region:        *createDbRegionFlag,
 		User:          *createDbUserFlag,
 		Password:      *createDbPasswordFlag,
 		Tier:          *createDbTierFlag,
 		CloudProvider: *createDbCloudProviderFlag,
 	}
-	id, _, err := client.CreateDb(createDb)
+	db, err := client.CreateDb(createDb)
 	if err != nil {
 		return fmt.Errorf("unable to create '%v' with error %v", createDb, err)
 	}
+	id := db.ID
 	fmt.Printf("database %v created\n", id)
 	return nil
 }
