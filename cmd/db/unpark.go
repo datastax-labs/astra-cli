@@ -38,7 +38,7 @@ func ExecuteUnpark(args []string, client *astraops.AuthenticatedClient) error {
 	}
 	id := args[0]
 	fmt.Printf("starting to unpark database %v\n", id)
-	if err := client.UnPark(id); err != nil {
+	if err := client.Unpark(id); err != nil {
 		return fmt.Errorf("unable to unpark '%s' with error %v\n", id, err)
 	}
 	fmt.Printf("database %v unparked\n", id)

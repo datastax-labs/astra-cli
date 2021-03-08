@@ -35,7 +35,7 @@ func usage() {
 }
 func main() {
 	flag.Parse()
-	confDir, confFile, err := pkg.GetHome()
+	confDir, confFiles, err := pkg.GetHome()
 	if err != nil {
 		fmt.Printf("%v\n", err)
 		os.Exit(3)
@@ -46,9 +46,9 @@ func main() {
 	}
 	switch flag.Arg(0) {
 	case "login":
-		err = cmd.ExecuteLogin(flag.Args()[1:], confDir, confFile)
+		err = cmd.ExecuteLogin(flag.Args()[1:], confDir, confFiles)
 	case "db":
-		err = cmd.ExecuteDB(flag.Args()[1:], confFile, *verbose)
+		err = cmd.ExecuteDB(flag.Args()[1:], confFiles, *verbose)
 	default:
 		fmt.Printf("%q is not valid command.\n", flag.Arg(1))
 		os.Exit(1)

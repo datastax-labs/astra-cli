@@ -42,14 +42,34 @@ func DBUsage() string {
 
 // ExecuteDB launches several different subcommands and as of today is the main entry point
 // into automation of Astra
-func ExecuteDB(args []string, confFile string, verbose bool) error {
-	clientInfo, err := pkg.ReadLogin(confFile)
+func ExecuteDB(args []string, confFile pkg.ConfFiles, verbose bool) error {
+	hasToken, err := confFile.HasToken()
 	if err != nil {
-		return fmt.Errorf("%v", err)
+		return fmt.Errorf("unable to read conf file %v with error %v", confFile.TokenPath, err)
 	}
-	client, err := astraops.Authenticate(clientInfo, verbose)
-	if err != nil {
-		return fmt.Errorf("authenticate failed with error %v", err)
+	var client *astraops.AuthenticatedClient
+	if hasToken {
+		token, err := pkg.ReadToken(confFile.TokenPath)
+		if err != nil {
+			return fmt.Errorf("found token at %v but unable to read it with error %v", confFile.TokenPath, err)
+		}
+		client = astraops.AuthenticateToken(token, verbose)
+	} else {
+		hasSa, err := confFile.HasServiceAccount()
+		if err != nil {
+			return fmt.Errorf("unable to read conf file %v with error %v", confFile.SaPath, err)
+		}
+		if !hasSa {
+			return fmt.Errorf("unable to access any configuration, run astra-cli login first")
+		}
+		clientInfo, err := pkg.ReadLogin(confFile.SaPath)
+		if err != nil {
+			return fmt.Errorf("%v", err)
+		}
+		client, err = astraops.Authenticate(clientInfo, verbose)
+		if err != nil {
+			return fmt.Errorf("authenticate failed with error %v", err)
+		}
 	}
 	if len(args) == 0 {
 		return &pkg.ParseError{

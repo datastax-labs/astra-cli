@@ -49,7 +49,7 @@ func ExecuteGet(args []string, client *astraops.AuthenticatedClient) error {
 		}
 	}
 	id := args[0]
-	var db astraops.DataBase
+	var db astraops.Database
 	var err error
 	if db, err = client.FindDb(id); err != nil {
 		return fmt.Errorf("unable to get '%s' with error %v\n", id, err)
@@ -59,7 +59,7 @@ func ExecuteGet(args []string, client *astraops.AuthenticatedClient) error {
 	case "text":
 		var rows [][]string
 		rows = append(rows, []string{"name", "id", "status"})
-		rows = append(rows, []string{db.Info.Name, db.ID, db.Status})
+		rows = append(rows, []string{db.Info.Name, db.ID, string(db.Status)})
 		for _, row := range pkg.PadColumns(rows) {
 			fmt.Println(strings.Join(row, " "))
 		}
