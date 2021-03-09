@@ -45,7 +45,7 @@ func ExecuteLogin(args []string, confDir string, confFiles pkg.ConfFiles) error 
 			Err:  fmt.Errorf("incorrect options with error %v", err),
 		}
 	}
-	if authTokenFlag != nil {
+	if *authTokenFlag != "" {
 		return makeConf(confDir, confFiles.TokenPath, *authTokenFlag)
 	}
 	var clientJSON string
