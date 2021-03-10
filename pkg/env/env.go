@@ -1,4 +1,5 @@
-//   Copyright 2021 Ryan Svihla
+
+//  Copyright 2021 Ryan Svihla
 //
 //  Licensed under the Apache License, Version 2.0 (the "License");
 //  you may not use this file except in compliance with the License.
@@ -12,16 +13,8 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
+//Package env is the package where global environment configuration goes
+package env
 
-package main
-
-import (
-	"github.com/rsds143/astra-cli/cmd"
-	"github.com/rsds143/astra-cli/pkg"
-	"os"
-)
-
-
-func main() {
-	cmd.Execute()
-}
+//Verbose sets the verbose mode for the command
+var Verbose bool

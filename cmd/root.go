@@ -1,4 +1,4 @@
-//  Copyright 2021 Ryan Svihla
+//   Copyright 2021 Ryan Svihla
 //
 //  Licensed under the Apache License, Version 2.0 (the "License");
 //  you may not use this file except in compliance with the License.
@@ -12,29 +12,25 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
+//Package cmd contains all fo the commands for the cli
 package cmd
 
 import (
     "github.com/spf13/cobra"
-	"github.com/rsds143/astra-cli/cmd/db"
+    "github.com/rsds143/astra-cli/pkg/env"
 )
 
-func init(){
-    dbCmd.AddCommand(db.CreateCmd)
-    dbCmd.AddCommand(db.DeleteCmd)
-    dbCmd.AddCommand(db.ParkCmd)
-    dbCmd.AddCommand(db.UnparkCmd)
-    dbCmd.AddCommand(db.ResizeCmd)
-    dbCmd.AddCommand(db.GetCmd)
-    dbCmd.AddCommand(db.ListCmd)
-    dbCmd.AddCommand(db.TiersCmd)
+func init() {
+  rootCmd.PersistentFlags().BoolVarP(&env.Verbose, "verbose", "v", false, "turns on verbose logging")
+  rootCmd.AddCommand(loginCmd)
+  rootCmd.AddCommand(dbCmd)
 }
 
-var dbCmd =  &cobra.Command{
-  Use:   "db",
-  Short: "Shows all the db commands",
-  Long:  `Shows all other db commands. Create, Delete, Get information on your databases`,
-  Run: func(cobraCmd *cobra.Command, args []string) {
-	cobraCmd.Usage()
-    },
+var rootCmd = &cobra.Command{
+  Use:   "astra-cli",
+  Short: "An easy to use client for automating DataStax Astra",
+  Long: `Manage and provision databases on DataStax Astra
+                Complete documentation is available at https://github.com/rsds143/astra-cli`,
+  Run: func(cmd *cobra.Command, args []string) {
+  },
 }

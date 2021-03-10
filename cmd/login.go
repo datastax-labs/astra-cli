@@ -1,87 +1,107 @@
-/**
-   Copyright 2021 Ryan Svihla
+//  Copyright 2021 Ryan Svihla
+//
+//  Licensed under the Apache License, Version 2.0 (the "License");
+//  you may not use this file except in compliance with the License.
+//  You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+//  Unless required by applicable law or agreed to in writing, software
+//  distributed under the License is distributed on an "AS IS" BASIS,
+//  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+//  See the License for the specific language governing permissions and
+//  limitations under the License.
 
-  Licensed under the Apache License, Version 2.0 (the "License");
-  you may not use this file except in compliance with the License.
-  You may obtain a copy of the License at
-
-      http://www.apache.org/licenses/LICENSE-2.0
-
-  Unless required by applicable law or agreed to in writing, software
-  distributed under the License is distributed on an "AS IS" BASIS,
-  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-  See the License for the specific language governing permissions and
-  limitations under the License.
-*/
 package cmd
 
 import (
 	"bufio"
 	"encoding/json"
-	"flag"
 	"fmt"
+	"os"
+
+    "github.com/spf13/cobra"
 	"github.com/rsds143/astra-cli/pkg"
 	"github.com/rsds143/astra-devops-sdk-go/astraops"
-	"os"
 )
 
-var loginCmd = flag.NewFlagSet("login", flag.ExitOnError)
-var clientIDFlag = loginCmd.String("id", "", "clientId from service account. Ignored if -json flag is used.")
-var clientNameFlag = loginCmd.String("name", "", "clientName from service account. Ignored if -json flag is used.")
-var clientSecretFlag = loginCmd.String("secret", "", "clientSecret from service account. Ignored if -json flag is used.")
-var clientJSONFlag = loginCmd.String("json", "", "copy the json for service account from the Astra site")
-var authTokenFlag = loginCmd.String("token", "", "authtoken generated with enough rights to perform the devops actions. Generated from the Astra site")
+var clientID string
+var clientName string
+var clientSecret string
+var clientJSON string
+var authToken string
 
-//LoginUsage returns the usage text for login
-func LoginUsage() string {
-	return pkg.PrintFlags(loginCmd, "astra-cli login", "stores off login credentials for astra devops api")
+func init(){
+    loginCmd.Flags().StringVarP(&authToken, "token", "t", "", "authtoken generated with enough rights to perform the devops actions. Generated from the Astra site")
+    loginCmd.Flags().StringVarP(&clientJSON, "json", "j", "", "copy the json for service account from the Astra site")
+    loginCmd.Flags().StringVarP(&clientSecret, "secret", "s", "", "clientSecret from service account. Ignored if -json flag is used.")
+    loginCmd.Flags().StringVarP(&clientName, "name", "n", "", "clientName from service account. Ignored if -json flag is used.")
+    loginCmd.Flags().StringVarP(&clientID, "id", "i", "",  "clientId from service account. Ignored if -json flag is used.")
 }
 
-//ExecuteLogin logs into Astra
-func ExecuteLogin(args []string, confDir string, confFiles pkg.ConfFiles) error {
-	if err := loginCmd.Parse(args); err != nil {
-		return &pkg.ParseError{
-			Args: args,
-			Err:  fmt.Errorf("incorrect options with error %v", err),
-		}
+var loginCmd =  &cobra.Command{
+  Use:   "login",
+  Short: "Stores credentials for the cli to use in other commands to operate on the Astra DevOps API",
+  Long:  `Token or service account is saved in .config/astra/ for use by the other commands`,
+  Run: func(cobraCmd *cobra.Command, args []string) {
+    confDir, confFiles, err := pkg.GetHome()
+	if err != nil {
+		fmt.Printf("%v\n", err)
+		os.Exit(3)
 	}
-	if *authTokenFlag != "" {
-		return makeConf(confDir, confFiles.TokenPath, *authTokenFlag)
-	}
-	var clientJSON string
-	if clientJSONFlag != nil {
-		clientJSON = *clientJSONFlag
-		var clientInfo astraops.ClientInfo
+    if authToken != "" {
+        if err := makeConf(confDir, confFiles.TokenPath, authToken); err != nil {
+		    fmt.Printf("%v\n", err)
+            os.Exit(1)
+        }
+        return
+	} else if clientJSON != "" {
+        var clientInfo astraops.ClientInfo
 		err := json.Unmarshal([]byte(clientJSON), &clientInfo)
 		if err != nil {
-			return fmt.Errorf("unable to serialize the json into a valid login due to error %s", err)
+			fmt.Println(os.Stderr, fmt.Errorf("unable to serialize the json into a valid login due to error %s", err))
+            os.Exit(1)
 		}
-
-		if len(clientInfo.ClientName) == 0 {
-			return &pkg.ParseError{
+	    if len(clientInfo.ClientName) == 0 {
+			fmt.Fprintln(os.Stderr, pkg.ParseError{
 				Args: args,
 				Err:  fmt.Errorf("clientName missing"),
-			}
+			})
+			os.Exit(1)
 		}
 		if len(clientInfo.ClientID) == 0 {
-			return &pkg.ParseError{
+			fmt.Fprintln(os.Stderr, pkg.ParseError{
 				Args: args,
 				Err:  fmt.Errorf("clientId missing"),
-			}
+			})
+			os.Exit(1)
 		}
 		if len(clientInfo.ClientSecret) == 0 {
-			return &pkg.ParseError{
+			fmt.Fprintln(os.Stderr, pkg.ParseError{
 				Args: args,
 				Err:  fmt.Errorf("clientSecret missing"),
-			}
-		}
-	} else {
-		clientID := *clientIDFlag
-		clientName := *clientNameFlag
-		clientSecret := *clientSecretFlag
-		clientJSON = fmt.Sprintf("{\"clientId\":\"%v\",\"clientName\":\"%v\",\"clientSecret\":\"%v:\"}", clientID, clientName, clientSecret)
-	}
-	return makeConf(confDir, confFiles.SaPath, clientJSON)
+			})
+			os.Exit(1)
+        }
+        if err :=  makeConf(confDir, confFiles.SaPath, clientJSON); err != nil {
+		    fmt.Printf("%v\n", err)
+            os.Exit(1)
+        }
+        return
+    } else {
+        clientJSON = fmt.Sprintf("{\"clientId\":\"%v\",\"clientName\":\"%v\",\"clientSecret\":\"%v:\"}", clientID, clientName, clientSecret)
+        if err :=  makeConf(confDir, confFiles.SaPath, clientJSON); err != nil {
+		    fmt.Printf("%v\n", err)
+            os.Exit(1)
+        }
+        return
+    }
+    err = cobraCmd.Usage()
+    if err != nil {
+        fmt.Printf("something went very wrong and astra-cli is unable to show usage due to errro %v", err)
+    }
+    os.Exit(1)
+  },
 }
 
 func makeConf(confDir, confFile, content string) error {
