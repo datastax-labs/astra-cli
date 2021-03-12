@@ -21,70 +21,70 @@ import (
 	"os"
 	"strings"
 
-    "github.com/spf13/cobra"
 	"github.com/rsds143/astra-cli/pkg"
 	"github.com/rsds143/astra-devops-sdk-go/astraops"
+	"github.com/spf13/cobra"
 )
 
 var tiersFmt string
 
-func init(){
-    TiersCmd.Flags().StringVarP(&tiersFmt, "output", "o", "text", "Output format for report default is json")
+func init() {
+	TiersCmd.Flags().StringVarP(&tiersFmt, "output", "o", "text", "Output format for report default is json")
 }
 
 //TiersCmd is the command to list availability data in Astra
-var TiersCmd =  &cobra.Command{
-  Use:   "tiers",
-  Short: "List all available tiers on the Astra DevOps API",
-  Long: `List all available tiers on the Astra DevOps API. Each tier is a combination of costs, size, region, and name`,
-  Run: func(cmd *cobra.Command, args []string) {
-	var tiers []astraops.TierInfo
-    client, err := pkg.LoginClient()
-	if err != nil {
-	    fmt.Fprintln(os.Stderr, fmt.Sprintf("unable to login with error %v", err))
-        os.Exit(1)
-    }
-	if tiers, err = client.GetTierInfo(); err != nil {
-	    fmt.Fprintln(os.Stderr, fmt.Sprintf("unable to get tiers with error %v", err))
-		os.Exit(1)
-	}
-	switch tiersFmt {
-	case "text":
-		var rows [][]string
-		rows = append(rows, []string{"name", "cloud", "region", "db (used)/(limit)", "cap (used)/(limit)", "cost per month", "cost per minute"})
-		for _, tier := range tiers {
-			costMonthRaw := tier.Cost.CostPerMonthCents
-			var costMonth float64
-			if costMonthRaw > 0 {
-				costMonth = costMonthRaw / 100.0
-			}
-			costMinRaw := tier.Cost.CostPerMinCents
-			var costMin float64
-			if costMinRaw > 0 {
-				costMin = costMinRaw / 100.0
-			}
-			rows = append(rows, []string{
-				tier.Tier,
-				tier.CloudProvider,
-				tier.Region,
-				fmt.Sprintf("%v/%v", tier.DatabaseCountUsed, tier.DatabaseCountLimit),
-				fmt.Sprintf("%v/%v", tier.CapacityUnitsUsed, tier.CapacityUnitsLimit),
-				fmt.Sprintf("$%.2f", costMonth),
-				fmt.Sprintf("$%.2f", costMin)})
-		}
-		for _, row := range pkg.PadColumns(rows) {
-			fmt.Println(strings.Join(row, " "))
-		}
-	case "json":
-		b, err := json.MarshalIndent(tiers, "", "  ")
+var TiersCmd = &cobra.Command{
+	Use:   "tiers",
+	Short: "List all available tiers on the Astra DevOps API",
+	Long:  `List all available tiers on the Astra DevOps API. Each tier is a combination of costs, size, region, and name`,
+	Run: func(cmd *cobra.Command, args []string) {
+		var tiers []astraops.TierInfo
+		client, err := pkg.LoginClient()
 		if err != nil {
-			fmt.Fprintln(os.Stderr, fmt.Errorf("unexpected error marshaling to json: '%v', Try -format text instead", err))
+			fmt.Fprintf(os.Stderr, "unable to login with error %v\n", err)
 			os.Exit(1)
 		}
-		fmt.Println(string(b))
-	default:
-        fmt.Fprintln(os.Stderr, fmt.Sprintf("-o %q is not valid option.", tiersFmt))
-		os.Exit(1)
-	}
-    },
+		if tiers, err = client.GetTierInfo(); err != nil {
+			fmt.Fprintf(os.Stderr, "unable to get tiers with error %v\n", err)
+			os.Exit(1)
+		}
+		switch tiersFmt {
+		case "text":
+			var rows [][]string
+			rows = append(rows, []string{"name", "cloud", "region", "db (used)/(limit)", "cap (used)/(limit)", "cost per month", "cost per minute"})
+			for _, tier := range tiers {
+				costMonthRaw := tier.Cost.CostPerMonthCents
+				var costMonth float64
+				if costMonthRaw > 0 {
+					costMonth = costMonthRaw / 100.0
+				}
+				costMinRaw := tier.Cost.CostPerMinCents
+				var costMin float64
+				if costMinRaw > 0 {
+					costMin = costMinRaw / 100.0
+				}
+				rows = append(rows, []string{
+					tier.Tier,
+					tier.CloudProvider,
+					tier.Region,
+					fmt.Sprintf("%v/%v", tier.DatabaseCountUsed, tier.DatabaseCountLimit),
+					fmt.Sprintf("%v/%v", tier.CapacityUnitsUsed, tier.CapacityUnitsLimit),
+					fmt.Sprintf("$%.2f", costMonth),
+					fmt.Sprintf("$%.2f", costMin)})
+			}
+			for _, row := range pkg.PadColumns(rows) {
+				fmt.Println(strings.Join(row, " "))
+			}
+		case "json":
+			b, err := json.MarshalIndent(tiers, "", "  ")
+			if err != nil {
+				fmt.Fprintf(os.Stderr, "unexpected error marshaling to json: '%v', Try -format text instead\n", err)
+				os.Exit(1)
+			}
+			fmt.Println(string(b))
+		default:
+			fmt.Fprintf(os.Stderr, "-o %q is not valid option.\n", tiersFmt)
+			os.Exit(1)
+		}
+	},
 }

@@ -17,32 +17,38 @@ package db
 
 import (
 	"fmt"
+	"os"
 	"strconv"
 
 	"github.com/rsds143/astra-cli/pkg"
 	"github.com/rsds143/astra-devops-sdk-go/astraops"
+	"github.com/spf13/cobra"
 )
 
-// ResizeUsage shows the help for the delete command
-func ResizeUsage() string {
-	return "\tresize <id> <capacity unit> #resizes a database by id with the specified capacity unit\n"
+//ResizeCmd provides the resize database command
+var ResizeCmd = &cobra.Command{
+	Use:   "resize <id> <capacity unit>",
+	Short: "Resizes a database by id with the specified capacity unit",
+	Long:  "Resizes a database by id with the specified capacity unit. Note does not work on serverless.",
+	Args:  cobra.ExactArgs(2),
+	Run: func(cobraCmd *cobra.Command, args []string) {
+
+		client, err := pkg.LoginClient()
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "unable to login with error %v\n", err)
+			os.Exit(1)
+		}
+		err = executeResize(args, client)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "unable to resize with error %v\n", err)
+			os.Exit(1)
+		}
+	},
 }
 
-// ExecuteResize resizes the database with the specified ID with the specified size. If no ID is provided
+//executeResize resizes the database with the specified ID with the specified size. If no ID is provided
 // the command will error out
-func ExecuteResize(args []string, client *astraops.AuthenticatedClient) error {
-	if len(args) == 0 {
-		return &pkg.ParseError{
-			Args: args,
-			Err:  fmt.Errorf("there is no id provided for resizing the database"),
-		}
-	}
-	if len(args) == 1 {
-		return &pkg.ParseError{
-			Args: args,
-			Err:  fmt.Errorf("there is no id provided for resizing the database"),
-		}
-	}
+func executeResize(args []string, client *astraops.AuthenticatedClient) error {
 	id := args[0]
 	capacityUnitRaw := args[1]
 	capacityUnit, err := strconv.Atoi(capacityUnitRaw)

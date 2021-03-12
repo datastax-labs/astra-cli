@@ -15,26 +15,32 @@
 package cmd
 
 import (
-    "github.com/spf13/cobra"
+	"fmt"
+	"os"
+
 	"github.com/rsds143/astra-cli/cmd/db"
+	"github.com/spf13/cobra"
 )
 
-func init(){
-    dbCmd.AddCommand(db.CreateCmd)
-    dbCmd.AddCommand(db.DeleteCmd)
-    dbCmd.AddCommand(db.ParkCmd)
-    dbCmd.AddCommand(db.UnparkCmd)
-    dbCmd.AddCommand(db.ResizeCmd)
-    dbCmd.AddCommand(db.GetCmd)
-    dbCmd.AddCommand(db.ListCmd)
-    dbCmd.AddCommand(db.TiersCmd)
+func init() {
+	dbCmd.AddCommand(db.CreateCmd)
+	dbCmd.AddCommand(db.DeleteCmd)
+	dbCmd.AddCommand(db.ParkCmd)
+	dbCmd.AddCommand(db.UnparkCmd)
+	dbCmd.AddCommand(db.ResizeCmd)
+	dbCmd.AddCommand(db.GetCmd)
+	dbCmd.AddCommand(db.ListCmd)
+	dbCmd.AddCommand(db.TiersCmd)
+	dbCmd.AddCommand(db.SecBundleCmd)
 }
 
-var dbCmd =  &cobra.Command{
-  Use:   "db",
-  Short: "Shows all the db commands",
-  Long:  `Shows all other db commands. Create, Delete, Get information on your databases`,
-  Run: func(cobraCmd *cobra.Command, args []string) {
-	cobraCmd.Usage()
-    },
+var dbCmd = &cobra.Command{
+	Use:   "db",
+	Short: "Shows all the db commands",
+	Long:  `Shows all other db commands. Create, Delete, Get information on your databases`,
+	Run: func(cobraCmd *cobra.Command, args []string) {
+		if err := cobraCmd.Usage(); err != nil {
+			fmt.Fprintf(os.Stderr, "Unable to print usage with error %v\n", err)
+		}
+	},
 }

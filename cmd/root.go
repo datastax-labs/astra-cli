@@ -16,21 +16,22 @@
 package cmd
 
 import (
-    "github.com/spf13/cobra"
-    "github.com/rsds143/astra-cli/pkg/env"
+	"github.com/rsds143/astra-cli/pkg/env"
+	"github.com/spf13/cobra"
 )
 
 func init() {
-  rootCmd.PersistentFlags().BoolVarP(&env.Verbose, "verbose", "v", false, "turns on verbose logging")
-  rootCmd.AddCommand(loginCmd)
-  rootCmd.AddCommand(dbCmd)
+	RootCmd.PersistentFlags().BoolVarP(&env.Verbose, "verbose", "v", false, "turns on verbose logging")
+	RootCmd.AddCommand(loginCmd)
+	RootCmd.AddCommand(dbCmd)
 }
 
-var rootCmd = &cobra.Command{
-  Use:   "astra-cli",
-  Short: "An easy to use client for automating DataStax Astra",
-  Long: `Manage and provision databases on DataStax Astra
+//RootCmd is the entry point for the whole app
+var RootCmd = &cobra.Command{
+	Use:   "astra-cli",
+	Short: "An easy to use client for automating DataStax Astra",
+	Long: `Manage and provision databases on DataStax Astra
                 Complete documentation is available at https://github.com/rsds143/astra-cli`,
-  Run: func(cmd *cobra.Command, args []string) {
-  },
+	Run: func(cmd *cobra.Command, args []string) {
+	},
 }

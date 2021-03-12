@@ -16,14 +16,15 @@
 package pkg
 
 import (
-    "fmt"
+	"fmt"
 
-    "github.com/rsds143/astra-cli/pkg/env"
-    "github.com/rsds143/astra-devops-sdk-go/astraops"
+	"github.com/rsds143/astra-cli/pkg/env"
+	"github.com/rsds143/astra-devops-sdk-go/astraops"
 )
+
 //LoginClient logs into the Astra DevOps API using the local configuration provided by the 'astra-cli login' command
 func LoginClient() (*astraops.AuthenticatedClient, error) {
-    _, confFile, err := GetHome()
+	_, confFile, err := GetHome()
 	if err != nil {
 		return &astraops.AuthenticatedClient{}, fmt.Errorf("unable to read conf dir with error %v", err)
 	}
@@ -50,7 +51,7 @@ func LoginClient() (*astraops.AuthenticatedClient, error) {
 		if err != nil {
 			return &astraops.AuthenticatedClient{}, fmt.Errorf("%v", err)
 		}
-        client, err = astraops.Authenticate(clientInfo, env.Verbose)
+		client, err = astraops.Authenticate(clientInfo, env.Verbose)
 		if err != nil {
 			return &astraops.AuthenticatedClient{}, fmt.Errorf("authenticate failed with error %v", err)
 		}

@@ -16,32 +16,31 @@
 package db
 
 import (
-    "os"
 	"fmt"
+	"os"
 
-    "github.com/spf13/cobra"
 	"github.com/rsds143/astra-cli/pkg"
+	"github.com/spf13/cobra"
 )
 
-
 //DeleteCmd provides the delete database command
-var DeleteCmd =  &cobra.Command{
-  Use:   "delete <id>",
-  Short: "delete database by databaseID",
-  Long: `deletes a database from your Astra account by ID`,
-  Args: cobra.ExactArgs(1),
-  Run: func(cmd *cobra.Command, args []string) {
-    client, err := pkg.LoginClient()
-	if err != nil {
-	    fmt.Fprintln(os.Stderr, fmt.Sprintf("unable to login with error %v", err))
-        os.Exit(1)
-    }
-    id := args[0]
-	fmt.Printf("starting to delete database %v\n", id)
-	if err := client.Terminate(id, false); err != nil {
-	    fmt.Fprintln(os.Stderr, fmt.Errorf("unable to delete '%s' with error %v", id, err))
-	    os.Exit(1)
-	}
-	fmt.Printf("database %v deleted\n",id)
-  },
+var DeleteCmd = &cobra.Command{
+	Use:   "delete <id>",
+	Short: "delete database by databaseID",
+	Long:  `deletes a database from your Astra account by ID`,
+	Args:  cobra.ExactArgs(1),
+	Run: func(cmd *cobra.Command, args []string) {
+		client, err := pkg.LoginClient()
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "unable to login with error %v\n", err)
+			os.Exit(1)
+		}
+		id := args[0]
+		fmt.Printf("starting to delete database %v\n", id)
+		if err := client.Terminate(id, false); err != nil {
+			fmt.Fprintln(os.Stderr, fmt.Errorf("unable to delete '%s' with error %v", id, err))
+			os.Exit(1)
+		}
+		fmt.Printf("database %v deleted\n", id)
+	},
 }
