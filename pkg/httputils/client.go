@@ -12,18 +12,30 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-package main
+//Package httputils
+package httputils
 
 import (
-	"fmt"
-	"os"
-
-	"github.com/rsds143/astra-cli/cmd"
+	"net"
+	"net/http"
+	"time"
 )
 
-func main() {
-	if err := cmd.RootCmd.Execute(); err != nil {
-		fmt.Fprintf(os.Stderr, "unhandled error executing command %v", err)
-		os.Exit(1)
+//NewHTTPClient fires up client with 'better' defaults
+func NewHTTPClient() *http.Client {
+	return &http.Client{
+		Timeout: 5 * time.Second,
+		Transport: &http.Transport{
+			MaxIdleConns:        10,
+			MaxConnsPerHost:     10,
+			MaxIdleConnsPerHost: 10,
+			Dial: (&net.Dialer{
+				Timeout:   10 * time.Second,
+				KeepAlive: 10 * time.Second,
+			}).Dial,
+			TLSHandshakeTimeout:   5 * time.Second,
+			ResponseHeaderTimeout: 5 * time.Second,
+			ExpectContinueTimeout: 1 * time.Second,
+		},
 	}
 }

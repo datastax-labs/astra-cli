@@ -29,19 +29,27 @@ Apache 2.0 licensed Astra Cloud Management CLI
 * login
 * execute commands on your database
 
-### login
+### login with token
+
+After creating a token with rights to use the devops api 
+
+```
+./bin/astra-cli login --token "changed"
+Login information saved
+```
+### login service account
 
 After creating a service account on the Astra page 
 
 ```
-./bin/astra-cli login -id "changed" -name "changed" -secret "changed"
+./bin/astra-cli login --id "changed" --name "changed" --secret "changed"
 Login information saved
 ```
 
-## login with json
+## login service account with json
 
 ```
-./bin/astra-cli login -json '{"clientId":"changed","clientName":"change@me.com","clientSecret":"changed"}'
+./bin/astra-cli login --json '{"clientId":"changed","clientName":"change@me.com","clientSecret":"changed"}'
 Login information saved
 
 ```
@@ -49,7 +57,7 @@ Login information saved
 ### creating database
 
 ```
-./bin/astra-cli db create -user dbuser -password test234  -keyspace myks -name mydb 
+./bin/astra-cli db create -v --keyspace myks --name mydb 
 2021/02/24 18:23:24 db 2c3bc0d6-5e3e-4d77-81c8-d95a35bdc58b in state PENDING but expected ACTIVE trying again 19 more times
 2021/02/24 18:23:29 db 2c3bc0d6-5e3e-4d77-81c8-d95a35bdc58b in state PENDING but expected ACTIVE trying again 18 more times
 2021/02/24 18:23:35 db 2c3bc0d6-5e3e-4d77-81c8-d95a35bdc58b in state PENDING but expected ACTIVE trying again 17 more times
@@ -59,6 +67,25 @@ Login information saved
 2021/02/24 18:23:55 db 2c3bc0d6-5e3e-4d77-81c8-d95a35bdc58b in state PENDING but expected ACTIVE trying again 13 more times
 2021/02/24 18:24:00 db 2c3bc0d6-5e3e-4d77-81c8-d95a35bdc58b in state PENDING but expected ACTIVE trying again 12 more times
 database 2c3bc0d6-5e3e-4d77-81c8-d95a35bdc58b created
+```
+
+### get secure connection bundle
+
+```
+./bin/astra-cli db secBundle 3c577e51-4ff5-4551-86a4-41d475c61822                 
+file secureBundle.zip saved 12072 bytes written
+```
+
+### get secure connection bundle url
+
+```
+./bin/astra-cli db secBundle 3c577e51-4ff5-4551-86a4-41d475c61822 -o json         
+{
+  "downloadURL": "changed",
+  "downloadURLInternal": "changed",
+  "downloadURLMigrationProxy": "changed",
+  "downloadURLMigrationProxyInternal": "changed"
+}
 ```
 
 ### listing databases
@@ -72,7 +99,7 @@ mydb 2c3bc0d6-5e3e-4d77-81c8-d95a35bdc58b ACTIVE
 ### listing databases in json
 
 ```
-./bin/astra-cli db list -format json
+./bin/astra-cli db list -o json
 [
   {
     "id": "2c3bc0d6-5e3e-4d77-81c8-d95a35bdc58b",
@@ -128,7 +155,7 @@ mydb 2c3bc0d6-5e3e-4d77-81c8-d95a35bdc58b ACTIVE
 ### getting database by id in json
 
 ```
-./bin/astra-cli db get 2c3bc0d6-5e3e-4d77-81c8-d95a35bdc58b -format json 
+./bin/astra-cli db get 2c3bc0d6-5e3e-4d77-81c8-d95a35bdc58b -o json 
 json
 {
   "id": "2c3bc0d6-5e3e-4d77-81c8-d95a35bdc58b",
@@ -176,8 +203,10 @@ json
 
 ### parking database
 
+Does not work on serverless
+
 ```
-./bin/astra-cli db park 2c3bc0d6-5e3e-4d77-81c8-d95a35bdc58b         
+./bin/astra-cli db park -v 2c3bc0d6-5e3e-4d77-81c8-d95a35bdc58b         
 starting to park database 2c3bc0d6-5e3e-4d77-81c8-d95a35bdc58b
 2021/02/24 18:31:26 db 2c3bc0d6-5e3e-4d77-81c8-d95a35bdc58b in state PARKING but expected PARKED trying again 29 more times
 2021/02/24 18:31:56 db 2c3bc0d6-5e3e-4d77-81c8-d95a35bdc58b in state PARKING but expected PARKED trying again 28 more times
@@ -189,8 +218,10 @@ database 2c3bc0d6-5e3e-4d77-81c8-d95a35bdc58b parked
 
 ### unparking database
 
+Does not work on serverless
+
 ```
-./bin/astra-cli db unpark 2c3bc0d6-5e3e-4d77-81c8-d95a35bdc58b
+./bin/astra-cli db unpark -v 2c3bc0d6-5e3e-4d77-81c8-d95a35bdc58b
 starting to unpark database 2c3bc0d6-5e3e-4d77-81c8-d95a35bdc58b
 2021/02/25 08:41:02 db 2c3bc0d6-5e3e-4d77-81c8-d95a35bdc58b in state UNPARKING but expected ACTIVE trying again 59 more times
 2021/02/25 08:41:32 db 2c3bc0d6-5e3e-4d77-81c8-d95a35bdc58b in state UNPARKING but expected ACTIVE trying again 58 more times
@@ -211,10 +242,10 @@ starting to unpark database 2c3bc0d6-5e3e-4d77-81c8-d95a35bdc58b
 database 2c3bc0d6-5e3e-4d77-81c8-d95a35bdc58b unparked
 ```
 
-### deleteting database
+### deleting database
 
 ```
-./bin/astra-cli db delete 2c3bc0d6-5e3e-4d77-81c8-d95a35bdc58b
+./bin/astra-cli db delete -v 2c3bc0d6-5e3e-4d77-81c8-d95a35bdc58b
 starting to delete database 2c3bc0d6-5e3e-4d77-81c8-d95a35bdc58b
 database 2c3bc0d6-5e3e-4d77-81c8-d95a35bdc58b deleted
 ```
@@ -224,5 +255,8 @@ database 2c3bc0d6-5e3e-4d77-81c8-d95a35bdc58b deleted
 I did not have a paid account to verify this works, but you can see it succesfully starts the process
 
 ```
-./bin/astra-cli db resize 72c4d35b-1875-495a-b5f1-97329d90b6c5 2                    
+./bin/astra-cli db resize -v 72c4d35b-1875-495a-b5f1-97329d90b6c5 2                    
 unable to unpark '72c4d35b-1875-495a-b5f1-97329d90b6c5' with error expected status code 2xx but had: 400 error was [map[ID:2.000009e+06 message:resizing is not supported for this database tier]]
+```
+
+

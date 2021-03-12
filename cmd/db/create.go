@@ -16,46 +16,65 @@
 package db
 
 import (
-	"flag"
 	"fmt"
-
 	"github.com/rsds143/astra-cli/pkg"
 	"github.com/rsds143/astra-devops-sdk-go/astraops"
+	"github.com/spf13/cobra"
+	"os"
 )
 
-var createCmd = flag.NewFlagSet("create", flag.ExitOnError)
-var createDbNameFlag = createCmd.String("name", "", "name to give to the Astra Database")
-var createDbKeyspaceFlag = createCmd.String("keyspace", "", "keyspace user to give to the Astra Database")
-var createDbUserFlag = createCmd.String("user", "", "user password to give to the Astra Database")
-var createDbPasswordFlag = createCmd.String("password", "", "db password to give to the Astra Database")
-var createDbRegionFlag = createCmd.String("region", "us-east1", "region to give to the Astra Database")
-var createDbTierFlag = createCmd.String("tier", "serverless", "tier to give to the Astra Database")
-var createDbCapacityUnitFlag = createCmd.Int("capacityUnit", 1, "capacityUnit flag to give to the Astra Database")
-var createDbCloudProviderFlag = createCmd.String("cloudProvider", "GCP", "cloud provider flag to give to the Astra Database")
+var createDbName string
+var createDbKeyspace string
+var createDbUser string
+var createDbPassword string
+var createDbRegion string
+var createDbTier string
+var createDbCapacityUnit int
+var createDbCloudProvider string
 
-// CreateUsage shows the help for the create command
-func CreateUsage() string {
-	return pkg.PrintFlags(createCmd, "create", "creates a database by id")
+func init() {
+	CreateCmd.Flags().StringVarP(&createDbName, "name", "n", "", "name to give to the Astra Database")
+	CreateCmd.Flags().StringVarP(&createDbKeyspace, "keyspace", "k", "", "keyspace user to give to the Astra Database")
+	CreateCmd.Flags().StringVarP(&createDbUser, "user", "u", "", "user password to give to the Astra Database")
+	CreateCmd.Flags().StringVarP(&createDbPassword, "password", "p", "", "db password to give to the Astra Database")
+	CreateCmd.Flags().StringVarP(&createDbRegion, "region", "r", "us-east1", "region to give to the Astra Database")
+	CreateCmd.Flags().StringVarP(&createDbTier, "tier", "t", "serverless", "tier to give to the Astra Database")
+	CreateCmd.Flags().IntVarP(&createDbCapacityUnit, "capacityUnit", "c", 1, "capacityUnit flag to give to the Astra Database")
+	CreateCmd.Flags().StringVarP(&createDbCloudProvider, "cloudProvider", "l", "GCP", "cloud provider flag to give to the Astra Database")
+
 }
 
-// ExecuteCreate submits a new database to astra
-func ExecuteCreate(args []string, client *astraops.AuthenticatedClient) error {
-	if err := createCmd.Parse(args); err != nil {
-		return &pkg.ParseError{
-			Args: args,
-			Err:  err,
+//CreateCmd creates a database in Astra
+var CreateCmd = &cobra.Command{
+	Use:   "create",
+	Short: "creates a database by id",
+	Long:  ``,
+	Run: func(cobraCmd *cobra.Command, args []string) {
+		client, err := pkg.LoginClient()
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "unable to login with error %v\n", err)
+			os.Exit(1)
 		}
-	}
-	capacity := int32(*createDbCapacityUnitFlag)
+
+		err = executeCreate(client)
+		if err != nil {
+			fmt.Fprintln(os.Stderr, err)
+			os.Exit(1)
+		}
+	},
+}
+
+func executeCreate(client *astraops.AuthenticatedClient) error {
+	capacity := int32(createDbCapacityUnit)
 	createDb := astraops.CreateDb{
-		Name:          *createDbNameFlag,
-		Keyspace:      *createDbKeyspaceFlag,
+		Name:          createDbName,
+		Keyspace:      createDbKeyspace,
 		CapacityUnits: capacity,
-		Region:        *createDbRegionFlag,
-		User:          *createDbUserFlag,
-		Password:      *createDbPasswordFlag,
-		Tier:          *createDbTierFlag,
-		CloudProvider: *createDbCloudProviderFlag,
+		Region:        createDbRegion,
+		User:          createDbUser,
+		Password:      createDbPassword,
+		Tier:          createDbTier,
+		CloudProvider: createDbCloudProvider,
 	}
 	db, err := client.CreateDb(createDb)
 	if err != nil {
