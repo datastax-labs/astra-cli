@@ -17,25 +17,36 @@ package db
 
 import (
 	"fmt"
+	"os"
 
 	"github.com/rsds143/astra-cli/pkg"
 	"github.com/rsds143/astra-devops-sdk-go/astraops"
+	"github.com/spf13/cobra"
 )
 
-// ParkUsage shows the help for the park command
-func ParkUsage() string {
-	return "\tpark <id> #parks a database by id\n"
+//ParkCmd provides parking support for classic database tiers in Astra
+var ParkCmd = &cobra.Command{
+	Use:   "park <id>",
+	Short: "parks the database specified, does not work with serverless",
+	Long:  `parks the database specified, only works on classic tier databases and can take a very long time to park (20-30 minutes)`,
+	Args:  cobra.ExactArgs(1),
+	Run: func(cobraCmd *cobra.Command, args []string) {
+		client, err := pkg.LoginClient()
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "unable to login with error %v\n", err)
+			os.Exit(1)
+		}
+		err = executePark(args, client)
+		if err != nil {
+			fmt.Fprintln(os.Stderr, err)
+			os.Exit(1)
+		}
+	},
 }
 
-// ExecutePark parks the database with the specified ID. If no ID is provided
+// executePark parks the database with the specified ID. If no ID is provided
 // the command will error out
-func ExecutePark(args []string, client *astraops.AuthenticatedClient) error {
-	if len(args) == 0 {
-		return &pkg.ParseError{
-			Args: args,
-			Err:  fmt.Errorf("there is no id provided for parking the database"),
-		}
-	}
+func executePark(args []string, client *astraops.AuthenticatedClient) error {
 	id := args[0]
 	fmt.Printf("starting to park database %v\n", id)
 	if err := client.Park(id); err != nil {

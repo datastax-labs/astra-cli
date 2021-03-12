@@ -17,25 +17,36 @@ package db
 
 import (
 	"fmt"
+	"os"
 
 	"github.com/rsds143/astra-cli/pkg"
 	"github.com/rsds143/astra-devops-sdk-go/astraops"
+	"github.com/spf13/cobra"
 )
 
-// UnparkUsage shows the help for the unpark command
-func UnparkUsage() string {
-	return "\tunpark <id> #parks a database by id\n"
+//UnparkCmd provides unparking support for classic database tiers in Astra
+var UnparkCmd = &cobra.Command{
+	Use:   "unpark <id>",
+	Short: "parks the database specified, does not work with serverless",
+	Long:  `parks the database specified, only works on classic tier databases and can take a very long time to park (20-30 minutes)`,
+	Args:  cobra.ExactArgs(1),
+	Run: func(cobraCmd *cobra.Command, args []string) {
+		client, err := pkg.LoginClient()
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "unable to login with error %v\n", err)
+			os.Exit(1)
+		}
+		err = executeUnpark(args, client)
+		if err != nil {
+			fmt.Fprintln(os.Stderr, err)
+			os.Exit(1)
+		}
+	},
 }
 
-// ExecuteUnpark unparks the database with the specified ID. If no ID is provided
+// executeUnpark unparks the database with the specified ID. If no ID is provided
 // the command will error out
-func ExecuteUnpark(args []string, client *astraops.AuthenticatedClient) error {
-	if len(args) == 0 {
-		return &pkg.ParseError{
-			Args: args,
-			Err:  fmt.Errorf("there is no id provided for unparking the database"),
-		}
-	}
+func executeUnpark(args []string, client *astraops.AuthenticatedClient) error {
 	id := args[0]
 	fmt.Printf("starting to unpark database %v\n", id)
 	if err := client.Unpark(id); err != nil {
