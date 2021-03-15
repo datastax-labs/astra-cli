@@ -16,6 +16,9 @@
 package cmd
 
 import (
+	"fmt"
+	"os"
+
 	"github.com/rsds143/astra-cli/pkg/env"
 	"github.com/spf13/cobra"
 )
@@ -32,6 +35,10 @@ var RootCmd = &cobra.Command{
 	Short: "An easy to use client for automating DataStax Astra",
 	Long: `Manage and provision databases on DataStax Astra
                 Complete documentation is available at https://github.com/rsds143/astra-cli`,
-	Run: func(cmd *cobra.Command, args []string) {
+	Run: func(cobraCmd *cobra.Command, args []string) {
+		if err := cobraCmd.Usage(); err != nil {
+			fmt.Printf("warn unable to show usage %v\n", err)
+			os.Exit(1)
+		}
 	},
 }
