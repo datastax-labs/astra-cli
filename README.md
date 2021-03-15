@@ -11,14 +11,20 @@ Apache 2.0 licensed Astra Cloud Management CLI
 
 - Alpha
 
-## How to install
+## How to install - Homebrew for Mac and Linux
+
+* [install homebrew](https://brew.sh/) if you have not
+* `brew tap rsds143/astra-cli`
+* `brew install astra-cli`
+
+## How to install - Release Binaries
 
 * download a [release](https://github.com/rsds143/astra-cli/releases)
 * tar zxvf <download>
 * cd <extracted folder>
 * ./astra-cli
 
-## How to build
+## How to install - From Source
 
 * Install [Go 1.16](https://golang.org/dl/)
 * run `git clone git@github.com:rsds143/astra-cli.git`

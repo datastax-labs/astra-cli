@@ -18,5 +18,11 @@
 
 t="/tmp/go-cover.$$.tmp"
 go test -coverprofile=$t ./... && go tool cover -func=$t 
-echo "deleting tmp file $t"
+last=$?
 unlink $t || true
+if [ "$last" = "0" ]; then
+    echo "successfully ran"
+else
+    (exit 1)
+fi
+
