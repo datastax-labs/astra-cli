@@ -34,5 +34,7 @@ changelog:
     exclude:
       - '^docs:'
       - '^test:'
-extra_files:
-  - - glob: ./dist/*.zip
+release:
+  draft: true
+  extra_files:
+    - glob: ./dist/*.zip
