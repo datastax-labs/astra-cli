@@ -23,6 +23,7 @@ import (
 	"io"
 	"os"
 	"path"
+	"path/filepath"
 	"strings"
 )
 
@@ -74,7 +75,7 @@ func GetHome() (confDir string, confFiles ConfFiles, err error) {
 
 // ReadToken retrieves the login from the specified json file
 func ReadToken(tokenFile string) (string, error) {
-	f, err := os.Open(tokenFile)
+	f, err := os.Open(filepath.FromSlash(tokenFile))
 	if err != nil {
 		return "", &FileNotFoundError{
 			Path: tokenFile,
@@ -92,14 +93,14 @@ func ReadToken(tokenFile string) (string, error) {
 	}
 	token := strings.Trim(string(b), "\n")
 	if !strings.HasPrefix(token, "AstraCS") {
-		return "", fmt.Errorf("invalid token in login file %s with error %s", tokenFile, err)
+		return "", fmt.Errorf("invalid token in login file %s with was %s", tokenFile, token)
 	}
 	return token, nil
 }
 
 // ReadLogin retrieves the login from the specified json file
 func ReadLogin(saJSONFile string) (astraops.ClientInfo, error) {
-	f, err := os.Open(saJSONFile)
+	f, err := os.Open(filepath.FromSlash(saJSONFile))
 	if err != nil {
 		return astraops.ClientInfo{}, &FileNotFoundError{
 			Path: saJSONFile,
