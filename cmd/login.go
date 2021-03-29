@@ -44,7 +44,7 @@ var loginCmd = &cobra.Command{
 	Short: "Stores credentials for the cli to use in other commands to operate on the Astra DevOps API",
 	Long:  `Token or service account is saved in .config/astra/ for use by the other commands`,
 	Run: func(cobraCmd *cobra.Command, args []string) {
-		confDir, confFiles, err := pkg.GetHome()
+		confDir, confFiles, err := pkg.GetHome(os.UserHomeDir)
 		if err != nil {
 			fmt.Printf("%v\n", err)
 			os.Exit(3)

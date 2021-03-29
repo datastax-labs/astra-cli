@@ -19,7 +19,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
-	"strings"
 
 	"github.com/rsds143/astra-cli/pkg"
 	"github.com/rsds143/astra-devops-sdk-go/astraops"
@@ -46,7 +45,8 @@ var ListCmd = &cobra.Command{
 	Short: "lists all databases",
 	Long:  `lists all databases in your Astra account`,
 	Run: func(cmd *cobra.Command, args []string) {
-		client, err := pkg.LoginClient()
+		creds := &pkg.Creds{}
+		client, err := creds.Login()
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "unable to login with error %v\n", err)
 			os.Exit(1)
@@ -63,8 +63,10 @@ var ListCmd = &cobra.Command{
 			for _, db := range dbs {
 				rows = append(rows, []string{db.Info.Name, db.ID, string(db.Status)})
 			}
-			for _, row := range pkg.PadColumns(rows) {
-				fmt.Println(strings.Join(row, " "))
+			err = pkg.WriteRows(os.Stdout, rows)
+			if err != nil {
+				fmt.Fprintf(os.Stderr, "unexpected error writing text output %v", err)
+				os.Exit(1)
 			}
 		case "json":
 			b, err := json.MarshalIndent(dbs, "", "  ")

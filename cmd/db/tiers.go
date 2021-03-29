@@ -19,7 +19,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
-	"strings"
 
 	"github.com/rsds143/astra-cli/pkg"
 	"github.com/rsds143/astra-devops-sdk-go/astraops"
@@ -39,7 +38,8 @@ var TiersCmd = &cobra.Command{
 	Long:  `List all available tiers on the Astra DevOps API. Each tier is a combination of costs, size, region, and name`,
 	Run: func(cmd *cobra.Command, args []string) {
 		var tiers []astraops.TierInfo
-		client, err := pkg.LoginClient()
+		creds := &pkg.Creds{}
+		client, err := creds.Login()
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "unable to login with error %v\n", err)
 			os.Exit(1)
@@ -72,8 +72,10 @@ var TiersCmd = &cobra.Command{
 					fmt.Sprintf("$%.2f", costMonth),
 					fmt.Sprintf("$%.2f", costMin)})
 			}
-			for _, row := range pkg.PadColumns(rows) {
-				fmt.Println(strings.Join(row, " "))
+			err = pkg.WriteRows(os.Stdout, rows)
+			if err != nil {
+				fmt.Fprintf(os.Stderr, "unexpected error writing text output %v", err)
+				os.Exit(1)
 			}
 		case "json":
 			b, err := json.MarshalIndent(tiers, "", "  ")

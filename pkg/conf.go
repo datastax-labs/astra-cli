@@ -19,11 +19,12 @@ package pkg
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/rsds143/astra-devops-sdk-go/astraops"
 	"io"
 	"os"
 	"path"
 	"strings"
+
+	"github.com/rsds143/astra-devops-sdk-go/astraops"
 )
 
 //ConfFiles supports both formats of credentials and will say if the token one is present
@@ -56,11 +57,11 @@ func (c ConfFiles) HasToken() (bool, error) {
 
 // GetHome returns the configuration directory and file
 // error will return if there is no user home folder
-func GetHome() (confDir string, confFiles ConfFiles, err error) {
+func GetHome(getHome func() (string, error)) (confDir string, confFiles ConfFiles, err error) {
 	var home string
-	home, err = os.UserHomeDir()
+	home, err = getHome()
 	if err != nil {
-		return "", ConfFiles{}, fmt.Errorf("unable to get user home directory with error %s", err)
+		return "", ConfFiles{}, fmt.Errorf("unable to get user home directory with error '%s'", err)
 	}
 	confDir = path.Join(home, ".config", "astra")
 
@@ -78,21 +79,24 @@ func ReadToken(tokenFile string) (string, error) {
 	if err != nil {
 		return "", &FileNotFoundError{
 			Path: tokenFile,
-			Err:  fmt.Errorf("unable to read login file with error %w", err),
+			Err:  fmt.Errorf("unable to read login file with error '%w'", err),
 		}
 	}
 	defer func() {
 		if err := f.Close(); err != nil {
-			fmt.Printf("warning unable to close %v with error %v", tokenFile, err)
+			fmt.Printf("warning unable to close %v with error '%v'", tokenFile, err)
 		}
 	}()
 	b, err := io.ReadAll(f)
 	if err != nil {
-		return "", fmt.Errorf("unable to read login file %s with error %w", tokenFile, err)
+		return "", fmt.Errorf("unable to read login file '%s' with error '%w'", tokenFile, err)
+	}
+	if len(b) == 0 {
+		return "", fmt.Errorf("token file '%s' is emtpy", tokenFile)
 	}
 	token := strings.Trim(string(b), "\n")
 	if !strings.HasPrefix(token, "AstraCS") {
-		return "", fmt.Errorf("invalid token in login file %s with error %s", tokenFile, err)
+		return "", fmt.Errorf("missing prefix 'AstraCS' in token file '%s'", tokenFile)
 	}
 	return token, nil
 }
@@ -122,6 +126,15 @@ func ReadLogin(saJSONFile string) (astraops.ClientInfo, error) {
 			Original: string(b),
 			Err:      fmt.Errorf("unable to parse json from login file %s with error %s", saJSONFile, err),
 		}
+	}
+	if clientInfo.ClientID == "" {
+		return astraops.ClientInfo{}, fmt.Errorf("Invalid service account: Client ID for service account is emtpy for file '%v'", saJSONFile)
+	}
+	if clientInfo.ClientName == "" {
+		return astraops.ClientInfo{}, fmt.Errorf("Invalid service account: Client name for service account is emtpy for file '%v'", saJSONFile)
+	}
+	if clientInfo.ClientSecret == "" {
+		return astraops.ClientInfo{}, fmt.Errorf("Invalid service account: Client secret for service account is emtpy for file '%v'", saJSONFile)
 	}
 	return clientInfo, err
 }

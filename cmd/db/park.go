@@ -31,7 +31,8 @@ var ParkCmd = &cobra.Command{
 	Long:  `parks the database specified, only works on classic tier databases and can take a very long time to park (20-30 minutes)`,
 	Args:  cobra.ExactArgs(1),
 	Run: func(cobraCmd *cobra.Command, args []string) {
-		client, err := pkg.LoginClient()
+		creds := &pkg.Creds{}
+		client, err := creds.Login()
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "unable to login with error %v\n", err)
 			os.Exit(1)
