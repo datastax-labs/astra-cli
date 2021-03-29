@@ -30,18 +30,25 @@ var DeleteCmd = &cobra.Command{
 	Long:  `deletes a database from your Astra account by ID`,
 	Args:  cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
-		creds := &pkg.Creds{}
-		client, err := creds.Login()
+		msg, err := execteDelete(args)
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "unable to login with error %v\n", err)
+			fmt.Fprintln(os.Stderr, err)
 			os.Exit(1)
 		}
-		id := args[0]
-		fmt.Printf("starting to delete database %v\n", id)
-		if err := client.Terminate(id, false); err != nil {
-			fmt.Fprintln(os.Stderr, fmt.Errorf("unable to delete '%s' with error %v", id, err))
-			os.Exit(1)
-		}
-		fmt.Printf("database %v deleted\n", id)
+		fmt.Fprintln(os.Stdout, msg)
 	},
+}
+
+func execteDelete(args []string) (string, error) {
+	creds := &pkg.Creds{}
+	client, err := creds.Login()
+	if err != nil {
+		return "", fmt.Errorf("unable to login with error '%v'", err)
+	}
+	id := args[0]
+	fmt.Printf("starting to delete database %v\n", id)
+	if err := client.Terminate(id, false); err != nil {
+		return "", fmt.Errorf("unable to delete '%s' with error %v", id, err)
+	}
+	return fmt.Sprintf("database %v deleted", id), nil
 }

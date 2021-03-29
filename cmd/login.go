@@ -12,6 +12,7 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
+//Package cmd is the entry point for all of the commands
 package cmd
 
 import (
