@@ -18,7 +18,6 @@ package db
 import (
 	"encoding/json"
 	"fmt"
-	"io"
 	"os"
 
 	"github.com/rsds143/astra-cli/pkg"
@@ -56,35 +55,12 @@ var SecBundleCmd = &cobra.Command{
 		}
 		switch secBundleFmt {
 		case "zip":
-			httpClient := httputils.NewHTTPClient()
-			res, err := httpClient.Get(secBundle.DownloadURL)
+			bytesWritten, err := httputils.DownloadZip(secBundle.DownloadURL, secBundleLoc)
 			if err != nil {
-				fmt.Fprintf(os.Stderr, "unable to download zip with error %v\n", err)
+				fmt.Fprintf(os.Stderr, "%v\n", err)
 				os.Exit(1)
 			}
-			defer func() {
-				err = res.Body.Close()
-				if err != nil {
-					fmt.Fprintf(os.Stderr, "Warn: error closing http response body %v\n for request %v with status code %v", err, secBundle.DownloadURL, res.StatusCode)
-				}
-			}()
-			f, err := os.Create(secBundleLoc)
-			if err != nil {
-				fmt.Fprintf(os.Stderr, "unable to create file to save too %v\n", err)
-				os.Exit(1)
-			}
-			defer func() {
-				err = f.Close()
-				if err != nil {
-					fmt.Fprintf(os.Stderr, "Warn: error closing file %v for file %v\n", err, secBundleLoc)
-				}
-			}()
-			i, err := io.Copy(f, res.Body)
-			if err != nil {
-				fmt.Fprintf(os.Stderr, "unable to copy downloaded file to %v\n", err)
-				os.Exit(1)
-			}
-			fmt.Printf("file %v saved %v bytes written\n", secBundleLoc, i)
+			fmt.Printf("file %v saved %v bytes written\n", secBundleLoc, bytesWritten)
 		case "json":
 			b, err := json.MarshalIndent(secBundle, "", "  ")
 			if err != nil {
