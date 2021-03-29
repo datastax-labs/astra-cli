@@ -41,7 +41,7 @@ type JSONParseError struct {
 }
 
 func (j *JSONParseError) Error() string {
-	return fmt.Sprintf("JSON parsing error: %s. Original file %s", j.Err, j.Original)
+	return fmt.Sprintf("JSON parsing error for json '%v' with error '%v'", j.Original, j.Err)
 }
 
 //FileNotFoundError when unable to read file
@@ -51,5 +51,5 @@ type FileNotFoundError struct {
 }
 
 func (j *FileNotFoundError) Error() string {
-	return fmt.Sprintf("Unable to find file error: %s. Path to file %s", j.Err, j.Path)
+	return fmt.Sprintf("Unable to find file '%v' with error: '%s'", j.Path, j.Err)
 }

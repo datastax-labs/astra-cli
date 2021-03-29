@@ -60,3 +60,54 @@ func TestReadLoginWithEmptyFile(t *testing.T) {
 		t.Errorf("expected %T but was %T", e, err)
 	}
 }
+
+func TestUnableToGetHomeFolder(t *testing.T) {
+	_, _, err := GetHome(func() (string, error) { return "", errors.New("unable to get home") })
+	if err == nil {
+		t.Fatal("expected error but none was present")
+	}
+}
+
+func TestReadTokenWithNoFile(t *testing.T) {
+	_, err := ReadToken("testdata/notthere")
+	if err == nil {
+		t.Fatal("expected an error but there was none")
+	}
+	var e *FileNotFoundError
+	if !errors.As(err, &e) {
+		t.Errorf("expected %T but was %T", e, err)
+	}
+}
+
+func TestMissingId(t *testing.T) {
+	_, err := ReadLogin("testdata/missing-id.json")
+	if err == nil {
+		t.Fatal("expected an error but there was none")
+	}
+	expected := "Invalid service account: Client ID for service account is emtpy for file 'testdata/missing-id.json'"
+	if err.Error() != expected {
+		t.Errorf("expected '%v' but was '%v'", expected, err)
+	}
+}
+
+func TestMissingName(t *testing.T) {
+	_, err := ReadLogin("testdata/missing-name.json")
+	if err == nil {
+		t.Fatal("expected an error but there was none")
+	}
+	expected := "Invalid service account: Client name for service account is emtpy for file 'testdata/missing-name.json'"
+	if err.Error() != expected {
+		t.Errorf("expected '%v' but was '%v'", expected, err)
+	}
+}
+
+func TestMissingSecret(t *testing.T) {
+	_, err := ReadLogin("testdata/missing-secret.json")
+	if err == nil {
+		t.Fatal("expected an error but there was none")
+	}
+	expected := "Invalid service account: Client secret for service account is emtpy for file 'testdata/missing-secret.json'"
+	if err.Error() != expected {
+		t.Errorf("expected '%v' but was '%v'", expected, err)
+	}
+}

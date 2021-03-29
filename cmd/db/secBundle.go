@@ -42,7 +42,8 @@ var SecBundleCmd = &cobra.Command{
 	Long:  `gets the secure connetion bundle for the database from your Astra account by ID`,
 	Args:  cobra.ExactArgs(1),
 	Run: func(cobraCmd *cobra.Command, args []string) {
-		client, err := pkg.LoginClient()
+		creds := &pkg.Creds{}
+		client, err := creds.Login()
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "unable to login with error %v\n", err)
 			os.Exit(1)

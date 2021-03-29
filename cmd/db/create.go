@@ -17,10 +17,11 @@ package db
 
 import (
 	"fmt"
+	"os"
+
 	"github.com/rsds143/astra-cli/pkg"
 	"github.com/rsds143/astra-devops-sdk-go/astraops"
 	"github.com/spf13/cobra"
-	"os"
 )
 
 var createDbName string
@@ -50,7 +51,8 @@ var CreateCmd = &cobra.Command{
 	Short: "creates a database by id",
 	Long:  ``,
 	Run: func(cobraCmd *cobra.Command, args []string) {
-		client, err := pkg.LoginClient()
+		creds := &pkg.Creds{}
+		client, err := creds.Login()
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "unable to login with error %v\n", err)
 			os.Exit(1)

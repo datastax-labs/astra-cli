@@ -32,8 +32,8 @@ var ResizeCmd = &cobra.Command{
 	Long:  "Resizes a database by id with the specified capacity unit. Note does not work on serverless.",
 	Args:  cobra.ExactArgs(2),
 	Run: func(cobraCmd *cobra.Command, args []string) {
-
-		client, err := pkg.LoginClient()
+		creds := &pkg.Creds{}
+		client, err := creds.Login()
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "unable to login with error %v\n", err)
 			os.Exit(1)
