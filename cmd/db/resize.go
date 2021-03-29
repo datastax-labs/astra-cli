@@ -1,18 +1,18 @@
-/**
-   Copyright 2021 Ryan Svihla
+//  Copyright 2021 Ryan Svihla
+//
+//  Licensed under the Apache License, Version 2.0 (the "License");
+//  you may not use this file except in compliance with the License.
+//  You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+//  Unless required by applicable law or agreed to in writing, software
+//  distributed under the License is distributed on an "AS IS" BASIS,
+//  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+//  See the License for the specific language governing permissions and
+//  limitations under the License.
 
-  Licensed under the Apache License, Version 2.0 (the "License");
-  you may not use this file except in compliance with the License.
-  You may obtain a copy of the License at
-
-      http://www.apache.org/licenses/LICENSE-2.0
-
-  Unless required by applicable law or agreed to in writing, software
-  distributed under the License is distributed on an "AS IS" BASIS,
-  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-  See the License for the specific language governing permissions and
-  limitations under the License.
-*/
+//Package db is where the Astra DB commands are
 package db
 
 import (
@@ -55,11 +55,11 @@ func executeResize(args []string, client *astraops.AuthenticatedClient) error {
 	if err != nil {
 		return &pkg.ParseError{
 			Args: args,
-			Err:  fmt.Errorf("unable to parse capacity unit '%s' with error %v\n", capacityUnitRaw, err),
+			Err:  fmt.Errorf("unable to parse capacity unit '%s' with error %v", capacityUnitRaw, err),
 		}
 	}
 	if err := client.Resize(id, int32(capacityUnit)); err != nil {
-		return fmt.Errorf("unable to unpark '%s' with error %v\n", id, err)
+		return fmt.Errorf("unable to unpark '%s' with error %v", id, err)
 	}
 	fmt.Printf("resize database %v submitted with size %v\n", id, capacityUnit)
 	return nil

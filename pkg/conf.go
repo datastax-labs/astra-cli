@@ -44,7 +44,7 @@ func (c ConfFiles) HasServiceAccount() (bool, error) {
 	return true, nil
 }
 
-//Hastoken returns true if there is a token file present and accessible
+//HasToken returns true if there is a token file present and accessible
 func (c ConfFiles) HasToken() (bool, error) {
 	if _, err := os.Stat(c.TokenPath); err != nil {
 		if os.IsNotExist(err) {
@@ -92,7 +92,7 @@ func ReadToken(tokenFile string) (string, error) {
 		return "", fmt.Errorf("unable to read login file '%s' with error '%w'", tokenFile, err)
 	}
 	if len(b) == 0 {
-		return "", fmt.Errorf("token file '%s' is emtpy", tokenFile)
+		return "", fmt.Errorf("token file '%s' is empty", tokenFile)
 	}
 	token := strings.Trim(string(b), "\n")
 	if !strings.HasPrefix(token, "AstraCS") {
@@ -128,13 +128,13 @@ func ReadLogin(saJSONFile string) (astraops.ClientInfo, error) {
 		}
 	}
 	if clientInfo.ClientID == "" {
-		return astraops.ClientInfo{}, fmt.Errorf("Invalid service account: Client ID for service account is emtpy for file '%v'", saJSONFile)
+		return astraops.ClientInfo{}, fmt.Errorf("Invalid service account: Client ID for service account is empty for file '%v'", saJSONFile)
 	}
 	if clientInfo.ClientName == "" {
-		return astraops.ClientInfo{}, fmt.Errorf("Invalid service account: Client name for service account is emtpy for file '%v'", saJSONFile)
+		return astraops.ClientInfo{}, fmt.Errorf("Invalid service account: Client name for service account is empty for file '%v'", saJSONFile)
 	}
 	if clientInfo.ClientSecret == "" {
-		return astraops.ClientInfo{}, fmt.Errorf("Invalid service account: Client secret for service account is emtpy for file '%v'", saJSONFile)
+		return astraops.ClientInfo{}, fmt.Errorf("Invalid service account: Client secret for service account is empty for file '%v'", saJSONFile)
 	}
 	return clientInfo, err
 }

@@ -28,7 +28,7 @@ type Creds struct {
 	GetHomeFunc func() (string, error) //optional. If not specified os.UserHomeDir is used for log base directory to find creds
 }
 
-//LoginClient logs into the Astra DevOps API using the local configuration provided by the 'astra-cli login' command
+//Login logs into the Astra DevOps API using the local configuration provided by the 'astra-cli login' command
 func (c *Creds) Login() (*astraops.AuthenticatedClient, error) {
 	getHome := c.GetHomeFunc
 	if getHome == nil {
@@ -49,22 +49,22 @@ func (c *Creds) Login() (*astraops.AuthenticatedClient, error) {
 			return &astraops.AuthenticatedClient{}, fmt.Errorf("found token at '%v' but unable to read token with error '%v'", confFile.TokenPath, err)
 		}
 		return astraops.AuthenticateToken(token, env.Verbose), nil
-	} else {
-		hasSa, err := confFile.HasServiceAccount()
-		if err != nil {
-			return &astraops.AuthenticatedClient{}, fmt.Errorf("unable to read service account file '%v' with error '%v'", confFile.SaPath, err)
-		}
-		if !hasSa {
-			return &astraops.AuthenticatedClient{}, fmt.Errorf("unable to access any file for directory `%v`, run astra-cli login first", confDir)
-		}
-		clientInfo, err := ReadLogin(confFile.SaPath)
-		if err != nil {
-			return &astraops.AuthenticatedClient{}, err
-		}
-		client, err = astraops.Authenticate(clientInfo, env.Verbose)
-		if err != nil {
-			return &astraops.AuthenticatedClient{}, fmt.Errorf("authenticate failed with error %v", err)
-		}
-		return client, nil
 	}
+	hasSa, err := confFile.HasServiceAccount()
+	if err != nil {
+		return &astraops.AuthenticatedClient{}, fmt.Errorf("unable to read service account file '%v' with error '%v'", confFile.SaPath, err)
+	}
+	if !hasSa {
+		return &astraops.AuthenticatedClient{}, fmt.Errorf("unable to access any file for directory `%v`, run astra-cli login first", confDir)
+	}
+	clientInfo, err := ReadLogin(confFile.SaPath)
+	if err != nil {
+		return &astraops.AuthenticatedClient{}, err
+	}
+	client, err = astraops.Authenticate(clientInfo, env.Verbose)
+	if err != nil {
+		return &astraops.AuthenticatedClient{}, fmt.Errorf("authenticate failed with error %v", err)
+	}
+	return client, nil
+
 }

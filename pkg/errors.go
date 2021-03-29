@@ -1,18 +1,18 @@
-/**
-   Copyright 2021 Ryan Svihla
+//  Copyright 2021 Ryan Svihla
+//
+//  Licensed under the Apache License, Version 2.0 (the "License");
+//  you may not use this file except in compliance with the License.
+//  You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+//  Unless required by applicable law or agreed to in writing, software
+//  distributed under the License is distributed on an "AS IS" BASIS,
+//  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+//  See the License for the specific language governing permissions and
+//  limitations under the License.
 
-  Licensed under the Apache License, Version 2.0 (the "License");
-  you may not use this file except in compliance with the License.
-  You may obtain a copy of the License at
-
-      http://www.apache.org/licenses/LICENSE-2.0
-
-  Unless required by applicable law or agreed to in writing, software
-  distributed under the License is distributed on an "AS IS" BASIS,
-  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-  See the License for the specific language governing permissions and
-  limitations under the License.
-*/
+//Package pkg is the top level package for shared libraries
 package pkg
 
 import (
@@ -40,6 +40,7 @@ type JSONParseError struct {
 	Err      error
 }
 
+//Error returns the error string
 func (j *JSONParseError) Error() string {
 	return fmt.Sprintf("JSON parsing error for json '%v' with error '%v'", j.Original, j.Err)
 }
@@ -50,6 +51,7 @@ type FileNotFoundError struct {
 	Err  error
 }
 
+//Error returns the error string
 func (j *FileNotFoundError) Error() string {
 	return fmt.Sprintf("Unable to find file '%v' with error: '%s'", j.Path, j.Err)
 }

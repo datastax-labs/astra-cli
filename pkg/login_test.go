@@ -74,7 +74,7 @@ func TestLoginWithEmptyTokenFile(t *testing.T) {
 	if err == nil {
 		t.Fatal("expected an error on an empty path")
 	}
-	expected := "found token at 'testdata/with_empty_token/.config/astra/token' but unable to read token with error 'token file 'testdata/with_empty_token/.config/astra/token' is emtpy'"
+	expected := "found token at 'testdata/with_empty_token/.config/astra/token' but unable to read token with error 'token file 'testdata/with_empty_token/.config/astra/token' is empty'"
 	if err.Error() != expected {
 		t.Errorf("expected '%v' but was '%v'", expected, err.Error())
 	}
@@ -100,7 +100,7 @@ func TestLoginWithInvalidSA(t *testing.T) {
 	if err == nil {
 		t.Fatal("expected an error on an empty path")
 	}
-	expected := "Invalid service account: Client ID for service account is emtpy for file 'testdata/with_invalid_sa/.config/astra/sa.json'"
+	expected := "Invalid service account: Client ID for service account is empty for file 'testdata/with_invalid_sa/.config/astra/sa.json'"
 	if err.Error() != expected {
 		t.Errorf("expected '%v' but was '%v'", expected, err.Error())
 	}

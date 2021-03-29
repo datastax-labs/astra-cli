@@ -84,7 +84,7 @@ func TestMissingId(t *testing.T) {
 	if err == nil {
 		t.Fatal("expected an error but there was none")
 	}
-	expected := "Invalid service account: Client ID for service account is emtpy for file 'testdata/missing-id.json'"
+	expected := "Invalid service account: Client ID for service account is empty for file 'testdata/missing-id.json'"
 	if err.Error() != expected {
 		t.Errorf("expected '%v' but was '%v'", expected, err)
 	}
@@ -95,7 +95,7 @@ func TestMissingName(t *testing.T) {
 	if err == nil {
 		t.Fatal("expected an error but there was none")
 	}
-	expected := "Invalid service account: Client name for service account is emtpy for file 'testdata/missing-name.json'"
+	expected := "Invalid service account: Client name for service account is empty for file 'testdata/missing-name.json'"
 	if err.Error() != expected {
 		t.Errorf("expected '%v' but was '%v'", expected, err)
 	}
@@ -106,7 +106,7 @@ func TestMissingSecret(t *testing.T) {
 	if err == nil {
 		t.Fatal("expected an error but there was none")
 	}
-	expected := "Invalid service account: Client secret for service account is emtpy for file 'testdata/missing-secret.json'"
+	expected := "Invalid service account: Client secret for service account is empty for file 'testdata/missing-secret.json'"
 	if err.Error() != expected {
 		t.Errorf("expected '%v' but was '%v'", expected, err)
 	}
