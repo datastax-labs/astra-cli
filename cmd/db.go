@@ -12,6 +12,7 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
+//Package cmd contains all fo the commands for the cli
 package cmd
 
 import (

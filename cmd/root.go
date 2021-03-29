@@ -36,9 +36,15 @@ var RootCmd = &cobra.Command{
 	Long: `Manage and provision databases on DataStax Astra
                 Complete documentation is available at https://github.com/rsds143/astra-cli`,
 	Run: func(cobraCmd *cobra.Command, args []string) {
-		if err := cobraCmd.Usage(); err != nil {
-			fmt.Printf("warn unable to show usage %v\n", err)
+		if err := executeRoot(cobraCmd.Usage); err != nil {
 			os.Exit(1)
 		}
 	},
+}
+
+func executeRoot(usage func() error) error {
+	if err := usage(); err != nil {
+		return fmt.Errorf("warn unable to show usage %v", err)
+	}
+	return nil
 }
