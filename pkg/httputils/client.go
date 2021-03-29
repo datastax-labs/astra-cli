@@ -12,7 +12,7 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-//Package httputils
+//Package httputils provides common http functions and utilities
 package httputils
 
 import (
