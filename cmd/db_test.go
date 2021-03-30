@@ -15,8 +15,21 @@
 //Package cmd contains all fo the commands for the cli
 package cmd
 
-import "testing"
+import (
+	"errors"
+	"testing"
+)
 
-func TestDbCmd(t *testing.T) {
-	t.Skip("ignore")
+func TestDBUsageFails(t *testing.T) {
+	fails := func() error {
+		return errors.New("error showing usage")
+	}
+	err := executeDB(fails)
+	if err == nil {
+		t.Fatal("there is supposed to be an error")
+	}
+	expected := "warn unable to show usage error showing usage"
+	if err.Error() != expected {
+		t.Errorf("expected '%v' but was '%v'", expected, err.Error())
+	}
 }

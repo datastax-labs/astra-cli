@@ -15,8 +15,49 @@
 //Package db is where the Astra DB commands are
 package db
 
-import "testing"
+import (
+	"testing"
+
+	tests "github.com/rsds143/astra-cli/pkg/tests"
+)
 
 func TestResize(t *testing.T) {
-	t.Skip("ignore")
+	//setting package variables by hand, there be dragons
+	mockClient := &tests.MockClient{}
+	id := "qdfkjoj"
+	size := "100"
+	err := executeResize([]string{id, size}, mockClient)
+	if err != nil {
+		t.Fatalf("unexpected error '%v'", err)
+	}
+
+	if len(mockClient.Calls()) != 1 {
+		t.Fatalf("expected 1 call but was %v", len(mockClient.Calls()))
+	}
+	actualID := mockClient.Call(0).([]interface{})[0]
+	if id != actualID {
+		t.Errorf("expected '%v' but was '%v'", id, actualID)
+	}
+	actualSize := mockClient.Call(0).([]interface{})[1].(int32)
+	if int32(100) != actualSize {
+		t.Errorf("expected '%v' but was '%v'", size, actualSize)
+	}
+}
+
+func TestResizeParseError(t *testing.T) {
+	//setting package variables by hand, there be dragons
+	mockClient := &tests.MockClient{}
+	id := "qdfkjoj"
+	size := "abcd"
+	err := executeResize([]string{id, size}, mockClient)
+	if err == nil {
+		t.Fatal("expected error")
+	}
+	expectedError := "Unable to parse command line with args: qdfkjoj, abcd. Nested error was 'unable to parse capacity unit 'abcd' with error strconv.Atoi: parsing \"abcd\": invalid syntax'"
+	if err.Error() != expectedError {
+		t.Errorf("expected '%v' but was '%v'", expectedError, err.Error())
+	}
+	if len(mockClient.Calls()) != 0 {
+		t.Fatalf("expected 0 call but was %v", len(mockClient.Calls()))
+	}
 }

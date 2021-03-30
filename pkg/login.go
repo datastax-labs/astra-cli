@@ -23,13 +23,31 @@ import (
 	"github.com/rsds143/astra-devops-sdk-go/astraops"
 )
 
+//LoginService provides interface to implement logins and produce an Client
+type LoginService interface {
+	Login() (Client, error)
+}
+
+//Client is the abstraction for client interactions. Allows alternative db management clients
+type Client interface {
+	CreateDb(astraops.CreateDb) (astraops.Database, error)
+	Terminate(string, bool) error
+	FindDb(string) (astraops.Database, error)
+	ListDb(string, string, string, int32) ([]astraops.Database, error)
+	Park(string) error
+	Unpark(string) error
+	Resize(string, int32) error
+	GetSecureBundle(string) (astraops.SecureBundle, error)
+	GetTierInfo() ([]astraops.TierInfo, error)
+}
+
 //Creds knows how handle and store credentials
 type Creds struct {
 	GetHomeFunc func() (string, error) //optional. If not specified os.UserHomeDir is used for log base directory to find creds
 }
 
 //Login logs into the Astra DevOps API using the local configuration provided by the 'astra-cli login' command
-func (c *Creds) Login() (*astraops.AuthenticatedClient, error) {
+func (c *Creds) Login() (Client, error) {
 	getHome := c.GetHomeFunc
 	if getHome == nil {
 		getHome = os.UserHomeDir

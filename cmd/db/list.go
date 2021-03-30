@@ -16,6 +16,7 @@
 package db
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"os"
@@ -46,38 +47,44 @@ var ListCmd = &cobra.Command{
 	Long:  `lists all databases in your Astra account`,
 	Run: func(cmd *cobra.Command, args []string) {
 		creds := &pkg.Creds{}
-		client, err := creds.Login()
+		msg, err := executeList(args, creds.Login)
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "unable to login with error %v\n", err)
+			fmt.Fprintf(os.Stderr, "%v\n", err)
 			os.Exit(1)
 		}
-		var dbs []astraops.Database
-		if dbs, err = client.ListDb(include, provider, startingAfter, int32(limit)); err != nil {
-			fmt.Fprintf(os.Stderr, "unable to get list of dbs with error %v\n", err)
-			os.Exit(1)
-		}
-		switch listFmt {
-		case "text":
-			var rows [][]string
-			rows = append(rows, []string{"name", "id", "status"})
-			for _, db := range dbs {
-				rows = append(rows, []string{db.Info.Name, db.ID, string(db.Status)})
-			}
-			err = pkg.WriteRows(os.Stdout, rows)
-			if err != nil {
-				fmt.Fprintf(os.Stderr, "unexpected error writing text output %v", err)
-				os.Exit(1)
-			}
-		case "json":
-			b, err := json.MarshalIndent(dbs, "", "  ")
-			if err != nil {
-				fmt.Fprintf(os.Stderr, "unexpected error marshaling to json: '%v', Try -output text instead\n", err)
-				os.Exit(1)
-			}
-			fmt.Println(string(b))
-		default:
-			fmt.Fprintf(os.Stderr, "-output %q is not valid option.\n", getFmt)
-			os.Exit(1)
-		}
+		fmt.Println(msg)
 	},
+}
+
+func executeList(args []string, login func() (pkg.Client, error)) (string, error) {
+	client, err := login()
+	if err != nil {
+		return "", fmt.Errorf("unable to login with error '%v'", err)
+	}
+	var dbs []astraops.Database
+	if dbs, err = client.ListDb(include, provider, startingAfter, int32(limit)); err != nil {
+		return "", fmt.Errorf("unable to get list of dbs with error '%v'", err)
+	}
+	switch listFmt {
+	case "text":
+		var rows [][]string
+		rows = append(rows, []string{"name", "id", "status"})
+		for _, db := range dbs {
+			rows = append(rows, []string{db.Info.Name, db.ID, string(db.Status)})
+		}
+		var out bytes.Buffer
+		err = pkg.WriteRows(&out, rows)
+		if err != nil {
+			return "", fmt.Errorf("unexpected error writing text output '%v'", err)
+		}
+		return out.String(), nil
+	case "json":
+		b, err := json.MarshalIndent(dbs, "", "  ")
+		if err != nil {
+			return "", fmt.Errorf("unexpected error marshaling to json: '%v', Try -output text instead", err)
+		}
+		return string(b), nil
+	default:
+		return "", fmt.Errorf("-output %q is not valid option", getFmt)
+	}
 }
