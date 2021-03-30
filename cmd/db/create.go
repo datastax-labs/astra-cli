@@ -66,7 +66,7 @@ var CreateCmd = &cobra.Command{
 	},
 }
 
-func executeCreate(client *astraops.AuthenticatedClient) error {
+func executeCreate(client pkg.Client) error {
 	capacity := int32(createDbCapacityUnit)
 	createDb := astraops.CreateDb{
 		Name:          createDbName,

@@ -20,7 +20,6 @@ import (
 	"os"
 
 	"github.com/rsds143/astra-cli/pkg"
-	"github.com/rsds143/astra-devops-sdk-go/astraops"
 	"github.com/spf13/cobra"
 )
 
@@ -47,7 +46,7 @@ var UnparkCmd = &cobra.Command{
 
 // executeUnpark unparks the database with the specified ID. If no ID is provided
 // the command will error out
-func executeUnpark(args []string, client *astraops.AuthenticatedClient) error {
+func executeUnpark(args []string, client pkg.Client) error {
 	id := args[0]
 	fmt.Printf("starting to unpark database %v\n", id)
 	if err := client.Unpark(id); err != nil {
