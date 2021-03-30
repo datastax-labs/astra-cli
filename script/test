@@ -17,7 +17,7 @@
 
 
 t="/tmp/go-cover.$$.tmp"
-go test -coverprofile=$t ./... && go tool cover -func=$t 
+go test -race -covermode=atomic  -coverprofile=$t ./... && go tool cover -func=$t 
 last=$?
 unlink $t || true
 if [ "$last" = "0" ]; then
