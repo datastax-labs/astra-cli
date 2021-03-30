@@ -40,8 +40,15 @@ var dbCmd = &cobra.Command{
 	Short: "Shows all the db commands",
 	Long:  `Shows all other db commands. Create, Delete, Get information on your databases`,
 	Run: func(cobraCmd *cobra.Command, args []string) {
-		if err := cobraCmd.Usage(); err != nil {
-			fmt.Fprintf(os.Stderr, "Unable to print usage with error %v\n", err)
+		if err := executeDB(cobraCmd.Usage); err != nil {
+			os.Exit(1)
 		}
 	},
+}
+
+func executeDB(usage func() error) error {
+	if err := usage(); err != nil {
+		return fmt.Errorf("warn unable to show usage %v", err)
+	}
+	return nil
 }

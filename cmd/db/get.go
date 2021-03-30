@@ -16,6 +16,7 @@
 package db
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"os"
@@ -39,37 +40,43 @@ var GetCmd = &cobra.Command{
 	Args:  cobra.ExactArgs(1),
 	Run: func(cobraCmd *cobra.Command, args []string) {
 		creds := &pkg.Creds{}
-		client, err := creds.Login()
+		txt, err := executeGet(args, creds.Login)
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "unable to login with error %v\n", err)
 			os.Exit(1)
 		}
-		id := args[0]
-		var db astraops.Database
-		if db, err = client.FindDb(id); err != nil {
-			fmt.Fprintf(os.Stderr, "unable to get '%s' with error %v\n", id, err)
-			os.Exit(1)
-		}
-		switch getFmt {
-		case "text":
-			var rows [][]string
-			rows = append(rows, []string{"name", "id", "status"})
-			rows = append(rows, []string{db.Info.Name, db.ID, string(db.Status)})
-			err = pkg.WriteRows(os.Stdout, rows)
-			if err != nil {
-				fmt.Fprintf(os.Stderr, "unexpected error writing out text %v\n", err)
-				os.Exit(1)
-			}
-		case "json":
-			b, err := json.MarshalIndent(db, "", "  ")
-			if err != nil {
-				fmt.Fprintf(os.Stderr, "unexpected error marshaling to json: '%v', Try -output text instead\n", err)
-				os.Exit(1)
-			}
-			fmt.Println(string(b))
-		default:
-			fmt.Fprintf(os.Stderr, "-output %q is not valid option.\n", getFmt)
-			os.Exit(1)
-		}
+		fmt.Println(txt)
 	},
+}
+
+func executeGet(args []string, login func() (pkg.Client, error)) (string, error) {
+	client, err := login()
+	if err != nil {
+		return "", fmt.Errorf("unable to login with error %v", err)
+	}
+	id := args[0]
+	var db astraops.Database
+	if db, err = client.FindDb(id); err != nil {
+		return "", fmt.Errorf("unable to get '%s' with error %v", id, err)
+	}
+	switch getFmt {
+	case "text":
+		var rows [][]string
+		rows = append(rows, []string{"name", "id", "status"})
+		rows = append(rows, []string{db.Info.Name, db.ID, string(db.Status)})
+		var buf bytes.Buffer
+		err = pkg.WriteRows(&buf, rows)
+		if err != nil {
+			return "", fmt.Errorf("unexpected error writing out text %v", err)
+		}
+		return buf.String(), nil
+	case "json":
+		b, err := json.MarshalIndent(db, "", "  ")
+		if err != nil {
+			return "", fmt.Errorf("unexpected error marshaling to json: '%v', Try -output text instead", err)
+		}
+		return string(b), nil
+	default:
+		return "", fmt.Errorf("-output %q is not valid option", getFmt)
+	}
 }

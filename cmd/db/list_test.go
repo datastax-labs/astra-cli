@@ -14,3 +14,82 @@
 
 //Package db is where the Astra DB commands are
 package db
+
+import (
+	"encoding/json"
+	"strings"
+	"testing"
+
+	"github.com/rsds143/astra-cli/pkg"
+	tests "github.com/rsds143/astra-cli/pkg/tests"
+	"github.com/rsds143/astra-devops-sdk-go/astraops"
+)
+
+func TestList(t *testing.T) {
+	listFmt = "json"
+	dbs := []astraops.Database{
+		{ID: "1"},
+		{ID: "2"},
+	}
+	jsonTxt, err := executeList([]string{"", "", "", "10"}, func() (pkg.Client, error) {
+		return &tests.MockClient{
+			Databases: dbs,
+		}, nil
+
+	})
+	if err != nil {
+		t.Fatalf("unexpected error %v", err)
+	}
+	var fromServer []astraops.Database
+	err = json.Unmarshal([]byte(jsonTxt), &fromServer)
+	if err != nil {
+		t.Fatalf("unexpected error with json %v with text %v", err, jsonTxt)
+	}
+	if len(fromServer) != len(dbs) {
+		t.Errorf("expected '%v' but was '%v'", len(dbs), len(fromServer))
+	}
+	if fromServer[0].ID != dbs[0].ID {
+		t.Errorf("expected '%v' but was '%v'", dbs[0].ID, fromServer[0].ID)
+	}
+	if fromServer[1].ID != dbs[1].ID {
+		t.Errorf("expected '%v' but was '%v'", dbs[1].ID, fromServer[1].ID)
+	}
+}
+
+func TestListText(t *testing.T) {
+	listFmt = "text"
+	dbs := []astraops.Database{
+		{
+			ID: "1",
+			Info: astraops.DatabaseInfo{
+				Name: "A",
+			},
+			Status: astraops.ACTIVE,
+		},
+		{
+			ID: "2",
+			Info: astraops.DatabaseInfo{
+				Name: "B",
+			},
+			Status: astraops.TERMINATING,
+		},
+	}
+	txt, err := executeList([]string{"", "", "", "10"}, func() (pkg.Client, error) {
+		return &tests.MockClient{
+			Databases: dbs,
+		}, nil
+
+	})
+	if err != nil {
+		t.Fatalf("unexpected error %v", err)
+	}
+	expected := strings.Join([]string{
+		"name id status",
+		"A    1  ACTIVE",
+		"B    2  TERMINATING",
+	},
+		"\n")
+	if txt != expected {
+		t.Errorf("expected '%v' but was '%v'", expected, txt)
+	}
+}

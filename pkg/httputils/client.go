@@ -16,8 +16,11 @@
 package httputils
 
 import (
+	"fmt"
+	"io"
 	"net"
 	"net/http"
+	"os"
 	"time"
 )
 
@@ -38,4 +41,34 @@ func NewHTTPClient() *http.Client {
 			ExpectContinueTimeout: 1 * time.Second,
 		},
 	}
+}
+
+//DownloadZip pulls down the URL listed and saves it to the specified location
+func DownloadZip(downloadURL string, secBundleLoc string) (int64, error) {
+	httpClient := NewHTTPClient()
+	res, err := httpClient.Get(downloadURL)
+	if err != nil {
+		return -1, fmt.Errorf("unable to download zip with error %v", err)
+	}
+	defer func() {
+		err = res.Body.Close()
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "Warn: error closing http response body %v\n for request %v with status code %v\n", err, downloadURL, res.StatusCode)
+		}
+	}()
+	f, err := os.Create(secBundleLoc)
+	if err != nil {
+		return -1, fmt.Errorf("unable to create file to save too %v", err)
+	}
+	defer func() {
+		err = f.Close()
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "Warn: error closing file %v for file %v\n", err, secBundleLoc)
+		}
+	}()
+	i, err := io.Copy(f, res.Body)
+	if err != nil {
+		return -1, fmt.Errorf("unable to copy downloaded file to %v", err)
+	}
+	return i, nil
 }

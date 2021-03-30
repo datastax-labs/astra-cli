@@ -15,8 +15,39 @@
 //Package db is where the Astra DB commands are
 package db
 
-import "testing"
+import (
+	"encoding/json"
+	"testing"
+
+	"github.com/rsds143/astra-cli/pkg"
+	tests "github.com/rsds143/astra-cli/pkg/tests"
+	"github.com/rsds143/astra-devops-sdk-go/astraops"
+)
 
 func TestSecBundle(t *testing.T) {
-	t.Skip("ignore")
+	id := "abc"
+	secBundleLoc = "my_loc"
+	secBundleFmt = "json"
+	bundle := astraops.SecureBundle{
+		DownloadURL:                       "abcd",
+		DownloadURLInternal:               "wyz",
+		DownloadURLMigrationProxy:         "opu",
+		DownloadURLMigrationProxyInternal: "zert",
+	}
+	jsonTxt, err := executeSecBundle([]string{id}, func() (pkg.Client, error) {
+		return &tests.MockClient{
+			Bundle: bundle,
+		}, nil
+	})
+	if err != nil {
+		t.Fatalf("unexpected error %v", err)
+	}
+	var fromServer astraops.SecureBundle
+	err = json.Unmarshal([]byte(jsonTxt), &fromServer)
+	if err != nil {
+		t.Fatalf("unexpected error with json %v", err)
+	}
+	if fromServer != bundle {
+		t.Errorf("expected '%v' but was '%v'", bundle, fromServer)
+	}
 }

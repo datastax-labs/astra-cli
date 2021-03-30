@@ -20,7 +20,7 @@ import (
 	"testing"
 )
 
-func TestUsageFails(t *testing.T) {
+func TestRootUsageFails(t *testing.T) {
 	fails := func() error {
 		return errors.New("error showing usage")
 	}

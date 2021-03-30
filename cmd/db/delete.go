@@ -30,7 +30,8 @@ var DeleteCmd = &cobra.Command{
 	Long:  `deletes a database from your Astra account by ID`,
 	Args:  cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
-		msg, err := execteDelete(args)
+		creds := &pkg.Creds{}
+		msg, err := executeDelete(args, creds.Login)
 		if err != nil {
 			fmt.Fprintln(os.Stderr, err)
 			os.Exit(1)
@@ -39,9 +40,8 @@ var DeleteCmd = &cobra.Command{
 	},
 }
 
-func execteDelete(args []string) (string, error) {
-	creds := &pkg.Creds{}
-	client, err := creds.Login()
+func executeDelete(args []string, makeClient func() (pkg.Client, error)) (string, error) {
+	client, err := makeClient()
 	if err != nil {
 		return "", fmt.Errorf("unable to login with error '%v'", err)
 	}

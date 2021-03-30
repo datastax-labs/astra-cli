@@ -21,7 +21,6 @@ import (
 	"strconv"
 
 	"github.com/rsds143/astra-cli/pkg"
-	"github.com/rsds143/astra-devops-sdk-go/astraops"
 	"github.com/spf13/cobra"
 )
 
@@ -48,7 +47,7 @@ var ResizeCmd = &cobra.Command{
 
 //executeResize resizes the database with the specified ID with the specified size. If no ID is provided
 // the command will error out
-func executeResize(args []string, client *astraops.AuthenticatedClient) error {
+func executeResize(args []string, client pkg.Client) error {
 	id := args[0]
 	capacityUnitRaw := args[1]
 	capacityUnit, err := strconv.Atoi(capacityUnitRaw)

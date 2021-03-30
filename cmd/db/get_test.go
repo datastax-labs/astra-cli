@@ -15,8 +15,74 @@
 //Package db is where the Astra DB commands are
 package db
 
-import "testing"
+import (
+	"encoding/json"
+	"strings"
+	"testing"
+
+	"github.com/rsds143/astra-cli/pkg"
+	tests "github.com/rsds143/astra-cli/pkg/tests"
+	"github.com/rsds143/astra-devops-sdk-go/astraops"
+)
 
 func TestGet(t *testing.T) {
-	t.Skip("ignore")
+	getFmt = "json"
+	dbs := []astraops.Database{
+		{ID: "1"},
+		{ID: "2"},
+	}
+	jsonTxt, err := executeGet([]string{"1"}, func() (pkg.Client, error) {
+		return &tests.MockClient{
+			Databases: dbs,
+		}, nil
+
+	})
+	if err != nil {
+		t.Fatalf("unexpected error %v", err)
+	}
+	var fromServer astraops.Database
+	err = json.Unmarshal([]byte(jsonTxt), &fromServer)
+	if err != nil {
+		t.Fatalf("unexpected error with json %v with text %v", err, jsonTxt)
+	}
+	if fromServer.ID != dbs[0].ID {
+		t.Errorf("expected '%v' but was '%v'", dbs[0].ID, fromServer.ID)
+	}
+}
+
+func TestGetText(t *testing.T) {
+	getFmt = "text"
+	dbs := []astraops.Database{
+		{
+			ID: "1",
+			Info: astraops.DatabaseInfo{
+				Name: "A",
+			},
+			Status: astraops.ACTIVE,
+		},
+		{
+			ID: "2",
+			Info: astraops.DatabaseInfo{
+				Name: "B",
+			},
+			Status: astraops.TERMINATING,
+		},
+	}
+	txt, err := executeGet([]string{"1"}, func() (pkg.Client, error) {
+		return &tests.MockClient{
+			Databases: dbs,
+		}, nil
+
+	})
+	if err != nil {
+		t.Fatalf("unexpected error %v", err)
+	}
+	expected := strings.Join([]string{
+		"name id status",
+		"A    1  ACTIVE",
+	},
+		"\n")
+	if txt != expected {
+		t.Errorf("expected '%v' but was '%v'", expected, txt)
+	}
 }
