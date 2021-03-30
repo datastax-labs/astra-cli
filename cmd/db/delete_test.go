@@ -15,8 +15,76 @@
 //Package db is where the Astra DB commands are
 package db
 
-import "testing"
+import (
+	"fmt"
+	"testing"
+
+	"github.com/rsds143/astra-cli/pkg"
+	tests "github.com/rsds143/astra-cli/pkg/tests"
+)
 
 func TestDelete(t *testing.T) {
-	t.Skip("ignore")
+	mockClient := &tests.MockClient{}
+	id := "123"
+	msg, err := executeDelete([]string{id}, func() (pkg.Client, error) {
+		return mockClient, nil
+	})
+	if err != nil {
+		t.Fatalf("unexpected error '%v'", err)
+	}
+	if len(mockClient.Calls()) != 1 {
+		t.Fatalf("expected 1 call but was %v", len(mockClient.Calls()))
+	}
+	if id != mockClient.Call(0) {
+		t.Errorf("expected '%v' but was '%v'", id, mockClient.Call(0))
+	}
+	expected := "database 123 deleted"
+	if expected != msg {
+		t.Errorf("expected '%v' but was '%v'", expected, msg)
+	}
+}
+
+func TestDeleteLoginError(t *testing.T) {
+	mockClient := &tests.MockClient{}
+	id := "123"
+	msg, err := executeDelete([]string{id}, func() (pkg.Client, error) {
+		return mockClient, fmt.Errorf("unable to login")
+	})
+	if err == nil {
+		t.Fatalf("should be returning an error and is not")
+	}
+	expectedError := "unable to login with error 'unable to login'"
+	if err.Error() != expectedError {
+		t.Errorf("expected '%v' but was '%v'", expectedError, err)
+	}
+	if len(mockClient.Calls()) != 0 {
+		t.Fatalf("expected no calls but was %v", len(mockClient.Calls()))
+	}
+
+	if "" != msg {
+		t.Errorf("expected emtpy but was '%v'", msg)
+	}
+}
+
+func TestDeleteError(t *testing.T) {
+	mockClient := &tests.MockClient{
+		ErrorQueue: []error{fmt.Errorf("timeout error")},
+	}
+	id := "123"
+	msg, err := executeDelete([]string{id}, func() (pkg.Client, error) {
+		return mockClient, nil
+	})
+	if err == nil {
+		t.Fatal("expected error but none came")
+	}
+	if len(mockClient.Calls()) != 1 {
+		t.Fatalf("expected 1 call but was %v", len(mockClient.Calls()))
+	}
+	if id != mockClient.Call(0) {
+		t.Errorf("expected '%v' but was '%v'", id, mockClient.Call(0))
+	}
+	expected := ""
+	if expected != msg {
+		t.Errorf("expected '%v' but was '%v'", expected, msg)
+	}
 }

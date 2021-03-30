@@ -52,13 +52,7 @@ var CreateCmd = &cobra.Command{
 	Long:  ``,
 	Run: func(cobraCmd *cobra.Command, args []string) {
 		creds := &pkg.Creds{}
-		client, err := creds.Login()
-		if err != nil {
-			fmt.Fprintf(os.Stderr, "unable to login with error %v\n", err)
-			os.Exit(1)
-		}
-
-		err = executeCreate(client)
+		err := executeCreate(creds.Login)
 		if err != nil {
 			fmt.Fprintln(os.Stderr, err)
 			os.Exit(1)
@@ -66,7 +60,11 @@ var CreateCmd = &cobra.Command{
 	},
 }
 
-func executeCreate(client pkg.Client) error {
+func executeCreate(makeClient func() (pkg.Client, error)) error {
+	client, err := makeClient()
+	if err != nil {
+		return fmt.Errorf("unable to login with error %v", err)
+	}
 	capacity := int32(createDbCapacityUnit)
 	createDb := astraops.CreateDb{
 		Name:          createDbName,
