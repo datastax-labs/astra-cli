@@ -34,9 +34,9 @@ func TestResize(t *testing.T) {
 	if len(mockClient.Calls()) != 1 {
 		t.Fatalf("expected 1 call but was %v", len(mockClient.Calls()))
 	}
-	actualId := mockClient.Call(0).([]interface{})[0]
-	if id != actualId {
-		t.Errorf("expected '%v' but was '%v'", id, actualId)
+	actualID := mockClient.Call(0).([]interface{})[0]
+	if id != actualID {
+		t.Errorf("expected '%v' but was '%v'", id, actualID)
 	}
 	actualSize := mockClient.Call(0).([]interface{})[1].(int32)
 	if int32(100) != actualSize {

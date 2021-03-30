@@ -42,35 +42,39 @@ var SecBundleCmd = &cobra.Command{
 	Args:  cobra.ExactArgs(1),
 	Run: func(cobraCmd *cobra.Command, args []string) {
 		creds := &pkg.Creds{}
-		client, err := creds.Login()
+		out, err := executeSecBundle(args, creds.Login)
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "unable to login with error %v\n", err)
+			fmt.Fprintf(os.Stderr, "%v\n", err)
 			os.Exit(1)
 		}
-		id := args[0]
-		var secBundle astraops.SecureBundle
-		if secBundle, err = client.GetSecureBundle(id); err != nil {
-			fmt.Fprintf(os.Stderr, "unable to get '%s' with error %v\n", id, err)
-			os.Exit(1)
-		}
-		switch secBundleFmt {
-		case "zip":
-			bytesWritten, err := httputils.DownloadZip(secBundle.DownloadURL, secBundleLoc)
-			if err != nil {
-				fmt.Fprintf(os.Stderr, "%v\n", err)
-				os.Exit(1)
-			}
-			fmt.Printf("file %v saved %v bytes written\n", secBundleLoc, bytesWritten)
-		case "json":
-			b, err := json.MarshalIndent(secBundle, "", "  ")
-			if err != nil {
-				fmt.Fprintf(os.Stderr, "unexpected error marshaling to json: '%v', Try -output text instead\n", err)
-				os.Exit(1)
-			}
-			fmt.Println(string(b))
-		default:
-			fmt.Fprintf(os.Stderr, "-output %q is not valid option.", secBundleFmt)
-			os.Exit(1)
-		}
+		fmt.Println(out)
 	},
+}
+
+func executeSecBundle(args []string, login func() (pkg.Client, error)) (string, error) {
+	client, err := login()
+	if err != nil {
+		return "", fmt.Errorf("unable to login with error %v", err)
+	}
+	id := args[0]
+	var secBundle astraops.SecureBundle
+	if secBundle, err = client.GetSecureBundle(id); err != nil {
+		return "", fmt.Errorf("unable to get '%s' with error %v", id, err)
+	}
+	switch secBundleFmt {
+	case "zip":
+		bytesWritten, err := httputils.DownloadZip(secBundle.DownloadURL, secBundleLoc)
+		if err != nil {
+			return "", fmt.Errorf("error outputing zip format '%v'", err)
+		}
+		return fmt.Sprintf("file %v saved %v bytes written", secBundleLoc, bytesWritten), nil
+	case "json":
+		b, err := json.MarshalIndent(secBundle, "", "  ")
+		if err != nil {
+			return "", fmt.Errorf("unexpected error marshaling to json: '%v', Try -output text instead", err)
+		}
+		return string(b), nil
+	default:
+		return "", fmt.Errorf("-output %q is not valid option", secBundleFmt)
+	}
 }
