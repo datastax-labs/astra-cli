@@ -49,7 +49,7 @@ func init() {
 var CreateCmd = &cobra.Command{
 	Use:   "create",
 	Short: "creates a database by id",
-	Long:  ``,
+	Long:  `creates a database by id`,
 	Run: func(cobraCmd *cobra.Command, args []string) {
 		creds := &pkg.Creds{}
 		err := executeCreate(creds.Login)
