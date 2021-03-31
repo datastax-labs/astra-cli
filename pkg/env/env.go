@@ -12,8 +12,8 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-//Package env is the package where global environment configuration goes
+// Package env is the package where global environment configuration goes
 package env
 
-//Verbose sets the verbose mode for the command
+// Verbose sets the verbose mode for the command
 var Verbose bool

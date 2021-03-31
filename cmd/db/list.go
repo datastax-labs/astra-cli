@@ -12,7 +12,7 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-//Package db provides the sub-commands for the db command
+// Package db provides the sub-commands for the db command
 package db
 
 import (
@@ -40,14 +40,14 @@ func init() {
 	ListCmd.Flags().StringVarP(&listFmt, "output", "o", "text", "Output format for report default is json")
 }
 
-//ListCmd provides the list databases command
+// ListCmd provides the list databases command
 var ListCmd = &cobra.Command{
 	Use:   "list",
 	Short: "lists all databases",
 	Long:  `lists all databases in your Astra account`,
 	Run: func(cmd *cobra.Command, args []string) {
 		creds := &pkg.Creds{}
-		msg, err := executeList(args, creds.Login)
+		msg, err := executeList(creds.Login)
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "%v\n", err)
 			os.Exit(1)
@@ -56,7 +56,7 @@ var ListCmd = &cobra.Command{
 	},
 }
 
-func executeList(args []string, login func() (pkg.Client, error)) (string, error) {
+func executeList(login func() (pkg.Client, error)) (string, error) {
 	client, err := login()
 	if err != nil {
 		return "", fmt.Errorf("unable to login with error '%v'", err)
@@ -66,7 +66,7 @@ func executeList(args []string, login func() (pkg.Client, error)) (string, error
 		return "", fmt.Errorf("unable to get list of dbs with error '%v'", err)
 	}
 	switch listFmt {
-	case "text":
+	case pkg.TextFormat:
 		var rows [][]string
 		rows = append(rows, []string{"name", "id", "status"})
 		for _, db := range dbs {
@@ -78,13 +78,13 @@ func executeList(args []string, login func() (pkg.Client, error)) (string, error
 			return "", fmt.Errorf("unexpected error writing text output '%v'", err)
 		}
 		return out.String(), nil
-	case "json":
+	case pkg.JSONFormat:
 		b, err := json.MarshalIndent(dbs, "", "  ")
 		if err != nil {
 			return "", fmt.Errorf("unexpected error marshaling to json: '%v', Try -output text instead", err)
 		}
 		return string(b), nil
 	default:
-		return "", fmt.Errorf("-output %q is not valid option", getFmt)
+		return "", fmt.Errorf("-o %q is not valid option", listFmt)
 	}
 }

@@ -12,7 +12,7 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-//Package pkg is the top level package for shared libraries
+// Package pkg is the top level package for shared libraries
 package pkg
 
 import (
@@ -22,7 +22,7 @@ import (
 	"text/tabwriter"
 )
 
-//WriteRows outputs a flexiable right aligned tabwriter
+// WriteRows outputs a flexiable right aligned tabwriter
 func WriteRows(w io.Writer, rows [][]string) error {
 	tw := tabwriter.NewWriter(w, 0, 0, 1, ' ', 0)
 	for i, row := range rows {

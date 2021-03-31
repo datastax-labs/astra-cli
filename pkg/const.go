@@ -12,28 +12,12 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-// Package db is where the Astra DB commands are
-package db
+// Package pkg is the top level package for shared libraries
+package pkg
 
-import (
-	"testing"
-
-	tests "github.com/rsds143/astra-cli/pkg/tests"
+const (
+	// JSONFormat is for the command line flag -o
+	JSONFormat = "json"
+	// TextFormat is for the command line flag -o
+	TextFormat = "text"
 )
-
-func TestUnpark(t *testing.T) {
-	// setting package variables by hand, there be dragons
-	mockClient := &tests.MockClient{}
-	id := "unparkID123"
-	err := executeUnpark([]string{id}, mockClient)
-	if err != nil {
-		t.Fatalf("unexpected error '%v'", err)
-	}
-
-	if len(mockClient.Calls()) != 1 {
-		t.Fatalf("expected 1 call but was %v", len(mockClient.Calls()))
-	}
-	if id != mockClient.Call(0) {
-		t.Errorf("expected '%v' but was '%v'", id, mockClient.Call(0))
-	}
-}

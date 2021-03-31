@@ -12,7 +12,7 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-//Package db is where the Astra DB commands are
+// Package db is where the Astra DB commands are
 package db
 
 import (
@@ -26,7 +26,7 @@ import (
 )
 
 func TestGet(t *testing.T) {
-	getFmt = "json"
+	getFmt = pkg.JSONFormat
 	dbs := []astraops.Database{
 		{ID: "1"},
 		{ID: "2"},
@@ -35,7 +35,6 @@ func TestGet(t *testing.T) {
 		return &tests.MockClient{
 			Databases: dbs,
 		}, nil
-
 	})
 	if err != nil {
 		t.Fatalf("unexpected error %v", err)
@@ -51,7 +50,7 @@ func TestGet(t *testing.T) {
 }
 
 func TestGetText(t *testing.T) {
-	getFmt = "text"
+	getFmt = pkg.TextFormat
 	dbs := []astraops.Database{
 		{
 			ID: "1",
@@ -72,7 +71,6 @@ func TestGetText(t *testing.T) {
 		return &tests.MockClient{
 			Databases: dbs,
 		}, nil
-
 	})
 	if err != nil {
 		t.Fatalf("unexpected error %v", err)
@@ -84,5 +82,19 @@ func TestGetText(t *testing.T) {
 		"\n")
 	if txt != expected {
 		t.Errorf("expected '%v' but was '%v'", expected, txt)
+	}
+}
+
+func TestGetInvalidFmt(t *testing.T) {
+	getFmt = "badham"
+	_, err := executeGet([]string{"abc"}, func() (pkg.Client, error) {
+		return &tests.MockClient{}, nil
+	})
+	if err == nil {
+		t.Fatalf("unexpected error %v", err)
+	}
+	expected := "-o \"badham\" is not valid option"
+	if err.Error() != expected {
+		t.Errorf("expected '%v' but was '%v'", expected, err.Error())
 	}
 }

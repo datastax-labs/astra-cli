@@ -12,7 +12,7 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-//Package db is where the Astra DB commands are
+// Package db is where the Astra DB commands are
 package db
 
 import (
@@ -23,7 +23,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-//ParkCmd provides parking support for classic database tiers in Astra
+// ParkCmd provides parking support for classic database tiers in Astra
 var ParkCmd = &cobra.Command{
 	Use:   "park <id>",
 	Short: "parks the database specified, does not work with serverless",

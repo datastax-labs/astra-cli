@@ -12,7 +12,7 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-//Package db is where the Astra DB commands are
+// Package db is where the Astra DB commands are
 package db
 
 import (
@@ -30,7 +30,7 @@ import (
 )
 
 func TestSecBundle(t *testing.T) {
-	id := "abc"
+	id := "secId123"
 	secBundleLoc = "my_loc"
 	secBundleFmt = "json"
 	bundle := astraops.SecureBundle{
@@ -110,7 +110,7 @@ func TestSecBundleInvalidFmt(t *testing.T) {
 	if err == nil {
 		t.Fatalf("unexpected error %v", err)
 	}
-	expected := "-output \"ham\" is not valid option"
+	expected := "-o \"ham\" is not valid option"
 	if err.Error() != expected {
 		t.Errorf("expected '%v' but was '%v'", expected, err.Error())
 	}
