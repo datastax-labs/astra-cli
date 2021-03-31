@@ -12,7 +12,7 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-//Package pkg is the top level package for shared libraries
+// Package pkg is the top level package for shared libraries
 package pkg
 
 import (
@@ -26,13 +26,13 @@ import (
 	"github.com/rsds143/astra-devops-sdk-go/astraops"
 )
 
-//ConfFiles supports both formats of credentials and will say if the token one is present
+// ConfFiles supports both formats of credentials and will say if the token one is present
 type ConfFiles struct {
 	TokenPath string
 	SaPath    string
 }
 
-//HasServiceAccount returns true if there is a service account file present and accessible
+// HasServiceAccount returns true if there is a service account file present and accessible
 func (c ConfFiles) HasServiceAccount() (bool, error) {
 	if _, err := os.Stat(c.SaPath); err != nil {
 		if os.IsNotExist(err) {
@@ -43,7 +43,7 @@ func (c ConfFiles) HasServiceAccount() (bool, error) {
 	return true, nil
 }
 
-//HasToken returns true if there is a token file present and accessible
+// HasToken returns true if there is a token file present and accessible
 func (c ConfFiles) HasToken() (bool, error) {
 	if _, err := os.Stat(c.TokenPath); err != nil {
 		if os.IsNotExist(err) {

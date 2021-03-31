@@ -12,7 +12,7 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-//Package db is where the Astra DB commands are
+// Package db is where the Astra DB commands are
 package db
 
 import (
@@ -62,7 +62,7 @@ func TestDeleteLoginError(t *testing.T) {
 	}
 
 	if "" != msg {
-		t.Errorf("expected emtpy but was '%v'", msg)
+		t.Errorf("expected empty but was '%v'", msg)
 	}
 }
 

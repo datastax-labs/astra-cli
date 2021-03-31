@@ -12,7 +12,7 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-//Package pkg is the top level package for shared libraries
+// Package pkg is the top level package for shared libraries
 package pkg
 
 import (
@@ -20,13 +20,13 @@ import (
 	"strings"
 )
 
-//ParseError is used to indicate there is an error in the command line args
+// ParseError is used to indicate there is an error in the command line args
 type ParseError struct {
 	Args []string
 	Err  error
 }
 
-//Error outpus the error with the args provided, if there are no args that becomes the error
+// Error outpus the error with the args provided, if there are no args that becomes the error
 func (p *ParseError) Error() string {
 	if len(p.Args) == 0 {
 		return "no args provided"
@@ -34,24 +34,24 @@ func (p *ParseError) Error() string {
 	return fmt.Sprintf("Unable to parse command line with args: %v. Nested error was '%v'", strings.Join(p.Args, ", "), p.Err)
 }
 
-//JSONParseError when unable to read JSON
+// JSONParseError when unable to read JSON
 type JSONParseError struct {
 	Original string
 	Err      error
 }
 
-//Error returns the error string
+// Error returns the error string
 func (j *JSONParseError) Error() string {
 	return fmt.Sprintf("JSON parsing error for json '%v' with error '%v'", j.Original, j.Err)
 }
 
-//FileNotFoundError when unable to read file
+// FileNotFoundError when unable to read file
 type FileNotFoundError struct {
 	Path string
 	Err  error
 }
 
-//Error returns the error string
+// Error returns the error string
 func (j *FileNotFoundError) Error() string {
 	return fmt.Sprintf("Unable to find file '%v' with error: '%s'", j.Path, j.Err)
 }

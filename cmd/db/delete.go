@@ -12,7 +12,7 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-//Package db provides the sub-commands for the db command
+// Package db provides the sub-commands for the db command
 package db
 
 import (
@@ -23,7 +23,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-//DeleteCmd provides the delete database command
+// DeleteCmd provides the delete database command
 var DeleteCmd = &cobra.Command{
 	Use:   "delete <id>",
 	Short: "delete database by databaseID",

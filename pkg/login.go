@@ -12,7 +12,7 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-//Package pkg is the top level package for shared libraries
+// Package pkg is the top level package for shared libraries
 package pkg
 
 import (
@@ -23,12 +23,12 @@ import (
 	"github.com/rsds143/astra-devops-sdk-go/astraops"
 )
 
-//LoginService provides interface to implement logins and produce an Client
+// LoginService provides interface to implement logins and produce an Client
 type LoginService interface {
 	Login() (Client, error)
 }
 
-//Client is the abstraction for client interactions. Allows alternative db management clients
+// Client is the abstraction for client interactions. Allows alternative db management clients
 type Client interface {
 	CreateDb(astraops.CreateDb) (astraops.Database, error)
 	Terminate(string, bool) error
@@ -41,12 +41,12 @@ type Client interface {
 	GetTierInfo() ([]astraops.TierInfo, error)
 }
 
-//Creds knows how handle and store credentials
+// Creds knows how handle and store credentials
 type Creds struct {
-	GetHomeFunc func() (string, error) //optional. If not specified os.UserHomeDir is used for log base directory to find creds
+	GetHomeFunc func() (string, error) // optional. If not specified os.UserHomeDir is used for log base directory to find creds
 }
 
-//Login logs into the Astra DevOps API using the local configuration provided by the 'astra-cli login' command
+// Login logs into the Astra DevOps API using the local configuration provided by the 'astra-cli login' command
 func (c *Creds) Login() (Client, error) {
 	getHome := c.GetHomeFunc
 	if getHome == nil {
@@ -84,5 +84,4 @@ func (c *Creds) Login() (Client, error) {
 		return &astraops.AuthenticatedClient{}, fmt.Errorf("authenticate failed with error %v", err)
 	}
 	return client, nil
-
 }
