@@ -12,20 +12,23 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-//Package db is where the Astra DB commands are
+// Package db is where the Astra DB commands are
 package db
 
 import (
 	"testing"
 
+	"github.com/rsds143/astra-cli/pkg"
 	tests "github.com/rsds143/astra-cli/pkg/tests"
 )
 
 func TestPark(t *testing.T) {
-	//setting package variables by hand, there be dragons
+	// setting package variables by hand, there be dragons
 	mockClient := &tests.MockClient{}
-	id := "qdfkjoj"
-	err := executePark([]string{id}, mockClient)
+	id := "abcd"
+	msg, err := executePark([]string{id}, func() (pkg.Client, error) {
+		return mockClient, nil
+	})
 	if err != nil {
 		t.Fatalf("unexpected error '%v'", err)
 	}
@@ -35,5 +38,9 @@ func TestPark(t *testing.T) {
 	}
 	if id != mockClient.Call(0) {
 		t.Errorf("expected '%v' but was '%v'", id, mockClient.Call(0))
+	}
+	expected := "database abcd parked"
+	if msg != expected {
+		t.Errorf("expected '%v' but was '%v'", expected, msg)
 	}
 }

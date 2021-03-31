@@ -12,7 +12,7 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-//Package db is where the Astra DB commands are
+// Package db is where the Astra DB commands are
 package db
 
 import (
@@ -26,7 +26,7 @@ import (
 
 func TestCreateGetsId(t *testing.T) {
 	expectedID := "abcd"
-	//setting package variables by hand, there be dragons
+	// setting package variables by hand, there be dragons
 	mockClient := &tests.MockClient{
 		Databases: []astraops.Database{
 			{
@@ -46,7 +46,7 @@ func TestCreateGetsId(t *testing.T) {
 	}
 }
 func TestCreateLoginFails(t *testing.T) {
-	//setting package variables by hand, there be dragons
+	// setting package variables by hand, there be dragons
 	mockClient := &tests.MockClient{}
 	err := executeCreate(func() (pkg.Client, error) {
 		return mockClient, fmt.Errorf("service down")
@@ -65,7 +65,7 @@ func TestCreateLoginFails(t *testing.T) {
 }
 
 func TestCreateFails(t *testing.T) {
-	//setting package variables by hand, there be dragons
+	// setting package variables by hand, there be dragons
 	mockClient := &tests.MockClient{
 		ErrorQueue: []error{fmt.Errorf("service down")},
 	}

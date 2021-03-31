@@ -12,7 +12,7 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-//Package test is for test utilies and mocks
+// Package test is for test utilies and mocks
 package test
 
 import (
@@ -76,7 +76,7 @@ func TestGetDB(t *testing.T) {
 
 func TestPark(t *testing.T) {
 	client := &MockClient{}
-	id := "DSQ"
+	id := "123"
 	err := client.Park(id)
 	if err != nil {
 		t.Fatal("unexpected error")
@@ -91,7 +91,7 @@ func TestPark(t *testing.T) {
 
 func TestUnpark(t *testing.T) {
 	client := &MockClient{}
-	id := "DSQ"
+	id := "parkid"
 	err := client.Unpark(id)
 	if err != nil {
 		t.Fatal("unexpected error")
@@ -106,7 +106,7 @@ func TestUnpark(t *testing.T) {
 
 func TestTerminate(t *testing.T) {
 	client := &MockClient{}
-	id := "DSQ"
+	id := "termid"
 	err := client.Terminate(id, false)
 	if err != nil {
 		t.Fatal("unexpected error")
@@ -126,7 +126,7 @@ func TestGetSecurteBundleId(t *testing.T) {
 			DownloadURL: url,
 		},
 	}
-	id := "DSQ"
+	id := "secid"
 	bundle, err := client.GetSecureBundle(id)
 	if err != nil {
 		t.Fatal("unexpected error")
@@ -194,9 +194,9 @@ func TestCreateDb(t *testing.T) {
 
 func TestResize(t *testing.T) {
 	client := &MockClient{}
-	id := "DSQ"
+	id := "987"
 	var size int32 = 10
-	err := client.Resize(id, int32(size))
+	err := client.Resize(id, size)
 	if err != nil {
 		t.Fatal("unexpected error")
 	}

@@ -12,7 +12,7 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-//Package db provides the sub-commands for the db command
+// Package db provides the sub-commands for the db command
 package db
 
 import (
@@ -32,7 +32,7 @@ func init() {
 	GetCmd.Flags().StringVarP(&getFmt, "output", "o", "text", "Output format for report default is text")
 }
 
-//GetCmd provides the get database command
+// GetCmd provides the get database command
 var GetCmd = &cobra.Command{
 	Use:   "get <id>",
 	Short: "get database by databaseID",
@@ -60,7 +60,7 @@ func executeGet(args []string, login func() (pkg.Client, error)) (string, error)
 		return "", fmt.Errorf("unable to get '%s' with error %v", id, err)
 	}
 	switch getFmt {
-	case "text":
+	case pkg.TextFormat:
 		var rows [][]string
 		rows = append(rows, []string{"name", "id", "status"})
 		rows = append(rows, []string{db.Info.Name, db.ID, string(db.Status)})
@@ -70,13 +70,13 @@ func executeGet(args []string, login func() (pkg.Client, error)) (string, error)
 			return "", fmt.Errorf("unexpected error writing out text %v", err)
 		}
 		return buf.String(), nil
-	case "json":
+	case pkg.JSONFormat:
 		b, err := json.MarshalIndent(db, "", "  ")
 		if err != nil {
 			return "", fmt.Errorf("unexpected error marshaling to json: '%v', Try -output text instead", err)
 		}
 		return string(b), nil
 	default:
-		return "", fmt.Errorf("-output %q is not valid option", getFmt)
+		return "", fmt.Errorf("-o %q is not valid option", getFmt)
 	}
 }

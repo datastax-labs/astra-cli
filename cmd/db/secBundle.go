@@ -12,7 +12,7 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-//Package db provides the sub-commands for the db command
+// Package db provides the sub-commands for the db command
 package db
 
 import (
@@ -34,7 +34,7 @@ func init() {
 	SecBundleCmd.Flags().StringVarP(&secBundleLoc, "location", "l", "secureBundle.zip", "location of bundle to download to if using zip format. ignore if using json")
 }
 
-//SecBundleCmd  provides the secBundle database command
+// SecBundleCmd  provides the secBundle database command
 var SecBundleCmd = &cobra.Command{
 	Use:   "secBundle <id>",
 	Short: "get secure bundle by databaseID",
@@ -68,13 +68,13 @@ func executeSecBundle(args []string, login func() (pkg.Client, error)) (string, 
 			return "", fmt.Errorf("error outputing zip format '%v'", err)
 		}
 		return fmt.Sprintf("file %v saved %v bytes written", secBundleLoc, bytesWritten), nil
-	case "json":
+	case pkg.JSONFormat:
 		b, err := json.MarshalIndent(secBundle, "", "  ")
 		if err != nil {
 			return "", fmt.Errorf("unexpected error marshaling to json: '%v', Try -output text instead", err)
 		}
 		return string(b), nil
 	default:
-		return "", fmt.Errorf("-output %q is not valid option", secBundleFmt)
+		return "", fmt.Errorf("-o %q is not valid option", secBundleFmt)
 	}
 }

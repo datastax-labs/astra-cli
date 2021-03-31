@@ -12,7 +12,7 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-//Package db is where the Astra DB commands are
+// Package db is where the Astra DB commands are
 package db
 
 import (
@@ -26,16 +26,15 @@ import (
 )
 
 func TestList(t *testing.T) {
-	listFmt = "json"
+	listFmt = pkg.JSONFormat
 	dbs := []astraops.Database{
 		{ID: "1"},
 		{ID: "2"},
 	}
-	jsonTxt, err := executeList([]string{"", "", "", "10"}, func() (pkg.Client, error) {
+	jsonTxt, err := executeList(func() (pkg.Client, error) {
 		return &tests.MockClient{
 			Databases: dbs,
 		}, nil
-
 	})
 	if err != nil {
 		t.Fatalf("unexpected error %v", err)
@@ -57,7 +56,7 @@ func TestList(t *testing.T) {
 }
 
 func TestListText(t *testing.T) {
-	listFmt = "text"
+	listFmt = pkg.TextFormat
 	dbs := []astraops.Database{
 		{
 			ID: "1",
@@ -74,11 +73,10 @@ func TestListText(t *testing.T) {
 			Status: astraops.TERMINATING,
 		},
 	}
-	txt, err := executeList([]string{"", "", "", "10"}, func() (pkg.Client, error) {
+	txt, err := executeList(func() (pkg.Client, error) {
 		return &tests.MockClient{
 			Databases: dbs,
 		}, nil
-
 	})
 	if err != nil {
 		t.Fatalf("unexpected error %v", err)
@@ -91,5 +89,19 @@ func TestListText(t *testing.T) {
 		"\n")
 	if txt != expected {
 		t.Errorf("expected '%v' but was '%v'", expected, txt)
+	}
+}
+
+func TestListInvalidFmt(t *testing.T) {
+	listFmt = "listham"
+	_, err := executeList(func() (pkg.Client, error) {
+		return &tests.MockClient{}, nil
+	})
+	if err == nil {
+		t.Fatalf("unexpected error %v", err)
+	}
+	expected := "-o \"listham\" is not valid option"
+	if err.Error() != expected {
+		t.Errorf("expected '%v' but was '%v'", expected, err.Error())
 	}
 }

@@ -12,7 +12,7 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-//Package cmd contains all fo the commands for the cli
+// Package cmd contains all fo the commands for the cli
 package cmd
 
 import (
@@ -29,7 +29,7 @@ func init() {
 	RootCmd.AddCommand(dbCmd)
 }
 
-//RootCmd is the entry point for the whole app
+// RootCmd is the entry point for the whole app
 var RootCmd = &cobra.Command{
 	Use:   "astra-cli",
 	Short: "An easy to use client for automating DataStax Astra",

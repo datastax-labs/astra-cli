@@ -12,7 +12,7 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-//Package db is where the Astra DB commands are
+// Package db is where the Astra DB commands are
 package db
 
 import (
@@ -42,10 +42,9 @@ func init() {
 	CreateCmd.Flags().StringVarP(&createDbTier, "tier", "t", "serverless", "tier to give to the Astra Database")
 	CreateCmd.Flags().IntVarP(&createDbCapacityUnit, "capacityUnit", "c", 1, "capacityUnit flag to give to the Astra Database")
 	CreateCmd.Flags().StringVarP(&createDbCloudProvider, "cloudProvider", "l", "GCP", "cloud provider flag to give to the Astra Database")
-
 }
 
-//CreateCmd creates a database in Astra
+// CreateCmd creates a database in Astra
 var CreateCmd = &cobra.Command{
 	Use:   "create",
 	Short: "creates a database by id",

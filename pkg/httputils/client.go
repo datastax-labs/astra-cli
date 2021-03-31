@@ -12,7 +12,7 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-//Package httputils provides common http functions and utilities
+// Package httputils provides common http functions and utilities
 package httputils
 
 import (
@@ -24,26 +24,31 @@ import (
 	"time"
 )
 
-//NewHTTPClient fires up client with 'better' defaults
+const connections = 10
+const standardTimeOut = 5 * time.Second
+const dialTimeout = 10 * time.Second
+const expectContinueResponse = 1 * time.Second
+
+// NewHTTPClient fires up client with 'better' defaults
 func NewHTTPClient() *http.Client {
 	return &http.Client{
-		Timeout: 5 * time.Second,
+		Timeout: standardTimeOut,
 		Transport: &http.Transport{
-			MaxIdleConns:        10,
-			MaxConnsPerHost:     10,
-			MaxIdleConnsPerHost: 10,
+			MaxIdleConns:        connections,
+			MaxConnsPerHost:     connections,
+			MaxIdleConnsPerHost: connections,
 			Dial: (&net.Dialer{
-				Timeout:   10 * time.Second,
-				KeepAlive: 10 * time.Second,
+				Timeout:   dialTimeout,
+				KeepAlive: dialTimeout,
 			}).Dial,
-			TLSHandshakeTimeout:   5 * time.Second,
-			ResponseHeaderTimeout: 5 * time.Second,
-			ExpectContinueTimeout: 1 * time.Second,
+			TLSHandshakeTimeout:   standardTimeOut,
+			ResponseHeaderTimeout: standardTimeOut,
+			ExpectContinueTimeout: expectContinueResponse,
 		},
 	}
 }
 
-//DownloadZip pulls down the URL listed and saves it to the specified location
+// DownloadZip pulls down the URL listed and saves it to the specified location
 func DownloadZip(downloadURL string, secBundleLoc string) (int64, error) {
 	httpClient := NewHTTPClient()
 	res, err := httpClient.Get(downloadURL)

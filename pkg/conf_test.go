@@ -12,7 +12,7 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-//Package pkg is the top level package for shared libraries
+// Package pkg is the top level package for shared libraries
 package pkg
 
 import (
@@ -33,9 +33,9 @@ func TestReadLogin(t *testing.T) {
 	if c.ClientID != id {
 		t.Errorf("expected %v but was %v", id, c.ClientID)
 	}
-	secret := "6ae15bff-1435-430f-975b-9b3d9914b698"
-	if c.ClientSecret != secret {
-		t.Errorf("expected %v but was %v", secret, c.ClientSecret)
+	testClientSec := "6ae15bff-1435-430f-975b-9b3d9914b698"
+	if c.ClientSecret != testClientSec {
+		t.Errorf("expected %v but was %v", testClientSec, c.ClientSecret)
 	}
 }
 

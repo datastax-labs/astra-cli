@@ -12,7 +12,7 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-//Package db is where the Astra DB commands are
+// Package db is where the Astra DB commands are
 package db
 
 import (
@@ -22,9 +22,9 @@ import (
 )
 
 func TestResize(t *testing.T) {
-	//setting package variables by hand, there be dragons
+	// setting package variables by hand, there be dragons
 	mockClient := &tests.MockClient{}
-	id := "qdfkjoj"
+	id := "resizeId1"
 	size := "100"
 	err := executeResize([]string{id, size}, mockClient)
 	if err != nil {
@@ -45,15 +45,15 @@ func TestResize(t *testing.T) {
 }
 
 func TestResizeParseError(t *testing.T) {
-	//setting package variables by hand, there be dragons
+	// setting package variables by hand, there be dragons
 	mockClient := &tests.MockClient{}
-	id := "qdfkjoj"
-	size := "abcd"
+	id := "resizeparseId"
+	size := "poppaoute"
 	err := executeResize([]string{id, size}, mockClient)
 	if err == nil {
 		t.Fatal("expected error")
 	}
-	expectedError := "Unable to parse command line with args: qdfkjoj, abcd. Nested error was 'unable to parse capacity unit 'abcd' with error strconv.Atoi: parsing \"abcd\": invalid syntax'"
+	expectedError := "Unable to parse command line with args: resizeparseId, poppaoute. Nested error was 'unable to parse capacity unit 'poppaoute' with error strconv.ParseInt: parsing \"poppaoute\": invalid syntax'"
 	if err.Error() != expectedError {
 		t.Errorf("expected '%v' but was '%v'", expectedError, err.Error())
 	}

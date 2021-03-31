@@ -10,7 +10,7 @@ Apache 2.0 licensed Astra Cloud Management CLI
 
 ## status
 
-- Alpha
+Ready for production
 
 ## How to install - Homebrew for Mac and Linux
 
