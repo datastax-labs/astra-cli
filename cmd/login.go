@@ -126,6 +126,9 @@ func makeConf(confDir, confFile, content string) error {
 		return fmt.Errorf("error writing file")
 	}
 	writer.Flush()
+	if err != nil {
+		return fmt.Errorf("error finishing file")
+	}
 	fmt.Println("Login information saved")
 	return nil
 }
