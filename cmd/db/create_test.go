@@ -25,7 +25,7 @@ import (
 )
 
 func TestCreateGetsId(t *testing.T) {
-	expectedID := "abcd"
+	expectedID := "createID1234"
 	// setting package variables by hand, there be dragons
 	mockClient := &tests.MockClient{
 		Databases: []astraops.Database{

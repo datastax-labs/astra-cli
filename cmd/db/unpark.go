@@ -31,12 +31,7 @@ var UnparkCmd = &cobra.Command{
 	Args:  cobra.ExactArgs(1),
 	Run: func(cobraCmd *cobra.Command, args []string) {
 		creds := &pkg.Creds{}
-		client, err := creds.Login()
-		if err != nil {
-			fmt.Fprintf(os.Stderr, "unable to login with error %v\n", err)
-			os.Exit(1)
-		}
-		err = executeUnpark(args, client)
+		err := executeUnpark(args, creds.Login)
 		if err != nil {
 			fmt.Fprintln(os.Stderr, err)
 			os.Exit(1)
@@ -46,7 +41,11 @@ var UnparkCmd = &cobra.Command{
 
 // executeUnpark unparks the database with the specified ID. If no ID is provided
 // the command will error out
-func executeUnpark(args []string, client pkg.Client) error {
+func executeUnpark(args []string, makeClient func() (pkg.Client, error)) error {
+	client, err := makeClient()
+	if err != nil {
+		return fmt.Errorf("unable to login with error %v", err)
+	}
 	id := args[0]
 	fmt.Printf("starting to unpark database %v\n", id)
 	if err := client.Unpark(id); err != nil {

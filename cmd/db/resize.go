@@ -34,12 +34,7 @@ var ResizeCmd = &cobra.Command{
 	Args:  cobra.ExactArgs(noRequiredArgs),
 	Run: func(cobraCmd *cobra.Command, args []string) {
 		creds := &pkg.Creds{}
-		client, err := creds.Login()
-		if err != nil {
-			fmt.Fprintf(os.Stderr, "unable to login with error %v\n", err)
-			os.Exit(1)
-		}
-		err = executeResize(args, client)
+		err := executeResize(args, creds.Login)
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "unable to resize with error %v\n", err)
 			os.Exit(1)
@@ -49,7 +44,11 @@ var ResizeCmd = &cobra.Command{
 
 // executeResize resizes the database with the specified ID with the specified size. If no ID is provided
 // the command will error out
-func executeResize(args []string, client pkg.Client) error {
+func executeResize(args []string, makeClient func() (pkg.Client, error)) error {
+	client, err := makeClient()
+	if err != nil {
+		return fmt.Errorf("unable to login with error %v", err)
+	}
 	id := args[0]
 	capacityUnitRaw := args[1]
 	capacityUnit, err := strconv.ParseInt(capacityUnitRaw, 10, 32)

@@ -17,6 +17,7 @@ package db
 
 import (
 	"encoding/json"
+	"errors"
 	"strings"
 	"testing"
 
@@ -46,6 +47,48 @@ func TestGet(t *testing.T) {
 	}
 	if fromServer.ID != dbs[0].ID {
 		t.Errorf("expected '%v' but was '%v'", dbs[0].ID, fromServer.ID)
+	}
+}
+
+func TestGetFindDbFails(t *testing.T) {
+	getFmt = pkg.JSONFormat
+	dbs := []astraops.Database{}
+	jsonTxt, err := executeGet([]string{"1"}, func() (pkg.Client, error) {
+		return &tests.MockClient{
+			Databases:  dbs,
+			ErrorQueue: []error{errors.New("cant find db")},
+		}, nil
+	})
+	if err == nil {
+		t.Fatal("expected error")
+	}
+	expected := "unable to get '1' with error cant find db"
+	if err.Error() != expected {
+		t.Errorf("expected '%v' but was '%v'", expected, err.Error())
+	}
+	if jsonTxt != "" {
+		t.Errorf("expected '%v' but was '%v'", "", jsonTxt)
+	}
+}
+
+func TestGetFailedLogin(t *testing.T) {
+	// setting package variables by hand, there be dragons
+	mockClient := &tests.MockClient{}
+	mockClient.ErrorQueue = []error{errors.New("no db")}
+	id := "12345"
+	msg, err := executeGet([]string{id}, func() (pkg.Client, error) {
+		return mockClient, nil
+	})
+	if err == nil {
+		t.Fatalf("expected error")
+	}
+	expectedErr := "unable to get '12345' with error no db"
+	if err.Error() != expectedErr {
+		t.Errorf("expected '%v' but was '%v'", expectedErr, err)
+	}
+	expected := ""
+	if msg != expected {
+		t.Errorf("expected '%v' but was '%v'", expected, msg)
 	}
 }
 
