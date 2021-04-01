@@ -16,8 +16,10 @@
 package db
 
 import (
+	"errors"
 	"testing"
 
+	"github.com/rsds143/astra-cli/pkg"
 	tests "github.com/rsds143/astra-cli/pkg/tests"
 )
 
@@ -26,7 +28,9 @@ func TestResize(t *testing.T) {
 	mockClient := &tests.MockClient{}
 	id := "resizeId1"
 	size := "100"
-	err := executeResize([]string{id, size}, mockClient)
+	err := executeResize([]string{id, size}, func() (pkg.Client, error) {
+		return mockClient, nil
+	})
 	if err != nil {
 		t.Fatalf("unexpected error '%v'", err)
 	}
@@ -49,7 +53,9 @@ func TestResizeParseError(t *testing.T) {
 	mockClient := &tests.MockClient{}
 	id := "resizeparseId"
 	size := "poppaoute"
-	err := executeResize([]string{id, size}, mockClient)
+	err := executeResize([]string{id, size}, func() (pkg.Client, error) {
+		return mockClient, nil
+	})
 	if err == nil {
 		t.Fatal("expected error")
 	}
@@ -59,5 +65,39 @@ func TestResizeParseError(t *testing.T) {
 	}
 	if len(mockClient.Calls()) != 0 {
 		t.Fatalf("expected 0 call but was %v", len(mockClient.Calls()))
+	}
+}
+
+func TestResizeFailed(t *testing.T) {
+	// setting package variables by hand, there be dragons
+	mockClient := &tests.MockClient{}
+	mockClient.ErrorQueue = []error{errors.New("no db")}
+	id := "12389"
+	err := executeResize([]string{id, "100"}, func() (pkg.Client, error) {
+		return mockClient, nil
+	})
+	if err == nil {
+		t.Fatalf("expected error")
+	}
+	expectedErr := "unable to resize '12389' with error no db"
+	if err.Error() != expectedErr {
+		t.Errorf("expected '%v' but was '%v'", expectedErr, err)
+	}
+}
+
+func TestResizeFailedLogin(t *testing.T) {
+	// setting package variables by hand, there be dragons
+	mockClient := &tests.MockClient{}
+	mockClient.ErrorQueue = []error{}
+	id := "12390"
+	err := executeResize([]string{id, "100"}, func() (pkg.Client, error) {
+		return mockClient, errors.New("no db")
+	})
+	if err == nil {
+		t.Fatalf("expected error")
+	}
+	expectedErr := "unable to login with error no db"
+	if err.Error() != expectedErr {
+		t.Errorf("expected '%v' but was '%v'", expectedErr, err)
 	}
 }

@@ -17,6 +17,7 @@ package db
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"net/http"
 	"net/http/httptest"
@@ -113,5 +114,22 @@ func TestSecBundleInvalidFmt(t *testing.T) {
 	expected := "-o \"ham\" is not valid option"
 	if err.Error() != expected {
 		t.Errorf("expected '%v' but was '%v'", expected, err.Error())
+	}
+}
+
+func TestSecBundleFailed(t *testing.T) {
+	// setting package variables by hand, there be dragons
+	mockClient := &tests.MockClient{}
+	mockClient.ErrorQueue = []error{errors.New("no db")}
+	id := "12390"
+	_, err := executeSecBundle([]string{id}, func() (pkg.Client, error) {
+		return mockClient, nil
+	})
+	if err == nil {
+		t.Fatalf("expected error")
+	}
+	expectedErr := "unable to get '12390' with error no db"
+	if err.Error() != expectedErr {
+		t.Errorf("expected '%v' but was '%v'", expectedErr, err)
 	}
 }

@@ -17,6 +17,7 @@ package db
 
 import (
 	"encoding/json"
+	"errors"
 	"reflect"
 	"strings"
 	"testing"
@@ -156,5 +157,37 @@ func TestTiersnvalidFmt(t *testing.T) {
 	expected := "-o \"ham\" is not valid option"
 	if err.Error() != expected {
 		t.Errorf("expected '%v' but was '%v'", expected, err.Error())
+	}
+}
+
+func TestTiersFailedLogin(t *testing.T) {
+	// setting package variables by hand, there be dragons
+	mockClient := &tests.MockClient{}
+	mockClient.ErrorQueue = []error{}
+	_, err := executeTiers(func() (pkg.Client, error) {
+		return mockClient, errors.New("no db")
+	})
+	if err == nil {
+		t.Fatalf("expected error")
+	}
+	expectedErr := "unable to login with error no db"
+	if err.Error() != expectedErr {
+		t.Errorf("expected '%v' but was '%v'", expectedErr, err)
+	}
+}
+
+func TestTiersFailed(t *testing.T) {
+	// setting package variables by hand, there be dragons
+	mockClient := &tests.MockClient{}
+	mockClient.ErrorQueue = []error{errors.New("no db")}
+	_, err := executeTiers(func() (pkg.Client, error) {
+		return mockClient, nil
+	})
+	if err == nil {
+		t.Fatalf("expected error")
+	}
+	expectedErr := "unable to get tiers with error no db"
+	if err.Error() != expectedErr {
+		t.Errorf("expected '%v' but was '%v'", expectedErr, err)
 	}
 }

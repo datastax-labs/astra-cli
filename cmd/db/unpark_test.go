@@ -16,8 +16,10 @@
 package db
 
 import (
+	"errors"
 	"testing"
 
+	"github.com/rsds143/astra-cli/pkg"
 	tests "github.com/rsds143/astra-cli/pkg/tests"
 )
 
@@ -25,7 +27,9 @@ func TestUnpark(t *testing.T) {
 	// setting package variables by hand, there be dragons
 	mockClient := &tests.MockClient{}
 	id := "unparkID123"
-	err := executeUnpark([]string{id}, mockClient)
+	err := executeUnpark([]string{id}, func() (pkg.Client, error) {
+		return mockClient, nil
+	})
 	if err != nil {
 		t.Fatalf("unexpected error '%v'", err)
 	}
@@ -35,5 +39,38 @@ func TestUnpark(t *testing.T) {
 	}
 	if id != mockClient.Call(0) {
 		t.Errorf("expected '%v' but was '%v'", id, mockClient.Call(0))
+	}
+}
+
+func TestUnparkFailedLogin(t *testing.T) {
+	// setting package variables by hand, there be dragons
+	mockClient := &tests.MockClient{}
+	id := "unpark136"
+	err := executeUnpark([]string{id}, func() (pkg.Client, error) {
+		return mockClient, errors.New("bad login")
+	})
+	if err == nil {
+		t.Fatalf("expected error")
+	}
+	expectedErr := "unable to login with error bad login"
+	if err.Error() != expectedErr {
+		t.Errorf("expected '%v' but was '%v'", expectedErr, err)
+	}
+}
+
+func TestUnparkFailed(t *testing.T) {
+	// setting package variables by hand, there be dragons
+	mockClient := &tests.MockClient{}
+	mockClient.ErrorQueue = []error{errors.New("unable to unpark")}
+	id := "123"
+	err := executeUnpark([]string{id}, func() (pkg.Client, error) {
+		return mockClient, nil
+	})
+	if err == nil {
+		t.Fatalf("expected error")
+	}
+	expectedErr := "unable to unpark '123' with error unable to unpark"
+	if err.Error() != expectedErr {
+		t.Errorf("expected '%v' but was '%v'", expectedErr, err)
 	}
 }
