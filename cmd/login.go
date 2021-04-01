@@ -125,7 +125,7 @@ func makeConf(confDir, confFile, content string) error {
 	if err != nil {
 		return fmt.Errorf("error writing file")
 	}
-	writer.Flush()
+	err = writer.Flush()
 	if err != nil {
 		return fmt.Errorf("error finishing file")
 	}
