@@ -16,7 +16,9 @@
 package cmd
 
 import (
+	"bytes"
 	"errors"
+	"io/ioutil"
 	"testing"
 )
 
@@ -31,5 +33,44 @@ func TestDBUsageFails(t *testing.T) {
 	expected := "warn unable to show usage error showing usage"
 	if err.Error() != expected {
 		t.Errorf("expected '%v' but was '%v'", expected, err.Error())
+	}
+}
+
+func TestDBUsage(t *testing.T) {
+	fails := func() error {
+		return nil
+	}
+	err := executeDB(fails)
+	if err != nil {
+		t.Fatalf("unexpected eror %v", err)
+	}
+}
+
+func TestDBShowHelp(t *testing.T) {
+	clientJSON = ""
+	authToken = ""
+	clientName = ""
+	clientSecret = ""
+	clientID = ""
+	originalOut := RootCmd.OutOrStderr()
+	defer func() {
+		RootCmd.SetOut(originalOut)
+		RootCmd.SetArgs([]string{})
+	}()
+	b := bytes.NewBufferString("")
+	RootCmd.SetOut(b)
+	RootCmd.SetArgs([]string{"db"})
+	err := RootCmd.Execute()
+	if err != nil {
+		t.Errorf("unexpected error '%v'", err)
+	}
+	out, err := ioutil.ReadAll(b)
+	if err != nil {
+		t.Fatal(err)
+	}
+	expected := dbCmd.UsageString()
+
+	if string(out) != expected {
+		t.Errorf("expected\n'%q'\nbut was\n'%q'", expected, string(out))
 	}
 }
