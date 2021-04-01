@@ -51,59 +51,62 @@ var loginCmd = &cobra.Command{
 	Short: "Stores credentials for the cli to use in other commands to operate on the Astra DevOps API",
 	Long:  `Token or service account is saved in .config/astra/ for use by the other commands`,
 	Run: func(cobraCmd *cobra.Command, args []string) {
-		confDir, confFiles, err := pkg.GetHome(os.UserHomeDir)
+		exitCode, err := executeLogin(args, func() (string, pkg.ConfFiles, error) {
+			return pkg.GetHome(os.UserHomeDir)
+		})
 		if err != nil {
 			fmt.Printf("%v\n", err)
-			os.Exit(CannotFindHome)
 		}
-		if authToken != "" {
-			if err := makeConf(confDir, confFiles.TokenPath, authToken); err != nil {
-				fmt.Printf("%v\n", err)
-				os.Exit(WriteError)
-			}
-			return
-		} else if clientJSON != "" {
-			var clientInfo astraops.ClientInfo
-			err := json.Unmarshal([]byte(clientJSON), &clientInfo)
-			if err != nil {
-				fmt.Fprintln(os.Stderr, fmt.Errorf("unable to serialize the json into a valid login due to error %s", err))
-				os.Exit(JSONError)
-			}
-			if len(clientInfo.ClientName) == 0 {
-				fmt.Fprintln(os.Stderr, pkg.ParseError{
-					Args: args,
-					Err:  fmt.Errorf("clientName missing"),
-				})
-				os.Exit(JSONError)
-			}
-			if len(clientInfo.ClientID) == 0 {
-				fmt.Fprintln(os.Stderr, pkg.ParseError{
-					Args: args,
-					Err:  fmt.Errorf("clientId missing"),
-				})
-				os.Exit(JSONError)
-			}
-			if len(clientInfo.ClientSecret) == 0 {
-				fmt.Fprintln(os.Stderr, pkg.ParseError{
-					Args: args,
-					Err:  fmt.Errorf("clientSecret missing"),
-				})
-				os.Exit(JSONError)
-			}
-			if err := makeConf(confDir, confFiles.SaPath, clientJSON); err != nil {
-				fmt.Printf("%v\n", err)
-				os.Exit(WriteError)
-			}
-			return
-		} else {
-			clientJSON = fmt.Sprintf("{\"clientId\":\"%v\",\"clientName\":\"%v\",\"clientSecret\":\"%v:\"}", clientID, clientName, clientSecret)
-			if err := makeConf(confDir, confFiles.SaPath, clientJSON); err != nil {
-				fmt.Printf("%v\n", err)
-				os.Exit(JSONError)
-			}
-			return
-		}
+		os.Exit(exitCode)
 	},
+}
+
+func executeLogin(args []string, getHome func() (string, pkg.ConfFiles, error)) (int, error) {
+	confDir, confFiles, err := getHome()
+	if err != nil {
+		return CannotFindHome, err
+	}
+	switch {
+	case authToken != "":
+		if err := makeConf(confDir, confFiles.TokenPath, authToken); err != nil {
+			return WriteError, err
+		}
+		return 0, nil
+	case clientJSON != "":
+		var clientInfo astraops.ClientInfo
+		err := json.Unmarshal([]byte(clientJSON), &clientInfo)
+		if err != nil {
+			return JSONError, fmt.Errorf("unable to serialize the json into a valid login due to error %s", err)
+		}
+		if len(clientInfo.ClientName) == 0 {
+			return JSONError, &pkg.ParseError{
+				Args: args,
+				Err:  fmt.Errorf("clientName missing"),
+			}
+		}
+		if len(clientInfo.ClientID) == 0 {
+			return JSONError, &pkg.ParseError{
+				Args: args,
+				Err:  fmt.Errorf("clientId missing"),
+			}
+		}
+		if len(clientInfo.ClientSecret) == 0 {
+			return JSONError, &pkg.ParseError{
+				Args: args,
+				Err:  fmt.Errorf("clientSecret missing"),
+			}
+		}
+		if err := makeConf(confDir, confFiles.SaPath, clientJSON); err != nil {
+			return WriteError, err
+		}
+		return 0, nil
+	default:
+		clientJSON = fmt.Sprintf("{\"clientId\":\"%v\",\"clientName\":\"%v\",\"clientSecret\":\"%v\"}", clientID, clientName, clientSecret)
+		if err := makeConf(confDir, confFiles.SaPath, clientJSON); err != nil {
+			return WriteError, err
+		}
+		return 0, nil
+	}
 }
 
 func makeConf(confDir, confFile, content string) error {
