@@ -16,8 +16,10 @@
 package cmd
 
 import (
+	"bytes"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"os"
 	"path"
 	"testing"
@@ -26,7 +28,13 @@ import (
 )
 
 const testJSON = `{"clientId":"deeb55bd-2a55-4988-a345-d8fdddd0e0c9","clientName":"me@example.com","clientSecret":"6ae15bff-1435-430f-975b-9b3d9914b698"}`
+const testSecret = "jljlajef"
+const testName = "me@me.com"
+const testID = "abd278332"
 
+func usageFunc() error {
+	return nil
+}
 func TestLoginCmdJson(t *testing.T) {
 	clientJSON = testJSON
 	defer func() {
@@ -34,11 +42,11 @@ func TestLoginCmdJson(t *testing.T) {
 	}()
 	dir := path.Join(t.TempDir(), "config")
 	f := path.Join(dir, "mytempFile")
-	exitCode, err := executeLogin([]string{}, func() (string, pkg.ConfFiles, error) {
+	exitCode, err := executeLogin([]string{"--json", clientJSON}, func() (string, pkg.ConfFiles, error) {
 		return dir, pkg.ConfFiles{
 			SaPath: f,
 		}, nil
-	})
+	}, usageFunc)
 	defer os.RemoveAll(dir)
 	if err != nil {
 		t.Fatalf("unexpected error %v", err)
@@ -83,7 +91,7 @@ func TestLoginCmdJsonInvalidPerms(t *testing.T) {
 		return dir, pkg.ConfFiles{
 			SaPath: f,
 		}, nil
-	})
+	}, usageFunc)
 	defer os.RemoveAll(dir)
 	if err == nil {
 		t.Error("expected error")
@@ -109,11 +117,11 @@ func TestArgs(t *testing.T) {
 
 	dir := path.Join(t.TempDir(), "config")
 	f := path.Join(dir, "mytempFile")
-	exitCode, err := executeLogin([]string{}, func() (string, pkg.ConfFiles, error) {
+	exitCode, err := executeLogin([]string{"--clientId", clientID, "--clientName", clientName, "--clientSecret", clientSecret}, func() (string, pkg.ConfFiles, error) {
 		return dir, pkg.ConfFiles{
 			SaPath: f,
 		}, nil
-	})
+	}, usageFunc)
 	defer os.RemoveAll(dir)
 	if err != nil {
 		t.Fatalf("unexpected error %v", err)
@@ -157,11 +165,11 @@ func TestArgsWithNoPermission(t *testing.T) {
 	}
 	defer os.RemoveAll(inaccessible)
 	f := path.Join(inaccessible, "mytempFile")
-	exitCode, err := executeLogin([]string{}, func() (string, pkg.ConfFiles, error) {
+	exitCode, err := executeLogin([]string{"--clientId", clientID, "--clientName", clientName, "--clientSecret", clientSecret}, func() (string, pkg.ConfFiles, error) {
 		return dir, pkg.ConfFiles{
 			SaPath: f,
 		}, nil
-	})
+	}, usageFunc)
 	defer os.RemoveAll(dir)
 	if err == nil {
 		t.Error("expected error")
@@ -175,10 +183,85 @@ func TestArgsWithNoPermission(t *testing.T) {
 	}
 }
 
+func TestLoginArgsMissingId(t *testing.T) {
+	clientJSON = ""
+	authToken = ""
+	clientName = testName
+	clientSecret = testSecret
+	clientID = ""
+	defer func() {
+		clientSecret = ""
+		clientName = ""
+	}()
+	exitCode, err := executeLogin([]string{"--clientId", clientID, "--clientName", clientName, "--clientSecret", clientSecret}, func() (string, pkg.ConfFiles, error) {
+		return "", pkg.ConfFiles{}, nil
+	}, usageFunc)
+	if err == nil {
+		t.Error("expected error")
+	}
+	expected := `Unable to parse command line with args: --clientId, , --clientName, me@me.com, --clientSecret, jljlajef. Nested error was 'clientId missing'`
+	if err.Error() != expected {
+		t.Errorf("expected '%v' but was '%v'", expected, err.Error())
+	}
+	if exitCode != JSONError {
+		t.Errorf("unexpected exit code %v", exitCode)
+	}
+}
+
+func TestLoginArgsMissingName(t *testing.T) {
+	clientJSON = ""
+	authToken = ""
+	clientName = ""
+	clientSecret = testSecret
+	clientID = testID
+	defer func() {
+		clientSecret = ""
+		clientID = ""
+	}()
+	exitCode, err := executeLogin([]string{"--clientId", clientID, "--clientName", clientName, "--clientSecret", clientSecret}, func() (string, pkg.ConfFiles, error) {
+		return "", pkg.ConfFiles{}, nil
+	}, usageFunc)
+	if err == nil {
+		t.Errorf("expected error")
+	}
+	expected := `Unable to parse command line with args: --clientId, abd278332, --clientName, , --clientSecret, jljlajef. Nested error was 'clientName missing'`
+	if err.Error() != expected {
+		t.Errorf("expected '%v' but was '%v'", expected, err.Error())
+	}
+	if exitCode != JSONError {
+		t.Errorf("unexpected exit code %v", exitCode)
+	}
+}
+
+func TestLoginArgsMissingSecret(t *testing.T) {
+	clientJSON = ""
+	authToken = ""
+	clientName = testName
+	clientSecret = ""
+	clientID = testID
+	defer func() {
+		clientName = ""
+		clientID = ""
+	}()
+	exitCode, err := executeLogin([]string{"--clientId", clientID, "--clientName", clientName, "--clientSecret", clientSecret}, func() (string, pkg.ConfFiles, error) {
+		return "", pkg.ConfFiles{}, nil
+	}, usageFunc)
+	if err == nil {
+		t.Error("expected error")
+	}
+	expected := `Unable to parse command line with args: --clientId, abd278332, --clientName, me@me.com, --clientSecret, . Nested error was 'clientSecret missing'`
+	if err.Error() != expected {
+		t.Errorf("expected '%v' but was '%v'", expected, err.Error())
+	}
+	if exitCode != JSONError {
+		t.Errorf("unexpected exit code %v", exitCode)
+	}
+}
+
 func TestLoginHomeError(t *testing.T) {
 	exitCode, err := executeLogin([]string{"--json", clientJSON}, func() (string, pkg.ConfFiles, error) {
 		return "", pkg.ConfFiles{}, fmt.Errorf("big error")
-	})
+	}, usageFunc)
 	if err == nil {
 		t.Error("expected error")
 	}
@@ -187,6 +270,24 @@ func TestLoginHomeError(t *testing.T) {
 		t.Errorf("expected '%v' but was '%v'", expected, err.Error())
 	}
 	if exitCode != CannotFindHome {
+		t.Errorf("unexpected exit code %v", exitCode)
+	}
+}
+
+func TestLoginUsageError(t *testing.T) {
+	exitCode, err := executeLogin([]string{}, func() (string, pkg.ConfFiles, error) {
+		return "", pkg.ConfFiles{}, fmt.Errorf("big error")
+	}, func() error {
+		return fmt.Errorf("no terminal")
+	})
+	if err == nil {
+		t.Error("expected error")
+	}
+	expected := "cannot show usage no terminal"
+	if err.Error() != expected {
+		t.Errorf("expected '%v' but was '%v'", expected, err.Error())
+	}
+	if exitCode != CriticalError {
 		t.Errorf("unexpected exit code %v", exitCode)
 	}
 }
@@ -202,7 +303,7 @@ func TestLoginCmdJsonMissignId(t *testing.T) {
 		return dir, pkg.ConfFiles{
 			SaPath: f,
 		}, nil
-	})
+	}, usageFunc)
 	defer os.RemoveAll(dir)
 	if err == nil {
 		t.Error("expected error")
@@ -227,7 +328,7 @@ func TestLoginCmdJsonMissignName(t *testing.T) {
 		return dir, pkg.ConfFiles{
 			SaPath: f,
 		}, nil
-	})
+	}, usageFunc)
 	defer os.RemoveAll(dir)
 	if err == nil {
 		t.Errorf("expected error")
@@ -252,7 +353,7 @@ func TestLoginCmdJsonMissignSecret(t *testing.T) {
 		return dir, pkg.ConfFiles{
 			SaPath: f,
 		}, nil
-	})
+	}, usageFunc)
 	defer os.RemoveAll(dir)
 	if err == nil {
 		t.Error("expected error")
@@ -273,11 +374,11 @@ func TestLoginCmdJsonInvalid(t *testing.T) {
 	}()
 	dir := path.Join(t.TempDir(), "config")
 	f := path.Join(dir, "mytempFile")
-	exitCode, err := executeLogin([]string{}, func() (string, pkg.ConfFiles, error) {
+	exitCode, err := executeLogin([]string{"--json", clientJSON}, func() (string, pkg.ConfFiles, error) {
 		return dir, pkg.ConfFiles{
 			SaPath: f,
 		}, nil
-	})
+	}, usageFunc)
 	defer os.RemoveAll(dir)
 	if err == nil {
 		t.Errorf("expected error")
@@ -298,7 +399,7 @@ func TestLoginToken(t *testing.T) {
 		return dir, pkg.ConfFiles{
 			TokenPath: f,
 		}, nil
-	})
+	}, usageFunc)
 	defer os.RemoveAll(dir)
 	if err != nil {
 		t.Fatalf("unexpected error %v", err)
@@ -339,7 +440,7 @@ func TestLoginTokenInvalidPerms(t *testing.T) {
 		return dir, pkg.ConfFiles{
 			TokenPath: f,
 		}, nil
-	})
+	}, usageFunc)
 	defer os.RemoveAll(dir)
 	if err == nil {
 		t.Error("expected error")
@@ -411,5 +512,34 @@ func TestMakeConfWithNonMakeableDir(t *testing.T) {
 	expected := fmt.Sprintf("unable to get make config directory with error mkdir %v: permission denied", newDir)
 	if err.Error() != expected {
 		t.Errorf("expected '%v' but was '%v'", expected, err.Error())
+	}
+}
+
+func TestLoginShowHelp(t *testing.T) {
+	clientJSON = ""
+	authToken = ""
+	clientName = ""
+	clientSecret = ""
+	clientID = ""
+	originalOut := RootCmd.OutOrStderr()
+	defer func() {
+		RootCmd.SetOut(originalOut)
+		RootCmd.SetArgs([]string{})
+	}()
+	b := bytes.NewBufferString("")
+	RootCmd.SetOut(b)
+	RootCmd.SetArgs([]string{"login"})
+	err := RootCmd.Execute()
+	if err != nil {
+		t.Errorf("unexpected error '%v'", err)
+	}
+	out, err := ioutil.ReadAll(b)
+	if err != nil {
+		t.Fatal(err)
+	}
+	expected := loginCmd.UsageString()
+
+	if string(out) != expected {
+		t.Errorf("expected\n'%q'\nbut was\n'%q'", expected, string(out))
 	}
 }
