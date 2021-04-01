@@ -17,6 +17,9 @@ package test
 
 import "github.com/rsds143/astra-devops-sdk-go/astraops"
 
+// LoginError is a pretty common error message
+const LoginError = "unable to login with error no db"
+
 // MockClient is used for testing
 type MockClient struct {
 	ErrorQueue []error

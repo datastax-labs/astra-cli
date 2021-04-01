@@ -74,15 +74,15 @@ func TestGetFindDbFails(t *testing.T) {
 func TestGetFailedLogin(t *testing.T) {
 	// setting package variables by hand, there be dragons
 	mockClient := &tests.MockClient{}
-	mockClient.ErrorQueue = []error{errors.New("no db")}
+	mockClient.ErrorQueue = []error{}
 	id := "12345"
 	msg, err := executeGet([]string{id}, func() (pkg.Client, error) {
-		return mockClient, nil
+		return mockClient, errors.New("no db")
 	})
 	if err == nil {
 		t.Fatalf("expected error")
 	}
-	expectedErr := "unable to get '12345' with error no db"
+	expectedErr := tests.LoginError
 	if err.Error() != expectedErr {
 		t.Errorf("expected '%v' but was '%v'", expectedErr, err)
 	}
