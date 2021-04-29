@@ -20,7 +20,7 @@ import (
 	"os"
 
 	"github.com/rsds143/astra-cli/pkg"
-	"github.com/rsds143/astra-devops-sdk-go/astraops"
+	astraops "github.com/rsds143/astra-cli/pkg/swagger"
 	"github.com/spf13/cobra"
 )
 

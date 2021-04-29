@@ -23,21 +23,21 @@ import (
 	"testing"
 
 	"github.com/rsds143/astra-cli/pkg"
+	astraops "github.com/rsds143/astra-cli/pkg/swagger"
 	tests "github.com/rsds143/astra-cli/pkg/tests"
-	"github.com/rsds143/astra-devops-sdk-go/astraops"
 )
 
 func TestTiers(t *testing.T) {
 	tiersFmt = "json"
-	tier1 := astraops.TierInfo{
+	tier1 := astraops.AvailableRegionCombination{
 		Tier: "abd",
 	}
-	tier2 := astraops.TierInfo{
+	tier2 := astraops.AvailableRegionCombination{
 		Tier: "xyz",
 	}
 	jsonTxt, err := executeTiers(func() (pkg.Client, error) {
 		return &tests.MockClient{
-			Tiers: []astraops.TierInfo{
+			Tiers: []astraops.AvailableRegionCombination{
 				tier1,
 				tier2,
 			},
@@ -62,7 +62,7 @@ func TestTiers(t *testing.T) {
 
 func TestTiersText(t *testing.T) {
 	tiersFmt = "text"
-	tier1 := astraops.TierInfo{
+	tier1 := astraops.AvailableRegionCombination{
 		Tier:               "tier1",
 		CloudProvider:      "cloud1",
 		Region:             "region1",
@@ -75,7 +75,7 @@ func TestTiersText(t *testing.T) {
 		CapacityUnitsUsed:  1,
 		CapacityUnitsLimit: 1,
 	}
-	tier2 := astraops.TierInfo{
+	tier2 := astraops.AvailableRegionCombination{
 		Tier:          "tier2",
 		CloudProvider: "cloud2",
 		Region:        "region2",
@@ -88,7 +88,7 @@ func TestTiersText(t *testing.T) {
 	}
 	msg, err := executeTiers(func() (pkg.Client, error) {
 		return &tests.MockClient{
-			Tiers: []astraops.TierInfo{
+			Tiers: []astraops.AvailableRegionCombination{
 				tier1,
 				tier2,
 			},
@@ -109,7 +109,7 @@ func TestTiersText(t *testing.T) {
 
 func TestTiersTextWithNoCost(t *testing.T) {
 	tiersFmt = "text"
-	tier1 := astraops.TierInfo{
+	tier1 := astraops.AvailableRegionCombination{
 		Tier:               "tier1",
 		CloudProvider:      "cloud1",
 		Region:             "region1",
@@ -118,7 +118,7 @@ func TestTiersTextWithNoCost(t *testing.T) {
 		CapacityUnitsUsed:  1,
 		CapacityUnitsLimit: 1,
 	}
-	tier2 := astraops.TierInfo{
+	tier2 := astraops.AvailableRegionCombination{
 		Tier:               "tier2",
 		CloudProvider:      "cloud2",
 		Region:             "region2",
@@ -127,7 +127,7 @@ func TestTiersTextWithNoCost(t *testing.T) {
 	}
 	msg, err := executeTiers(func() (pkg.Client, error) {
 		return &tests.MockClient{
-			Tiers: []astraops.TierInfo{
+			Tiers: []astraops.AvailableRegionCombination{
 				tier1,
 				tier2,
 			},

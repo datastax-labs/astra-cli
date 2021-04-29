@@ -23,7 +23,7 @@ import (
 	"path"
 	"strings"
 
-	"github.com/rsds143/astra-devops-sdk-go/astraops"
+	astraops "github.com/rsds143/astra-cli/pkg/swagger"
 )
 
 // ConfFiles supports both formats of credentials and will say if the token one is present

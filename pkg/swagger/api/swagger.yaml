@@ -1,0 +1,1280 @@
+openapi: 3.0.0
+info:
+  title: Astra DevOps API
+  description: "Use this REST API to perform lifecycle actions for DataStax Astra\
+    \ databases.</br> </br> To get started, get your application token from your Astra\
+    \ database. You can then create, terminate, resize, park, and unpark databases\
+    \ using the DevOps API. You cannot park, unpark, or resize serverless databases.\n\
+    \n# Authentication\n\n<!-- ReDoc-Inject: <security-definitions> -->"
+  contact:
+    email: ad-astra@datastax.com
+  version: 2.0.0
+servers:
+- url: https://api.astra.datastax.com
+security:
+- BearerAuth:
+  - org-db-create
+  - org-db-terminate
+  - org-db-view
+  - org-db-expand
+  - org-db-suspend
+  - db-keyspace-create
+  - db-cql
+tags:
+- name: Operations
+  description: The DevOps APIs are for interacting with Astra databases and all aspects
+    of their lifecycle
+paths:
+  /v2/databases:
+    get:
+      tags:
+      - Operations
+      summary: Returns a list of databases
+      description: Get a list of databases visible to the user
+      operationId: listDatabases
+      parameters:
+      - name: include
+        in: query
+        description: Allows filtering so that databases in listed states are returned
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: string
+          default: nonterminated
+          enum:
+          - nonterminated
+          - all
+          - active
+          - pending
+          - preparing
+          - prepared
+          - initializing
+          - parked
+          - parking
+          - unparking
+          - terminating
+          - terminated
+          - resizing
+          - error
+          - maintenance
+      - name: provider
+        in: query
+        description: Allows filtering so that databases from a given provider are
+          returned
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: string
+          default: ALL
+          enum:
+          - ALL
+          - GCP
+          - AWS
+          - AZURE
+      - name: starting_after
+        in: query
+        description: Optional parameter for pagination purposes. Used as this value
+          for starting retrieving a specific page of results
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: string
+      - name: limit
+        in: query
+        description: Optional parameter for pagination purposes. Specify the number
+          of items for one page of data
+        required: false
+        style: form
+        explode: true
+        schema:
+          maximum: 100
+          minimum: 1
+          type: integer
+          default: 25
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Database'
+                x-content-type: application/json
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Errors'
+        "401":
+          description: The user is unauthorized to perform the operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Errors'
+        "5XX":
+          description: A server error occurred
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Errors'
+      security:
+      - BearerAuth:
+        - org-db-view
+    post:
+      tags:
+      - Operations
+      summary: Create a new database
+      description: Takes a user provided databaseInfo and returns the uuid for a new
+        database
+      operationId: createDatabase
+      requestBody:
+        description: Definition of new database
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DatabaseInfoCreate'
+        required: true
+      responses:
+        "201":
+          description: created
+          headers:
+            Location:
+              style: simple
+              explode: false
+              schema:
+                type: string
+                description: Database UUID
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Errors'
+        "401":
+          description: The user is unauthorized to perform the operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Errors'
+        "422":
+          description: The structured data in the request could not be parsed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Errors'
+        "500":
+          description: A server error occurred
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Errors'
+      security:
+      - BearerAuth:
+        - org-db-create
+  /v2/databases/{databaseID}:
+    get:
+      tags:
+      - Operations
+      summary: Finds database by ID
+      description: Returns specified database
+      operationId: getDatabase
+      parameters:
+      - name: databaseID
+        in: path
+        description: String representation of the database ID
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Database'
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Errors'
+        "401":
+          description: The user is unauthorized to perform the operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Errors'
+        "404":
+          description: The specified database was not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Errors'
+        "5XX":
+          description: A server error occurred
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Errors'
+      security:
+      - BearerAuth:
+        - org-db-view
+  /v2/databases/{databaseID}/keyspaces/{keyspaceName}:
+    post:
+      tags:
+      - Operations
+      summary: Adds keyspace into database
+      description: Adds the specified keyspace to the database
+      operationId: addKeyspace
+      parameters:
+      - name: databaseID
+        in: path
+        description: String representation of the database ID
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      - name: keyspaceName
+        in: path
+        description: Name of database keyspace
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      responses:
+        "201":
+          description: created
+        "401":
+          description: The user is unauthorized to perform the operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Errors'
+        "404":
+          description: The specified database was not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Errors'
+        "422":
+          description: The structured data in the request could not be parsed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Errors'
+        "5XX":
+          description: A server error occurred
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Errors'
+      security:
+      - BearerAuth:
+        - db-keyspace-create
+  /v2/databases/{databaseID}/secureBundleURL:
+    post:
+      tags:
+      - Operations
+      summary: Obtain zip for connecting to the database
+      description: "Returns a temporary URL to download a zip file with certificates\
+        \ for connecting to the database. The URL expires after five minutes.<p>There\
+        \ are two types of the secure bundle URL: <ul><li><b>Internal</b> - Use with\
+        \ VPC peering connections to use private networking and avoid public internet\
+        \ for communication.</li> <li><b>External</b> - Use with any connection where\
+        \ the public internet is sufficient for communication between the application\
+        \ and the Astra database with MTLS.</li></ul> Both types support MTLS for\
+        \ communication via the driver.</p>"
+      operationId: generateSecureBundleURL
+      parameters:
+      - name: databaseID
+        in: path
+        description: String representation of the database ID
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      responses:
+        "200":
+          description: Credentials provides a link to download cluster secure-connect-*.zip
+            file
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CredsURL'
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Errors'
+        "401":
+          description: The user is unauthorized to perform the operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Errors'
+        "404":
+          description: The specified database was not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Errors'
+        "409":
+          description: The database is not in a valid state to perform the operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Errors'
+        "5XX":
+          description: A server error occurred
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Errors'
+      security:
+      - BearerAuth:
+        - db-cql
+  /v2/databases/{databaseID}/terminate:
+    post:
+      tags:
+      - Operations
+      summary: Terminates a database
+      description: Terminates a database
+      operationId: terminateDatabase
+      parameters:
+      - name: databaseID
+        in: path
+        description: String representation of the database ID
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      - name: preparedStateOnly
+        in: query
+        description: For internal use only.  Used to safely terminate prepared databases.
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: boolean
+          default: false
+      responses:
+        "202":
+          description: The request was accepted
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Errors'
+        "401":
+          description: The user is unauthorized to perform the operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Errors'
+        "404":
+          description: The specified database was not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Errors'
+        "409":
+          description: The database is not in a valid state to perform the operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Errors'
+        "5XX":
+          description: A server error occurred
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Errors'
+      security:
+      - BearerAuth:
+        - org-db-terminate
+  /v2/databases/{databaseID}/park:
+    post:
+      tags:
+      - Operations
+      summary: Parks a database
+      description: Parks a database
+      operationId: parkDatabase
+      parameters:
+      - name: databaseID
+        in: path
+        description: String representation of the database ID
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      responses:
+        "202":
+          description: The request was accepted
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Errors'
+        "401":
+          description: The user is unauthorized to perform the operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Errors'
+        "404":
+          description: The specified database was not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Errors'
+        "409":
+          description: The database is not in a valid state to perform the operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Errors'
+        "5XX":
+          description: A server error occurred
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Errors'
+      security:
+      - BearerAuth:
+        - org-db-suspend
+  /v2/databases/{databaseID}/unpark:
+    post:
+      tags:
+      - Operations
+      summary: Unparks a database
+      description: Unparks a database
+      operationId: unparkDatabase
+      parameters:
+      - name: databaseID
+        in: path
+        description: String representation of the database ID
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      responses:
+        "202":
+          description: The request was accepted
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Errors'
+        "401":
+          description: The user is unauthorized to perform the operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Errors'
+        "404":
+          description: The specified database was not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Errors'
+        "409":
+          description: The database is not in a valid state to perform the operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Errors'
+        "5XX":
+          description: A server error occurred
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Errors'
+      security:
+      - BearerAuth:
+        - org-db-suspend
+  /v2/databases/{databaseID}/resize:
+    post:
+      tags:
+      - Operations
+      summary: Resizes a database
+      description: Resizes a database. Total number of capacity units desired should
+        be specified. Reducing a size of a database is not supported at this time.
+      operationId: resizeDatabase
+      parameters:
+      - name: databaseID
+        in: path
+        description: String representation of the database ID
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      requestBody:
+        description: Map containing capacityUnits key with a value greater than the
+          current number of capacity units (max increment of 3 additional capacity
+          units)
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CapacityUnits'
+        required: true
+      responses:
+        "202":
+          description: The request was accepted
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Errors'
+        "401":
+          description: The user is unauthorized to perform the operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Errors'
+        "404":
+          description: The specified database was not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Errors'
+        "409":
+          description: The database is not in a valid state to perform the operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Errors'
+        "5XX":
+          description: A server error occurred
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Errors'
+      security:
+      - BearerAuth:
+        - org-db-expand
+  /v2/databases/{databaseID}/resetPassword:
+    post:
+      tags:
+      - Operations
+      summary: Resets Password
+      description: Sets a database password to the one specified in POST body
+      operationId: resetPassword
+      parameters:
+      - name: databaseID
+        in: path
+        description: String representation of the database ID
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      requestBody:
+        description: Map containing username and password. The specified password
+          will be updated for the specified database user
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserPassword'
+        required: true
+      responses:
+        "202":
+          description: The request was accepted
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Errors'
+        "401":
+          description: The user is unauthorized to perform the operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Errors'
+        "404":
+          description: The specified database was not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Errors'
+        "409":
+          description: The database is not in a valid state to perform the operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Errors'
+        "5XX":
+          description: A server error occurred
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Errors'
+      security:
+      - BearerAuth:
+        - org-db-create
+  /v2/availableRegions:
+    get:
+      tags:
+      - Operations
+      summary: Returns supported regions and availability for a given user and organization
+      description: "Returns all supported tier, cloud, region, count, and capacitity\
+        \ combinations"
+      operationId: listAvailableRegions
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AvailableRegionCombination'
+                x-content-type: application/json
+        "401":
+          description: The user is unauthorized to perform the operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Errors'
+        "5XX":
+          description: A server error occurred
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Errors'
+      security:
+      - BearerAuth:
+        - org-db-create
+components:
+  schemas:
+    ServiceAccountTokenResponse:
+      type: object
+      properties:
+        token:
+          type: string
+          description: The application token. Use this token in each request.
+          example: Bearer eyJhbGciOiJIUzI1NiJ9.eyJqdGkiOiIwMDAwMDAwMC0wMDAwLTAwMDAtMDA...
+    ServiceAccountTokenInput:
+      required:
+      - clientId
+      - clientName
+      - clientSecret
+      type: object
+      properties:
+        clientName:
+          type: string
+          description: The organization name in a more human readable format
+          example: Binford Tools
+        clientId:
+          type: string
+          description: The unique identifier for the client for authentication
+          example: binford
+        clientSecret:
+          type: string
+          description: The UUID client secret for the service account from the create
+            service account response in the user interface
+          format: uuid
+          example: 00b03a37-209c-462a-971b-be35ab3321de
+    StatusEnum:
+      type: string
+      example: ACTIVE
+      enum:
+      - ACTIVE
+      - PENDING
+      - PREPARING
+      - PREPARED
+      - INITIALIZING
+      - PARKED
+      - PARKING
+      - UNPARKING
+      - TERMINATED
+      - TERMINATING
+      - RESIZING
+      - ERROR
+      - MAINTENANCE
+      - UNKNOWN
+    Database:
+      required:
+      - id
+      - info
+      - orgId
+      - ownerId
+      - status
+      type: object
+      properties:
+        id:
+          type: string
+          example: 1234-5678-91011121-3141
+        orgId:
+          type: string
+          example: organizations/7142-1283-54249566-3707
+        ownerId:
+          type: string
+          example: users/8243-2404-85664728-0889
+        info:
+          $ref: '#/components/schemas/DatabaseInfo'
+        creationTime:
+          type: string
+          description: CreationTime in ISO RFC3339 format
+          example: 2012-11-01T22:08:41+00:00
+        terminationTime:
+          type: string
+          description: TerminationTime in ISO RFC3339 format
+          example: 2019-11-01T22:08:41+00:00
+        status:
+          $ref: '#/components/schemas/StatusEnum'
+        storage:
+          $ref: '#/components/schemas/Storage'
+        availableActions:
+          type: array
+          items:
+            type: string
+            example: "park, terminate"
+            enum:
+            - park
+            - unpark
+            - resize
+            - resetPassword
+            - addKeyspace
+            - addDatacenters
+            - terminateDatacenter
+            - getCreds
+            - terminate
+            - removeKeyspace
+            - addTable
+            - removeMigrationProxy
+            - launchMigrationProxy
+        message:
+          type: string
+          description: Message to the customer about the cluster
+          example: Auto parked due to inactivity
+        studioUrl:
+          type: string
+          example: http://path-to-studio:port
+        grafanaUrl:
+          type: string
+          example: http://path-to-grafana:port
+        cqlshUrl:
+          type: string
+          example: http://path-to-cqlsh:port/cqlsh
+        graphqlUrl:
+          type: string
+          example: http://path-to-graqphl:port/api/graphql
+        dataEndpointUrl:
+          type: string
+          example: http://path-to-dataendpoint:port/api/rest
+      description: Database contains the key information about a database
+      example:
+        availableActions:
+        - "park, terminate"
+        - "park, terminate"
+        creationTime: 2012-11-01T22:08:41+00:00
+        studioUrl: http://path-to-studio:port
+        storage:
+          replicationFactor: 3
+          totalStorage: 800
+          nodeCount: 6
+          usedStorage: 348
+        ownerId: users/8243-2404-85664728-0889
+        message: Auto parked due to inactivity
+        orgId: organizations/7142-1283-54249566-3707
+        graphqlUrl: http://path-to-graqphl:port/api/graphql
+        dataEndpointUrl: http://path-to-dataendpoint:port/api/rest
+        terminationTime: 2019-11-01T22:08:41+00:00
+        cqlshUrl: http://path-to-cqlsh:port/cqlsh
+        id: 1234-5678-91011121-3141
+        grafanaUrl: http://path-to-grafana:port
+        info:
+          keyspace: myKeyspace
+          password: '*****'
+          tier: serverless
+          additionalKeyspaces:
+          - additionalKeyspace
+          - additionalKeyspace
+          cloudProvider: AWS
+          name: mySplendidDatabase
+          capacityUnits: 1
+          region: us-west-2
+          user: db_admin
+        status: ACTIVE
+    DatabaseInfoCreate:
+      required:
+      - capacityUnits
+      - cloudProvider
+      - keyspace
+      - name
+      - region
+      - tier
+      type: object
+      properties:
+        name:
+          type: string
+          description: Name of the database--user friendly identifier
+          example: mySplendidDatabase
+        keyspace:
+          type: string
+          description: Keyspace name in database
+          example: myKeyspace
+        cloudProvider:
+          type: string
+          description: This is the cloud provider where the database lives.
+          example: AWS
+          enum:
+          - AWS
+          - GCP
+        tier:
+          type: string
+          description: "With the exception of classic databases, all databases are\
+            \ serverless. Classic databases can no longer be created with the DevOps\
+            \ API."
+          example: serverless
+          enum:
+          - serverless
+        capacityUnits:
+          maximum: 1
+          minimum: 1
+          type: integer
+          description: "Capacity units were used for classic databases, but are not\
+            \ used for serverless databases. Enter 1 CU for serverless databases.\
+            \ Classic databases can no longer be created with the DevOps API."
+          example: 1
+        region:
+          type: string
+          description: Region refers to the cloud region.
+          example: us-west-2
+      description: DatabaseInfo is the user-provided information describing a database
+    DatabaseInfo:
+      type: object
+      properties:
+        name:
+          type: string
+          description: Name of the database--user friendly identifier
+          example: mySplendidDatabase
+        keyspace:
+          type: string
+          description: Keyspace name in database
+          example: myKeyspace
+        cloudProvider:
+          type: string
+          description: This is the cloud provider where the database lives.
+          example: AWS
+          enum:
+          - AWS
+          - GCP
+        tier:
+          type: string
+          description: "With the exception of classic databases, all databases are\
+            \ serverless. Classic databases can no longer be created with the DevOps\
+            \ API."
+          example: serverless
+          enum:
+          - serverless
+        capacityUnits:
+          maximum: 1
+          minimum: 1
+          type: integer
+          description: "Capacity units were used for classic databases, but are not\
+            \ used for serverless databases. Enter 1 CU for serverless databases.\
+            \ Classic databases can no longer be created with the DevOps API."
+          example: 1
+        region:
+          type: string
+          description: Region refers to the cloud region.
+          example: us-west-2
+        user:
+          type: string
+          description: User is the user to access the database
+          example: db_admin
+        password:
+          type: string
+          description: Password for the user to access the database
+          example: '*****'
+        additionalKeyspaces:
+          maximum: 1
+          type: array
+          description: Additional keyspaces names in database
+          items:
+            type: string
+            example: additionalKeyspace
+      description: DatabaseInfo is the user-provided information describing a database
+      example:
+        keyspace: myKeyspace
+        password: '*****'
+        tier: serverless
+        additionalKeyspaces:
+        - additionalKeyspace
+        - additionalKeyspace
+        cloudProvider: AWS
+        name: mySplendidDatabase
+        capacityUnits: 1
+        region: us-west-2
+        user: db_admin
+    CredsURL:
+      required:
+      - downloadURL
+      type: object
+      properties:
+        downloadURL:
+          type: string
+          description: DownloadURL is only valid for about 5 minutes
+          example: nifty.cloud.datastax.com:9092
+        downloadURLInternal:
+          type: string
+          description: Internal DownloadURL is only valid for about 5 minutes
+          example: internal-nifty.cloud.datastax.com:9092
+        downloadURLMigrationProxy:
+          type: string
+          description: Migration Proxy DownloadURL is only valid for about 5 minutes
+          example: proxy-nifty.cloud.datastax.com:9092
+        downloadURLMigrationProxyInternal:
+          type: string
+          description: Internal Migration Proxy DownloadURL is only valid for about
+            5 minutes
+          example: proxy-nifty.cloud.datastax.com:9092
+      description: CredsURL from which the creds zip may be downloaded
+      example:
+        downloadURL: nifty.cloud.datastax.com:9092
+        downloadURLMigrationProxy: proxy-nifty.cloud.datastax.com:9092
+        downloadURLInternal: internal-nifty.cloud.datastax.com:9092
+        downloadURLMigrationProxyInternal: proxy-nifty.cloud.datastax.com:9092
+    UserPassword:
+      type: object
+      properties:
+        username:
+          type: string
+          example: dbusername
+        password:
+          type: string
+          description: New password (min 6 characters)
+          example: MyNewSecur3Passw0rd
+      description: UserPassword specifies a username and new password. The specified
+        password will be updated for the specified database user
+    MigrationProxyConfiguration:
+      required:
+      - mappings
+      - originPassword
+      - originUsername
+      type: object
+      properties:
+        originUsername:
+          type: string
+          description: origin cassandra username
+          example: cassandraUsername
+        originPassword:
+          type: string
+          description: origin cassandra password
+          example: cassandraPassword
+        mappings:
+          type: array
+          items:
+            $ref: '#/components/schemas/MigrationProxyMapping'
+      description: Configuration of the migration proxy and mappings of astra node
+        to a customer node currently in use
+    MigrationProxyMapping:
+      required:
+      - originIP
+      - originPort
+      - rack
+      - rackNodeOrdinal
+      type: object
+      properties:
+        originIP:
+          type: string
+          description: ip on which the node currently in use is accessible
+          example: 172.18.19.20
+        originPort:
+          type: integer
+          description: port on which the node currently in use is accessible
+          example: 9042
+        rack:
+          type: integer
+          description: "the number of the rack, usually 0, 1, or 2"
+          example: 2
+        rackNodeOrdinal:
+          type: integer
+          description: "The number of the node in a given rack, starting with 0"
+          example: 1
+      description: A mapping of astra node to a customer node currently in use
+    CapacityUnits:
+      type: object
+      properties:
+        capacityUnits:
+          maximum: 100
+          minimum: 1
+          type: integer
+          description: CapacityUnits an be increased by a max of three additional
+            capacity units per operation. Reducing capacity units is not supported
+            at this time
+          example: 4
+      description: CapacityUnits is used to horizontally scale a database.
+    Storage:
+      required:
+      - nodeCount
+      - replicationFactor
+      - totalStorage
+      type: object
+      properties:
+        nodeCount:
+          type: integer
+          description: NodeCount for the cluster
+          example: 6
+        replicationFactor:
+          type: integer
+          description: ReplicationFactor is the number of nodes storing a piece of
+            data
+          example: 3
+        totalStorage:
+          type: integer
+          description: TotalStorage of the cluster in GB
+          example: 800
+        usedStorage:
+          type: integer
+          description: UsedStorage in GB
+          example: 348
+      description: Storage contains the information about how much storage space a
+        cluster has available
+      example:
+        replicationFactor: 3
+        totalStorage: 800
+        nodeCount: 6
+        usedStorage: 348
+    RegionCombination:
+      required:
+      - cloudProvider
+      - cost
+      - region
+      - tier
+      type: object
+      properties:
+        tier:
+          type: string
+          example: Free
+        cloudProvider:
+          type: string
+          example: GCP
+        region:
+          type: string
+          example: us-east1
+        cost:
+          $ref: '#/components/schemas/Costs'
+      description: "RegionCombination defines a Tier, cloud provider, region combination"
+    AvailableRegionCombination:
+      required:
+      - capacityUnitsLimit
+      - capacityUnitsUsed
+      - cloudProvider
+      - cost
+      - databaseCountLimit
+      - databaseCountUsed
+      - defaultStoragePerCapacityUnitGb
+      - region
+      - tier
+      type: object
+      properties:
+        tier:
+          type: string
+          example: Free
+        cloudProvider:
+          type: string
+          example: GCP
+        region:
+          type: string
+          example: us-east1
+        cost:
+          $ref: '#/components/schemas/Costs'
+        databaseCountUsed:
+          type: integer
+          example: 0
+        databaseCountLimit:
+          type: integer
+          example: 1
+        capacityUnitsUsed:
+          type: integer
+          example: 0
+        capacityUnitsLimit:
+          type: integer
+          example: 30
+        defaultStoragePerCapacityUnitGb:
+          type: integer
+          example: 500
+      description: "AvailableRegionCombination defines a Tier, cloud provider, region\
+        \ combination"
+      example:
+        databaseCountLimit: 1
+        defaultStoragePerCapacityUnitGb: 500
+        cost:
+          costPerMinParkedCents: 0
+          costPerMonthCents: 0
+          costPerHourParkedCents: 0
+          costPerHourCents: 0
+          costPerDayParkedCents: 0
+          costPerMinCents: 0
+          costPerDayCents: 0
+          costPerMonthParkedCents: 0
+        tier: Free
+        cloudProvider: GCP
+        capacityUnitsUsed: 0
+        databaseCountUsed: 0
+        capacityUnitsLimit: 30
+        region: us-east1
+    Costs:
+      properties:
+        costPerMinCents:
+          type: number
+          format: double
+          example: 0
+        costPerHourCents:
+          type: number
+          format: double
+          example: 0
+        costPerDayCents:
+          type: number
+          format: double
+          example: 0
+        costPerMonthCents:
+          type: number
+          format: double
+          example: 0
+        costPerMinParkedCents:
+          type: number
+          format: double
+          example: 0
+        costPerHourParkedCents:
+          type: number
+          format: double
+          example: 0
+        costPerDayParkedCents:
+          type: number
+          format: double
+          example: 0
+        costPerMonthParkedCents:
+          type: number
+          format: double
+          example: 0
+      example:
+        costPerMinParkedCents: 0
+        costPerMonthCents: 0
+        costPerHourParkedCents: 0
+        costPerHourCents: 0
+        costPerDayParkedCents: 0
+        costPerMinCents: 0
+        costPerDayCents: 0
+        costPerMonthParkedCents: 0
+    Errors:
+      required:
+      - errors
+      type: object
+      properties:
+        errors:
+          type: array
+          items:
+            $ref: '#/components/schemas/Error'
+      description: Errors is a collection of individual Error objects
+    Error:
+      required:
+      - id
+      - message
+      type: object
+      properties:
+        ID:
+          type: integer
+          description: API specific error code
+          example: 123
+        message:
+          type: string
+          description: User-friendly description of error
+          example: Something is broken
+      description: ModelError information that is returned to users
+  responses:
+    Ok:
+      description: The request completed successfully
+    Accepted:
+      description: The request was accepted
+    BadRequest:
+      description: Bad request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Errors'
+    Unauthorized:
+      description: The user is unauthorized to perform the operation
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Errors'
+    NotFound:
+      description: The specified database was not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Errors'
+    Conflict:
+      description: The database is not in a valid state to perform the operation
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Errors'
+    UnprocessableEntity:
+      description: The structured data in the request could not be parsed
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Errors'
+    ServerError:
+      description: A server error occurred
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Errors'
+  parameters:
+    DatabaseIdParam:
+      name: databaseID
+      in: path
+      description: String representation of the database ID
+      required: true
+      style: simple
+      explode: false
+      schema:
+        type: string
+    TagNameParam:
+      name: tagName
+      in: path
+      description: Name of database tag
+      required: true
+      style: simple
+      explode: false
+      schema:
+        type: string
+    KeyspaceNameParam:
+      name: keyspaceName
+      in: path
+      description: Name of database keyspace
+      required: true
+      style: simple
+      explode: false
+      schema:
+        type: string
+  securitySchemes:
+    BearerAuth:
+      type: http
+      description: A token must be passed in header to access the API
+      scheme: bearer

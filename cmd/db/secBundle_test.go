@@ -26,15 +26,15 @@ import (
 	"testing"
 
 	"github.com/rsds143/astra-cli/pkg"
+	astraops "github.com/rsds143/astra-cli/pkg/swagger"
 	tests "github.com/rsds143/astra-cli/pkg/tests"
-	"github.com/rsds143/astra-devops-sdk-go/astraops"
 )
 
 func TestSecBundle(t *testing.T) {
 	id := "secId123"
 	secBundleLoc = "my_loc"
 	secBundleFmt = "json"
-	bundle := astraops.SecureBundle{
+	bundle := astraops.CredsUrl{
 		DownloadURL:                       "abcd",
 		DownloadURLInternal:               "wyz",
 		DownloadURLMigrationProxy:         "opu",
@@ -48,7 +48,7 @@ func TestSecBundle(t *testing.T) {
 	if err != nil {
 		t.Fatalf("unexpected error %v", err)
 	}
-	var fromServer astraops.SecureBundle
+	var fromServer astraops.CredsUrl
 	err = json.Unmarshal([]byte(jsonTxt), &fromServer)
 	if err != nil {
 		t.Fatalf("unexpected error with json %v", err)
@@ -74,7 +74,7 @@ func TestSecBundleZip(t *testing.T) {
 	id := "abc"
 	secBundleLoc = zipFile
 	secBundleFmt = "zip"
-	bundle := astraops.SecureBundle{
+	bundle := astraops.CredsUrl{
 		DownloadURL:                       ts.URL,
 		DownloadURLInternal:               "wyz",
 		DownloadURLMigrationProxy:         "opu",
@@ -97,7 +97,7 @@ func TestSecBundleZip(t *testing.T) {
 func TestSecBundleInvalidFmt(t *testing.T) {
 	id := "abc"
 	secBundleFmt = "ham"
-	bundle := astraops.SecureBundle{
+	bundle := astraops.CredsUrl{
 		DownloadURL:                       "url",
 		DownloadURLInternal:               "wyz",
 		DownloadURLMigrationProxy:         "opu",

@@ -22,8 +22,8 @@ import (
 	"testing"
 
 	"github.com/rsds143/astra-cli/pkg"
+	astraops "github.com/rsds143/astra-cli/pkg/swagger"
 	tests "github.com/rsds143/astra-cli/pkg/tests"
-	"github.com/rsds143/astra-devops-sdk-go/astraops"
 )
 
 func TestList(t *testing.T) {

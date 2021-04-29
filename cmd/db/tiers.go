@@ -22,7 +22,7 @@ import (
 	"os"
 
 	"github.com/rsds143/astra-cli/pkg"
-	"github.com/rsds143/astra-devops-sdk-go/astraops"
+	astraops "github.com/rsds143/astra-cli/pkg/swagger"
 	"github.com/spf13/cobra"
 )
 
@@ -49,7 +49,7 @@ var TiersCmd = &cobra.Command{
 }
 
 func executeTiers(login func() (pkg.Client, error)) (string, error) {
-	var tiers []astraops.TierInfo
+	var tiers []astraops.AvailableRegionCombination
 	client, err := login()
 	if err != nil {
 		return "", fmt.Errorf("unable to login with error %v", err)
