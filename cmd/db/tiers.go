@@ -22,7 +22,7 @@ import (
 	"os"
 
 	"github.com/rsds143/astra-cli/pkg"
-	astraops "github.com/rsds143/astra-cli/pkg/swagger"
+	astraops "github.com/datastax/astra-client-go/v2/astra"
 	"github.com/spf13/cobra"
 )
 
@@ -64,9 +64,10 @@ func executeTiers(login func() (pkg.Client, error)) (string, error) {
 		for _, tier := range tiers {
 			var costMonthRaw float64
 			var costMinRaw float64
-			if tier.Cost != nil {
-				costMonthRaw = tier.Cost.CostPerMonthCents
-				costMinRaw = tier.Cost.CostPerMinCents
+			var emtpyCosts astraops.Costs 
+			if tier.Cost != emtpyCosts {
+				costMonthRaw = astraops.Float64Value(tier.Cost.CostPerMonthCents)
+				costMinRaw = astraops.Float64Value(tier.Cost.CostPerMinCents)
 			}
 			divisor := 100.0
 			var costMonth float64

@@ -22,7 +22,7 @@ import (
 
 	"github.com/rsds143/astra-cli/pkg"
 	"github.com/rsds143/astra-cli/pkg/httputils"
-	astraops "github.com/rsds143/astra-cli/pkg/swagger"
+	astraops "github.com/datastax/astra-client-go/v2/astra"
 	"github.com/spf13/cobra"
 )
 
@@ -57,7 +57,7 @@ func executeSecBundle(args []string, login func() (pkg.Client, error)) (string, 
 		return "", fmt.Errorf("unable to login with error %v", err)
 	}
 	id := args[0]
-	var secBundle astraops.CredsUrl
+	var secBundle astraops.CredsURL
 	if secBundle, err = client.GetSecureBundle(id); err != nil {
 		return "", fmt.Errorf("unable to get '%s' with error %v", id, err)
 	}

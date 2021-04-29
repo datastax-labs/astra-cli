@@ -15,7 +15,7 @@
 // Package test is for test utilies and mocks
 package test
 
-import astraops "github.com/rsds143/astra-cli/pkg/swagger"
+import 	astraops "github.com/datastax/astra-client-go/v2/astra"
 
 // LoginError is a pretty common error message
 const LoginError = "unable to login with error no db"
@@ -25,8 +25,8 @@ type MockClient struct {
 	ErrorQueue []error
 	calls      []interface{}
 	Databases  []astraops.Database
-	Tiers      []astraops.RegionCombination
-	Bundle     astraops.CredsUrl
+	Tiers      []astraops.AvailableRegionCombination
+	Bundle     astraops.CredsURL
 }
 
 // getError pops the next error stored off the stack
@@ -79,7 +79,7 @@ func (c *MockClient) FindDb(id string) (astraops.Database, error) {
 }
 
 // ListDb returns all databases and stores the arguments as an interface array
-func (c *MockClient) ListDb(include string, provider string, startingAfter string, limit int32) ([]astraops.Database, error) {
+func (c *MockClient) ListDb(include string, provider string, startingAfter string, limit int) ([]astraops.Database, error) {
 	c.calls = append(c.calls, []interface{}{
 		include,
 		provider,
@@ -102,18 +102,18 @@ func (c *MockClient) Park(id string) error {
 }
 
 // Resize returns the next error, the id call and size is stored
-func (c *MockClient) Resize(id string, size int32) error {
+func (c *MockClient) Resize(id string, size int) error {
 	c.calls = append(c.calls, []interface{}{id, size})
 	return c.getError()
 }
 
 // GetSecureBundle returns the next error, the secured bundle stored, and the id call is stored
-func (c *MockClient) GetSecureBundle(id string) (astraops.CredsUrl, error) {
+func (c *MockClient) GetSecureBundle(id string) (astraops.CredsURL, error) {
 	c.calls = append(c.calls, id)
 	return c.Bundle, c.getError()
 }
 
 // GetTierInfo returns the next error, and the tierinfo objects stored
-func (c *MockClient) GetTierInfo() ([]astraops.RegionCombination, error) {
+func (c *MockClient) GetTierInfo() ([]astraops.AvailableRegionCombination, error) {
 	return c.Tiers, c.getError()
 }

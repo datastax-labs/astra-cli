@@ -23,7 +23,7 @@ import (
 	"testing"
 
 	"github.com/rsds143/astra-cli/pkg"
-	astraops "github.com/rsds143/astra-cli/pkg/swagger"
+	astraops "github.com/datastax/astra-client-go/v2/astra"
 	tests "github.com/rsds143/astra-cli/pkg/tests"
 )
 
@@ -46,12 +46,12 @@ func TestTiers(t *testing.T) {
 	if err != nil {
 		t.Fatalf("unexpected error %v", err)
 	}
-	var fromServer []astraops.TierInfo
+	var fromServer []astraops.AvailableRegionCombination
 	err = json.Unmarshal([]byte(jsonTxt), &fromServer)
 	if err != nil {
 		t.Fatalf("unexpected error with json %v", err)
 	}
-	expected := []astraops.TierInfo{
+	expected := []astraops.AvailableRegionCombination{
 		tier1,
 		tier2,
 	}
@@ -62,26 +62,30 @@ func TestTiers(t *testing.T) {
 
 func TestTiersText(t *testing.T) {
 	tiersFmt = "text"
+	var costMonth float64 = 10.0
+	var costMin float64 = 1.0
 	tier1 := astraops.AvailableRegionCombination{
 		Tier:               "tier1",
 		CloudProvider:      "cloud1",
 		Region:             "region1",
 		DatabaseCountUsed:  1,
 		DatabaseCountLimit: 1,
-		Cost: &astraops.Costs{
-			CostPerMonthCents: 10,
-			CostPerMinCents:   1,
+		Cost: astraops.Costs{
+			CostPerMonthCents: &costMonth,
+			CostPerMinCents:  &costMin,
 		},
 		CapacityUnitsUsed:  1,
 		CapacityUnitsLimit: 1,
 	}
+	var costMonth2 float64 = 10.0
+	var costMin2 float64 = 1.0
 	tier2 := astraops.AvailableRegionCombination{
 		Tier:          "tier2",
 		CloudProvider: "cloud2",
 		Region:        "region2",
-		Cost: &astraops.Costs{
-			CostPerMonthCents: 20,
-			CostPerMinCents:   2,
+		Cost: astraops.Costs{
+			CostPerMonthCents: &costMonth2,
+			CostPerMinCents:  &costMin2,
 		},
 		CapacityUnitsUsed:  2,
 		CapacityUnitsLimit: 2,

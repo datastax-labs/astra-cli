@@ -42,8 +42,8 @@ func TestResize(t *testing.T) {
 	if id != actualID {
 		t.Errorf("expected '%v' but was '%v'", id, actualID)
 	}
-	actualSize := mockClient.Call(0).([]interface{})[1].(int32)
-	if int32(100) != actualSize {
+	actualSize := mockClient.Call(0).([]interface{})[1].(int)
+	if 100 != actualSize {
 		t.Errorf("expected '%v' but was '%v'", size, actualSize)
 	}
 }

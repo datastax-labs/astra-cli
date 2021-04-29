@@ -22,15 +22,15 @@ import (
 	"testing"
 
 	"github.com/rsds143/astra-cli/pkg"
-	astraops "github.com/rsds143/astra-cli/pkg/swagger"
+	astraops "github.com/datastax/astra-client-go/v2/astra"
 	tests "github.com/rsds143/astra-cli/pkg/tests"
 )
 
 func TestList(t *testing.T) {
 	listFmt = pkg.JSONFormat
 	dbs := []astraops.Database{
-		{ID: "1"},
-		{ID: "2"},
+		{Id: "1"},
+		{Id: "2"},
 	}
 	jsonTxt, err := executeList(func() (pkg.Client, error) {
 		return &tests.MockClient{
@@ -48,30 +48,32 @@ func TestList(t *testing.T) {
 	if len(fromServer) != len(dbs) {
 		t.Errorf("expected '%v' but was '%v'", len(dbs), len(fromServer))
 	}
-	if fromServer[0].ID != dbs[0].ID {
-		t.Errorf("expected '%v' but was '%v'", dbs[0].ID, fromServer[0].ID)
+	if fromServer[0].Id != dbs[0].Id {
+		t.Errorf("expected '%v' but was '%v'", dbs[0].Id, fromServer[0].Id)
 	}
-	if fromServer[1].ID != dbs[1].ID {
-		t.Errorf("expected '%v' but was '%v'", dbs[1].ID, fromServer[1].ID)
+	if fromServer[1].Id != dbs[1].Id {
+		t.Errorf("expected '%v' but was '%v'", dbs[1].Id, fromServer[1].Id)
 	}
 }
 
 func TestListText(t *testing.T) {
 	listFmt = pkg.TextFormat
+	name1 := "A"
+	name2 := "B"
 	dbs := []astraops.Database{
 		{
-			ID: "1",
+			Id: "1",
 			Info: astraops.DatabaseInfo{
-				Name: "A",
+				Name: &name1,
 			},
-			Status: astraops.ACTIVE,
+			Status: astraops.StatusEnum_ACTIVE,
 		},
 		{
-			ID: "2",
+			Id: "2",
 			Info: astraops.DatabaseInfo{
-				Name: "B",
+				Name: &name2,
 			},
-			Status: astraops.TERMINATING,
+			Status: astraops.StatusEnum_TERMINATING,
 		},
 	}
 	txt, err := executeList(func() (pkg.Client, error) {

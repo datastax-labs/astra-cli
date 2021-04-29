@@ -22,7 +22,7 @@ import (
 	"os"
 
 	"github.com/rsds143/astra-cli/pkg"
-	astraops "github.com/rsds143/astra-cli/pkg/swagger"
+	astraops "github.com/datastax/astra-client-go/v2/astra"
 	"github.com/spf13/cobra"
 )
 
@@ -63,7 +63,7 @@ func executeGet(args []string, login func() (pkg.Client, error)) (string, error)
 	case pkg.TextFormat:
 		var rows [][]string
 		rows = append(rows, []string{"name", "id", "status"})
-		rows = append(rows, []string{db.Info.Name, db.ID, string(db.Status)})
+		rows = append(rows, []string{astraops.StringValue(db.Info.Name), db.Id, string(db.Status)})
 		var buf bytes.Buffer
 		err = pkg.WriteRows(&buf, rows)
 		if err != nil {

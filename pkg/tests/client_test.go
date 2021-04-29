@@ -18,8 +18,7 @@ package test
 import (
 	"errors"
 	"testing"
-
-	astraops "github.com/rsds143/astra-cli/pkg/swagger"
+	astraops "github.com/datastax/astra-client-go/v2/astra"
 )
 
 func TestGetError(t *testing.T) {
@@ -122,7 +121,7 @@ func TestTerminate(t *testing.T) {
 func TestGetSecurteBundleId(t *testing.T) {
 	url := "myurl"
 	client := &MockClient{
-		Bundle: astraops.CredsUrl{
+		Bundle: astraops.CredsURL{
 			DownloadURL: url,
 		},
 	}
@@ -175,14 +174,14 @@ func TestCreateDb(t *testing.T) {
 			{Id: "fakeid"},
 		},
 	}
-	db, err := client.CreateDb(astraops.CreateDb{
+	db, err := client.CreateDb(astraops.DatabaseInfoCreate{
 		Name: "myname",
 	})
 	if err != nil {
 		t.Fatal("unexpected error")
 	}
 	if db.Id != id {
-		t.Errorf("expected '%v' but was '%v'", id, db.ID)
+		t.Errorf("expected '%v' but was '%v'", id, db.Id)
 	}
 	if client.Call(0).(astraops.DatabaseInfoCreate).Name != "myname" {
 		t.Errorf("expected '%v' but was '%v'", "myname", client.Call(0).(astraops.DatabaseInfoCreate).Name)
@@ -195,7 +194,7 @@ func TestCreateDb(t *testing.T) {
 func TestResize(t *testing.T) {
 	client := &MockClient{}
 	id := "987"
-	var size int32 = 10
+	size := 10
 	err := client.Resize(id, size)
 	if err != nil {
 		t.Fatal("unexpected error")
@@ -204,7 +203,7 @@ func TestResize(t *testing.T) {
 	if actual[0].(string) != id {
 		t.Errorf("expected '%v' but was '%v'", id, actual[0])
 	}
-	if actual[1].(int32) != size {
+	if actual[1].(int) != size {
 		t.Errorf("expected '%v' but was '%v'", size, actual[1])
 	}
 	if len(client.Calls()) != 1 {
@@ -238,11 +237,11 @@ func TestListdDb(t *testing.T) {
 	include := "filter"
 	provider := "gcp"
 	starting := "today"
-	var limit int32 = 1000
+	limit := 1000
 	client := &MockClient{
 		Databases: []astraops.Database{
 			{Id: id1},
-			{: id2},
+			{Id: id2},
 		},
 	}
 	dbs, err := client.ListDb(include, provider, starting, limit)
@@ -269,7 +268,7 @@ func TestListdDb(t *testing.T) {
 	if actualStarting != starting {
 		t.Errorf("expected '%v' but was '%v'", starting, actualStarting)
 	}
-	actualLimit := args[3].(int32)
+	actualLimit := args[3].(int)
 	if actualLimit != limit {
 		t.Errorf("expected '%v' but was '%v'", limit, actualLimit)
 	}

@@ -20,7 +20,7 @@ import (
 	"testing"
 
 	"github.com/rsds143/astra-cli/pkg"
-	astraops "github.com/rsds143/astra-cli/pkg/swagger"
+	astraops "github.com/datastax/astra-client-go/v2/astra"
 	tests "github.com/rsds143/astra-cli/pkg/tests"
 )
 
@@ -30,7 +30,7 @@ func TestCreateGetsId(t *testing.T) {
 	mockClient := &tests.MockClient{
 		Databases: []astraops.Database{
 			{
-				ID: expectedID,
+				Id: expectedID,
 			},
 		},
 	}
@@ -90,7 +90,7 @@ func TestCreateSetsName(t *testing.T) {
 	if err != nil {
 		t.Fatalf("unexpected error '%v'", err)
 	}
-	arg0 := mockClient.Call(0).(astraops.CreateDb)
+	arg0 := mockClient.Call(0).(astraops.DatabaseInfoCreate)
 	if arg0.Name != createDbName {
 		t.Errorf("expected '%v' but was '%v'", arg0.Name, createDbName)
 	}
@@ -105,7 +105,7 @@ func TestCreateSetsKeyspace(t *testing.T) {
 	if err != nil {
 		t.Fatalf("unexpected error '%v'", err)
 	}
-	arg0 := mockClient.Call(0).(astraops.CreateDb)
+	arg0 := mockClient.Call(0).(astraops.DatabaseInfoCreate)
 	if arg0.Keyspace != createDbKeyspace {
 		t.Errorf("expected '%v' but was '%v'", arg0.Keyspace, createDbKeyspace)
 	}
@@ -120,8 +120,8 @@ func TestCreateSetsCapacityUnit(t *testing.T) {
 	if err != nil {
 		t.Fatalf("unexpected error '%v'", err)
 	}
-	arg0 := mockClient.Call(0).(astraops.CreateDb)
-	if arg0.CapacityUnits != int32(createDbCapacityUnit) {
+	arg0 := mockClient.Call(0).(astraops.DatabaseInfoCreate)
+	if arg0.CapacityUnits != createDbCapacityUnit {
 		t.Errorf("expected '%v' but was '%v'", arg0.CapacityUnits, createDbCapacityUnit)
 	}
 }
@@ -135,39 +135,9 @@ func TestCreateSetsRegion(t *testing.T) {
 	if err != nil {
 		t.Fatalf("unexpected error '%v'", err)
 	}
-	arg0 := mockClient.Call(0).(astraops.CreateDb)
+	arg0 := mockClient.Call(0).(astraops.DatabaseInfoCreate)
 	if arg0.Region != createDbRegion {
 		t.Errorf("expected '%v' but was '%v'", arg0.Region, createDbRegion)
-	}
-}
-
-func TestCreateSetsUser(t *testing.T) {
-	mockClient := &tests.MockClient{}
-	createDbUser = "john@james.com"
-	err := executeCreate(func() (pkg.Client, error) {
-		return mockClient, nil
-	})
-	if err != nil {
-		t.Fatalf("unexpected error '%v'", err)
-	}
-	arg0 := mockClient.Call(0).(astraops.CreateDb)
-	if arg0.User != createDbUser {
-		t.Errorf("expected '%v' but was '%v'", arg0.User, createDbUser)
-	}
-}
-
-func TestCreateSetsPass(t *testing.T) {
-	mockClient := &tests.MockClient{}
-	createDbUser = "afdfdf"
-	err := executeCreate(func() (pkg.Client, error) {
-		return mockClient, nil
-	})
-	if err != nil {
-		t.Fatalf("unexpected error '%v'", err)
-	}
-	arg0 := mockClient.Call(0).(astraops.CreateDb)
-	if arg0.Password != createDbPassword {
-		t.Errorf("expected '%v' but was '%v'", arg0.Password, createDbPassword)
 	}
 }
 
@@ -180,7 +150,7 @@ func TestCreateSetsTier(t *testing.T) {
 	if err != nil {
 		t.Fatalf("unexpected error '%v'", err)
 	}
-	arg0 := mockClient.Call(0).(astraops.CreateDb)
+	arg0 := mockClient.Call(0).(astraops.DatabaseInfoCreate)
 	if arg0.Tier != createDbTier {
 		t.Errorf("expected '%v' but was '%v'", arg0.Tier, createDbTier)
 	}
@@ -195,7 +165,7 @@ func TestCreateSetsProvider(t *testing.T) {
 	if err != nil {
 		t.Fatalf("unexpected error '%v'", err)
 	}
-	arg0 := mockClient.Call(0).(astraops.CreateDb)
+	arg0 := mockClient.Call(0).(astraops.DatabaseInfoCreate)
 	if arg0.CloudProvider != createDbCloudProvider {
 		t.Errorf("expected '%v' but was '%v'", arg0.CloudProvider, createDbCloudProvider)
 	}

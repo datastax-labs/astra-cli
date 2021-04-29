@@ -26,7 +26,7 @@ import (
 	"testing"
 
 	"github.com/rsds143/astra-cli/pkg"
-	astraops "github.com/rsds143/astra-cli/pkg/swagger"
+	astraops "github.com/datastax/astra-client-go/v2/astra"
 	tests "github.com/rsds143/astra-cli/pkg/tests"
 )
 
@@ -34,11 +34,15 @@ func TestSecBundle(t *testing.T) {
 	id := "secId123"
 	secBundleLoc = "my_loc"
 	secBundleFmt = "json"
-	bundle := astraops.CredsUrl{
-		DownloadURL:                       "abcd",
-		DownloadURLInternal:               "wyz",
-		DownloadURLMigrationProxy:         "opu",
-		DownloadURLMigrationProxyInternal: "zert",
+	url := "abcd"
+	urlInternal := "wyz"
+	migrationUrl :=  "opu"
+	migrationInternal := "zert"
+	bundle := astraops.CredsURL{
+		DownloadURL:                       url,
+		DownloadURLInternal:               &urlInternal,
+		DownloadURLMigrationProxy:        &migrationUrl,
+		DownloadURLMigrationProxyInternal: &migrationInternal,
 	}
 	jsonTxt, err := executeSecBundle([]string{id}, func() (pkg.Client, error) {
 		return &tests.MockClient{
@@ -48,7 +52,7 @@ func TestSecBundle(t *testing.T) {
 	if err != nil {
 		t.Fatalf("unexpected error %v", err)
 	}
-	var fromServer astraops.CredsUrl
+	var fromServer astraops.CredsURL
 	err = json.Unmarshal([]byte(jsonTxt), &fromServer)
 	if err != nil {
 		t.Fatalf("unexpected error with json %v", err)
@@ -74,11 +78,14 @@ func TestSecBundleZip(t *testing.T) {
 	id := "abc"
 	secBundleLoc = zipFile
 	secBundleFmt = "zip"
-	bundle := astraops.CredsUrl{
+	urlInternal := "wyz"
+	migrationUrl :=  "opu"
+	migrationInternal := "zert"
+	bundle := astraops.CredsURL{
 		DownloadURL:                       ts.URL,
-		DownloadURLInternal:               "wyz",
-		DownloadURLMigrationProxy:         "opu",
-		DownloadURLMigrationProxyInternal: "zert",
+		DownloadURLInternal:               &urlInternal,
+		DownloadURLMigrationProxy:        &migrationUrl,
+		DownloadURLMigrationProxyInternal: &migrationInternal,
 	}
 	msg, err := executeSecBundle([]string{id}, func() (pkg.Client, error) {
 		return &tests.MockClient{
@@ -97,11 +104,14 @@ func TestSecBundleZip(t *testing.T) {
 func TestSecBundleInvalidFmt(t *testing.T) {
 	id := "abc"
 	secBundleFmt = "ham"
-	bundle := astraops.CredsUrl{
+	urlInternal := "wyz"
+	migrationUrl :=  "opu"
+	migrationInternal := "zert"
+	bundle := astraops.CredsURL{
 		DownloadURL:                       "url",
-		DownloadURLInternal:               "wyz",
-		DownloadURLMigrationProxy:         "opu",
-		DownloadURLMigrationProxyInternal: "zert",
+		DownloadURLInternal:               &urlInternal,
+		DownloadURLMigrationProxy:        &migrationUrl,
+		DownloadURLMigrationProxyInternal: &migrationInternal,
 	}
 	_, err := executeSecBundle([]string{id}, func() (pkg.Client, error) {
 		return &tests.MockClient{

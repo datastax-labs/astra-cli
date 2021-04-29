@@ -22,15 +22,15 @@ import (
 	"testing"
 
 	"github.com/rsds143/astra-cli/pkg"
-	astraops "github.com/rsds143/astra-cli/pkg/swagger"
+	astraops "github.com/datastax/astra-client-go/v2/astra"
 	tests "github.com/rsds143/astra-cli/pkg/tests"
 )
 
 func TestGet(t *testing.T) {
 	getFmt = pkg.JSONFormat
 	dbs := []astraops.Database{
-		{ID: "1"},
-		{ID: "2"},
+		{Id: "1"},
+		{Id: "2"},
 	}
 	jsonTxt, err := executeGet([]string{"1"}, func() (pkg.Client, error) {
 		return &tests.MockClient{
@@ -45,8 +45,8 @@ func TestGet(t *testing.T) {
 	if err != nil {
 		t.Fatalf("unexpected error with json %v with text %v", err, jsonTxt)
 	}
-	if fromServer.ID != dbs[0].ID {
-		t.Errorf("expected '%v' but was '%v'", dbs[0].ID, fromServer.ID)
+	if fromServer.Id != dbs[0].Id {
+		t.Errorf("expected '%v' but was '%v'", dbs[0].Id, fromServer.Id)
 	}
 }
 
@@ -94,20 +94,22 @@ func TestGetFailedLogin(t *testing.T) {
 
 func TestGetText(t *testing.T) {
 	getFmt = pkg.TextFormat
+	name1 := "A"
+	name2 := "B"
 	dbs := []astraops.Database{
 		{
-			ID: "1",
+			Id: "1",
 			Info: astraops.DatabaseInfo{
-				Name: "A",
+				Name: &name1,
 			},
-			Status: astraops.ACTIVE,
+			Status: astraops.StatusEnum_ACTIVE,
 		},
 		{
-			ID: "2",
+			Id: "2",
 			Info: astraops.DatabaseInfo{
-				Name: "B",
+				Name: &name2,
 			},
-			Status: astraops.TERMINATING,
+			Status: astraops.StatusEnum_TERMINATING,
 		},
 	}
 	txt, err := executeGet([]string{"1"}, func() (pkg.Client, error) {

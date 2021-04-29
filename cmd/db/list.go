@@ -22,7 +22,7 @@ import (
 	"os"
 
 	"github.com/rsds143/astra-cli/pkg"
-	astraops "github.com/rsds143/astra-cli/pkg/swagger"
+	astraops "github.com/datastax/astra-client-go/v2/astra"
 	"github.com/spf13/cobra"
 )
 
@@ -62,7 +62,7 @@ func executeList(login func() (pkg.Client, error)) (string, error) {
 		return "", fmt.Errorf("unable to login with error '%v'", err)
 	}
 	var dbs []astraops.Database
-	if dbs, err = client.ListDb(include, provider, startingAfter, int32(limit)); err != nil {
+	if dbs, err = client.ListDb(include, provider, startingAfter, limit); err != nil {
 		return "", fmt.Errorf("unable to get list of dbs with error '%v'", err)
 	}
 	switch listFmt {
@@ -70,7 +70,7 @@ func executeList(login func() (pkg.Client, error)) (string, error) {
 		var rows [][]string
 		rows = append(rows, []string{"name", "id", "status"})
 		for _, db := range dbs {
-			rows = append(rows, []string{db.Info.Name, db.ID, string(db.Status)})
+			rows = append(rows, []string{astraops.StringValue(db.Info.Name), db.Id, string(db.Status)})
 		}
 		var out bytes.Buffer
 		err = pkg.WriteRows(&out, rows)
