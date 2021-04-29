@@ -71,10 +71,11 @@ func (a *AuthenticatedClient) setHeaders(req *http.Request) {
 }
 
 
-func (a *AuthenticatedClient) requestEditorForAPI(rctx context.Context, req *http.Request) {
+func (a *AuthenticatedClient) requestEditorForAPI(rctx context.Context, req *http.Request) error {
 	req.Header.Set("Accept", "application/json")
 	req.Header.Set("Authorization", a.token)
 	req.Header.Set("Content-Type", "application/json")
+	return nil
 }
 
 // WaitUntil will keep checking the database for the requested status until it is available. Eventually it will timeout if the operation is not
@@ -118,7 +119,7 @@ func (a* AuthenticatedClient) getContext() (context.Context, context.CancelFunc)
 func (a* AuthenticatedClient) CreateDb(db astraops.DatabaseInfoCreate) (astraops.Database, error) {
 	ctx, cancel := a.getContext()
 	defer cancel()
-	res, err := a.client.CreateDatabase(ctx, astraops.CreateDatabaseJSONRequestBody(db))
+	res, err := a.client.CreateDatabase(ctx, astraops.CreateDatabaseJSONRequestBody(db), a.requestEditorForAPI)
 	if err != nil {
 		return astraops.Database{}, fmt.Errorf("failed creating database with: %w", err)
 	}
@@ -141,7 +142,7 @@ func (a* AuthenticatedClient) CreateDb(db astraops.DatabaseInfoCreate) (astraops
 func (a* AuthenticatedClient) Terminate(databaseID string, internalOnly bool) error {
 	ctx, cancel := a.getContext()
 	defer cancel()
-	res, err := a.client.TerminateDatabase(ctx, astraops.DatabaseIdParam(databaseID), nil)
+	res, err := a.client.TerminateDatabase(ctx, astraops.DatabaseIdParam(databaseID), nil, a.requestEditorForAPI)
 	if err != nil {
 		return fmt.Errorf("failed to terminate database id %s with: %w", databaseID, err)
 	}
@@ -201,7 +202,7 @@ func (a* AuthenticatedClient) FindDb(databaseID string) (astraops.Database, erro
 	var dbs astraops.Database
 	ctx, cancel := a.getContext()
 	defer cancel()
-	res, err := a.client.GetDatabase(ctx, astraops.DatabaseIdParam(databaseID))
+	res, err := a.client.GetDatabase(ctx, astraops.DatabaseIdParam(databaseID), a.requestEditorForAPI)
 	if err != nil {
 		return dbs, fmt.Errorf("failed get database id %s with: %w", databaseID, err)
 	}
@@ -239,7 +240,7 @@ func (a* AuthenticatedClient) 	ListDb(include string, provider string, startingA
 	}
 	ctx, cancel := a.getContext()
 	defer cancel()
-	res, err := a.client.ListDatabases(ctx, &params)
+	res, err := a.client.ListDatabases(ctx, &params, a.requestEditorForAPI)
 	if err != nil {
 		return dbs, fmt.Errorf("failed listing databases with: %v", err)
 	}
@@ -259,7 +260,7 @@ func (a* AuthenticatedClient) 	ListDb(include string, provider string, startingA
 // @return error
 func (a* AuthenticatedClient) Park(databaseID string) error {
 	ctx, cancel := a.getContext()
-	res, err := a.client.ParkDatabase(ctx, astraops.DatabaseIdParam( databaseID))
+	res, err := a.client.ParkDatabase(ctx, astraops.DatabaseIdParam( databaseID), a.requestEditorForAPI)
 	defer cancel()
 	if err != nil {
 		return fmt.Errorf("failed to park database id %s with: %w",  databaseID, err)
@@ -281,7 +282,7 @@ func (a* AuthenticatedClient) Park(databaseID string) error {
 func (a* AuthenticatedClient) Unpark(databaseID string) error {
 	ctx, cancel := a.getContext()
 	defer cancel()
-	res, err := a.client.UnparkDatabase(ctx, astraops.DatabaseIdParam (databaseID))
+	res, err := a.client.UnparkDatabase(ctx, astraops.DatabaseIdParam (databaseID), a.requestEditorForAPI)
 	if err != nil {
 		return fmt.Errorf("failed to unpark database id %s with: %w", databaseID, err)
 	}
@@ -306,7 +307,7 @@ func (a* AuthenticatedClient) 	Resize(databaseID string, capacityUnits int) erro
 	units := astraops.ResizeDatabaseJSONRequestBody{
 		CapacityUnits: &capacityUnits,
 	}
-	res, err := a.client.ResizeDatabase(ctx, astraops.DatabaseIdParam(databaseID), units)
+	res, err := a.client.ResizeDatabase(ctx, astraops.DatabaseIdParam(databaseID), units, a.requestEditorForAPI)
 	defer res.Body.Close()
 	if res.StatusCode > 299 {
 		var resObj ErrorResponse
@@ -326,7 +327,7 @@ func (a* AuthenticatedClient) 	Resize(databaseID string, capacityUnits int) erro
 func (a* AuthenticatedClient) 	GetSecureBundle(databaseID string) (astraops.CredsURL, error) {
 	ctx, cancel := a.getContext()
 	defer cancel()
-	res, err := a.client.GenerateSecureBundleURL(ctx, astraops.DatabaseIdParam(databaseID))
+	res, err := a.client.GenerateSecureBundleURL(ctx, astraops.DatabaseIdParam(databaseID), a.requestEditorForAPI)
 	if err != nil {
 		return astraops.CredsURL{}, fmt.Errorf("failed get secure bundle for database id %s with: %w", databaseID, err)
 	}
@@ -347,7 +348,7 @@ func (a* AuthenticatedClient) 	GetSecureBundle(databaseID string) (astraops.Cred
 func (a* AuthenticatedClient) 	GetTierInfo() ([]astraops.AvailableRegionCombination, error) {
 	ctx, cancel := a.getContext()
 	defer cancel()
-	res, err := a.client.ListAvailableRegions(ctx)
+	res, err := a.client.ListAvailableRegions(ctx, a.requestEditorForAPI)
 	if err != nil {
 		return []astraops.AvailableRegionCombination{}, fmt.Errorf("failed listing tier info with: %w", err)
 	}
