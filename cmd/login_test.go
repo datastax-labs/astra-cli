@@ -259,11 +259,14 @@ func TestLoginArgsMissingSecret(t *testing.T) {
 }
 
 func TestLoginHomeError(t *testing.T) {
-	exitCode, err := executeLogin([]string{"--json", clientJSON}, func() (string, pkg.ConfFiles, error) {
+	clientJSON = "invalidjson"
+	defer func() { clientJSON = "" }()
+	exitCode, err := executeLogin([]string{}, func() (string, pkg.ConfFiles, error) {
 		return "", pkg.ConfFiles{}, fmt.Errorf("big error")
 	}, usageFunc)
 	if err == nil {
-		t.Error("expected error")
+		t.Logf("expected error there was none and exit code was %v", exitCode)
+		t.FailNow()
 	}
 	expected := "big error"
 	if err.Error() != expected {

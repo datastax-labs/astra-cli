@@ -65,7 +65,7 @@ var loginCmd = &cobra.Command{
 }
 
 func executeLogin(args []string, getHome func() (string, pkg.ConfFiles, error), usageFunc func() error) (int, error) {
-	if len(args) == 0 {
+	if clientJSON == "" && clientID == "" && clientName == "" && clientSecret == "" && authToken == "" {
 		if err := usageFunc(); err != nil {
 			return CriticalError, fmt.Errorf("cannot show usage %v", err)
 		}
