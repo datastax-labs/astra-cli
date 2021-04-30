@@ -163,6 +163,6 @@ func makeConf(confDir, confFile, content string) error {
 	if err != nil {
 		return fmt.Errorf("error finishing file")
 	}
-	fmt.Println("Login information saved")
+	fmt.Printf("Login information saved at %v\n", confFile)
 	return nil
 }
