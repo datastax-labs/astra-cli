@@ -27,7 +27,7 @@ Ready for production
 ## How to install - From Source
 
 * Install [Go 1.16](https://golang.org/dl/)
-* run `git clone git@github.com:rsds143/astra-cli.git`
+* run `git clone git@github.com:rsds/astra-cli.git`
 * run `./scripts/build` or `go build -o ./bin/astra-cli .`
 
 ## How to use
