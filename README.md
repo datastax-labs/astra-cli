@@ -15,7 +15,7 @@ Ready for production
 ## How to install - Homebrew for Mac and Linux
 
 * [install homebrew](https://brew.sh/) if you have not
-* `brew tap rsds143/astra-cli && brew install astra-cli`
+* `brew tap rsds143/rsds && brew install astra-cli`
 
 ## How to install - Release Binaries
 
@@ -27,7 +27,7 @@ Ready for production
 ## How to install - From Source
 
 * Install [Go 1.16](https://golang.org/dl/)
-* run `git clone git@github.com:rsds/astra-cli.git`
+* run `git clone git@github.com:rsds143/astra-cli.git`
 * run `./scripts/build` or `go build -o ./bin/astra-cli .`
 
 ## How to use
