@@ -78,20 +78,24 @@ database 2c3bc0d6-5e3e-4d77-81c8-d95a35bdc58b created
 ### get secure connection bundle
 
 ```
-./bin/astra-cli db secBundle 3c577e51-4ff5-4551-86a4-41d475c61822                 
-file secureBundle.zip saved 12072 bytes written
+./bin/astra-cli db secBundle 3c577e51-4ff5-4551-86a4-41d475c61822 -d external -l external.zip            
+file external.zip saved 12072 bytes written
+./bin/astra-cli db secBundle 3c577e51-4ff5-4551-86a4-41d475c61822 -d internal -l internal.zip            
+file internal.zip saved 12066 bytes written
+./bin/astra-cli db secBundle 3c577e51-4ff5-4551-86a4-41d475c61822 -d proxy-internal -l proxy-internal.zip 
+file proxy-internal.zip saved 348 bytes written
+./bin/astra-cli db secBundle 3c577e51-4ff5-4551-86a4-41d475c61822 -d proxy-external -l proxy-external.zip 
+file proxy-external.zip saved 339 bytes written
 ```
 
-### get secure connection bundle url
+### get secure connection bundle URLs
 
 ```
-./bin/astra-cli db secBundle 3c577e51-4ff5-4551-86a4-41d475c61822 -o json         
-{
-  "downloadURL": "changed",
-  "downloadURLInternal": "changed",
-  "downloadURLMigrationProxy": "changed",
-  "downloadURLMigrationProxyInternal": "changed"
-}
+./bin/astra-cli db secBundle 3c577e51-4ff5-4551-86a4-41d475c61822 -o list         
+  external bundle: changed
+  internal bundle: changed
+  external proxy: changed
+  internal proxy: changed
 ```
 
 ### listing databases

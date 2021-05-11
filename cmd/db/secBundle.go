@@ -28,9 +28,11 @@ import (
 
 var secBundleFmt string
 var secBundleLoc string
+var secBundleDownloadType string
 
 func init() {
 	SecBundleCmd.Flags().StringVarP(&secBundleFmt, "output", "o", "zip", "Output format for report default is zip")
+	SecBundleCmd.Flags().StringVarP(&secBundleDownloadType, "download-type", "d", "external", "Bundle type to download external, internal, proxy-external and proxy-internal available. Only works with -o zip")
 	SecBundleCmd.Flags().StringVarP(&secBundleLoc, "location", "l", "secureBundle.zip", "location of bundle to download to if using zip format. ignore if using json")
 }
 
@@ -63,7 +65,20 @@ func executeSecBundle(args []string, login func() (pkg.Client, error)) (string, 
 	}
 	switch secBundleFmt {
 	case "zip":
-		bytesWritten, err := httputils.DownloadZip(secBundle.DownloadURL, secBundleLoc)
+		var urlToDownload string
+		switch secBundleDownloadType {
+		case "external":
+			urlToDownload = secBundle.DownloadURL
+		case "internal":
+			urlToDownload = secBundle.DownloadURLInternal
+		case "proxy-external":
+			urlToDownload = secBundle.DownloadURLMigrationProxy
+		case "proxy-internal":
+			urlToDownload = secBundle.DownloadURLMigrationProxyInternal
+		default:
+			return "", fmt.Errorf("invalid download type %s passed. valid options are 'external', 'internal', 'proxy-external', 'proxy-internal'", secBundleDownloadType)
+		}
+		bytesWritten, err := httputils.DownloadZip(urlToDownload, secBundleLoc)
 		if err != nil {
 			return "", fmt.Errorf("error outputing zip format '%v'", err)
 		}
@@ -74,6 +89,13 @@ func executeSecBundle(args []string, login func() (pkg.Client, error)) (string, 
 			return "", fmt.Errorf("unexpected error marshaling to json: '%v', Try -output text instead", err)
 		}
 		return string(b), nil
+	case "list":
+		return fmt.Sprintf(`
+		external bundle: %s
+		internal bundle: %s
+		external proxy: %s
+		internal proxy: %s
+		`, secBundle.DownloadURL, secBundle.DownloadURLInternal, secBundle.DownloadURLMigrationProxy, secBundle.DownloadURLMigrationProxyInternal), nil
 	default:
 		return "", fmt.Errorf("-o %q is not valid option", secBundleFmt)
 	}
