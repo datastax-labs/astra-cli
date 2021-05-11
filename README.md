@@ -15,7 +15,7 @@ Ready for production
 ## How to install - Homebrew for Mac and Linux
 
 * [install homebrew](https://brew.sh/) if you have not
-* `brew tap rsds143/astra-cli && brew install astra-cli`
+* `brew tap rsds143/rsds && brew install astra-cli`
 
 ## How to install - Release Binaries
 
