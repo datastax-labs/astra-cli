@@ -1,0 +1,19 @@
+name: astra-cli
+version: git
+summary: Apache 2.0 licensed DataStax Astra management CLI
+description: |
+    Automates provisioning services in DataStax Astra.
+    Currently supporting AstraDB classic and serverless databases
+confinement: devmode
+base: core18
+parts:
+  astra-cli:
+    plugin: go
+    go-importpath: github.com/rsds143/astra-cli
+    source: .
+    source-type: git
+    build-packages:
+      - gcc
+apps:
+  astra-cli:
+    command: bin/astra-cli
