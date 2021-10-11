@@ -166,7 +166,6 @@ mydb 2c3bc0d6-5e3e-4d77-81c8-d95a35bdc58b ACTIVE
 
 ```
 ./bin/astra-cli db get 2c3bc0d6-5e3e-4d77-81c8-d95a35bdc58b -o json 
-json
 {
   "id": "2c3bc0d6-5e3e-4d77-81c8-d95a35bdc58b",
   "orgId": "changed",
