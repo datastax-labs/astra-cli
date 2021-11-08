@@ -1,4 +1,4 @@
-source = ["./dist/astra-cli-osx-amd_darwin_amd64/astra-cli"]
+source = ["./dist/astra-osx-amd_darwin_amd64/astra"]
 bundle_id = "pro.foundev.astra.cli"
 
 sign {
@@ -6,7 +6,7 @@ sign {
 }
 
 zip {
-  output_path = "./dist/astra-cli-osx-amd64-signed.zip"
+  output_path = "./dist/astra-osx-amd64-signed.zip"
 }
 
 apple_id {

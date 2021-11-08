@@ -16,4 +16,4 @@ parts:
       - gcc
 apps:
   astra-cli:
-    command: bin/astra-cli
+    command: bin/astra
