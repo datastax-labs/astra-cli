@@ -19,6 +19,7 @@ import (
 	"bufio"
 	"encoding/json"
 	"fmt"
+	"io/fs"
 	"os"
 
 	"github.com/rsds143/astra-cli/pkg"
@@ -64,12 +65,41 @@ var loginCmd = &cobra.Command{
 	},
 }
 
+func getTokenFromInput(usageFunc func() error) (string, int, error) {
+	fmt.Print("token:")
+	reader := bufio.NewReader(os.Stdin)
+	var token string
+	var err error
+	tries := 0
+	maxTries := 3
+	for token == "" {
+		if tries == maxTries {
+			break
+		}
+		token, err = reader.ReadString('\n')
+		if err != nil {
+			return "", CriticalError, fmt.Errorf("error reading input %v", err)
+		}
+		if token == "" {
+			fmt.Println("the token was empty try again")
+		} else {
+			return token, 0, nil
+		}
+		tries++
+	}
+	if err := usageFunc(); err != nil {
+		return "", CriticalError, fmt.Errorf("cannot show usage %v", err)
+	}
+	return "", CriticalError, fmt.Errorf("you must enter a token exiting")
+}
+
 func executeLogin(args []string, getHome func() (string, pkg.ConfFiles, error), usageFunc func() error) (int, error) {
 	if clientJSON == "" && clientID == "" && clientName == "" && clientSecret == "" && authToken == "" {
-		if err := usageFunc(); err != nil {
-			return CriticalError, fmt.Errorf("cannot show usage %v", err)
+		token, retcode, err := getTokenFromInput(usageFunc)
+		if err != nil {
+			return retcode, err
 		}
-		return 0, nil
+		authToken = token
 	}
 	confDir, confFiles, err := getHome()
 	if err != nil {
@@ -141,7 +171,8 @@ func executeLoginJSON(args []string, confDir string, confFiles pkg.ConfFiles) (i
 }
 
 func makeConf(confDir, confFile, content string) error {
-	if err := os.MkdirAll(confDir, 0700); err != nil {
+	var rwxPerm fs.FileMode = 0700
+	if err := os.MkdirAll(confDir, rwxPerm); err != nil {
 		return fmt.Errorf("unable to get make config directory with error %s", err)
 	}
 	f, err := os.Create(confFile)
