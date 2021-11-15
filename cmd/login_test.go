@@ -16,10 +16,8 @@
 package cmd
 
 import (
-	"bytes"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"os"
 	"path"
 	"testing"
@@ -277,24 +275,6 @@ func TestLoginHomeError(t *testing.T) {
 	}
 }
 
-func TestLoginUsageError(t *testing.T) {
-	exitCode, err := executeLogin([]string{}, func() (string, pkg.ConfFiles, error) {
-		return "", pkg.ConfFiles{}, fmt.Errorf("big error")
-	}, func() error {
-		return fmt.Errorf("no terminal")
-	})
-	if err == nil {
-		t.Error("expected error")
-	}
-	expected := "cannot show usage no terminal"
-	if err.Error() != expected {
-		t.Errorf("expected '%v' but was '%v'", expected, err.Error())
-	}
-	if exitCode != CriticalError {
-		t.Errorf("unexpected exit code %v", exitCode)
-	}
-}
-
 func TestLoginCmdJsonMissignId(t *testing.T) {
 	clientJSON = `{"clientId":"","clientName":"me@example.com","clientSecret":"6ae15bff-1435-430f-975b-9b3d9914b698"}`
 	defer func() {
@@ -518,31 +498,3 @@ func TestMakeConfWithNonMakeableDir(t *testing.T) {
 	}
 }
 
-func TestLoginShowHelp(t *testing.T) {
-	clientJSON = ""
-	authToken = ""
-	clientName = ""
-	clientSecret = ""
-	clientID = ""
-	originalOut := RootCmd.OutOrStderr()
-	defer func() {
-		RootCmd.SetOut(originalOut)
-		RootCmd.SetArgs([]string{})
-	}()
-	b := bytes.NewBufferString("")
-	RootCmd.SetOut(b)
-	RootCmd.SetArgs([]string{"login"})
-	err := RootCmd.Execute()
-	if err != nil {
-		t.Errorf("unexpected error '%v'", err)
-	}
-	out, err := ioutil.ReadAll(b)
-	if err != nil {
-		t.Fatal(err)
-	}
-	expected := loginCmd.UsageString()
-
-	if string(out) != expected {
-		t.Errorf("expected\n'%q'\nbut was\n'%q'", expected, string(out))
-	}
-}

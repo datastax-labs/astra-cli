@@ -12,6 +12,19 @@ Apache 2.0 licensed Astra Cloud Management CLI
 
 Ready for production
 
+## How to install - install script
+
+* /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/rsds143/astra-cli/main/script/install-astra.sh)"
+* astra login
+
+## How to install - docker
+
+Instead of downloading the binary this trusts that you have docker installed
+
+* make sure docker is installed
+* /bin/bash -c "$(curl -fsSL  https://raw.githubusercontent.com/rsds143/astra-cli/main/script/install-astra-docker.sh)"
+* astra.sh login
+
 ## How to install - Homebrew for Mac and Linux
 
 * [install homebrew](https://brew.sh/) if you have not
