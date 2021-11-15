@@ -37,8 +37,6 @@ fi
 url=https://github.com/rsds143/astra-cli/releases/download/$VERSION/$ARC
 curl -O -L $url
 if [ "$OS" = "darwin" ]; then
-    ls
-    cat astra-cli-osx-x86_64-signed.zip
     unzip $ARC
     sudo mv $EXE /usr/local/bin/$EXE
 else 
