@@ -18,4 +18,4 @@
 
 rm -fr ./bin
 mkdir ./bin
-go build -o bin/astra-cli .
+go build -o bin/astra .

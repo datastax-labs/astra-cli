@@ -51,7 +51,9 @@ func executeResize(args []string, makeClient func() (pkg.Client, error)) error {
 	}
 	id := args[0]
 	capacityUnitRaw := args[1]
-	capacityUnit, err := strconv.ParseInt(capacityUnitRaw, 10, 32)
+	defaultCapacity := 10
+	bits := 32
+	capacityUnit, err := strconv.ParseInt(capacityUnitRaw, defaultCapacity, bits)
 	if err != nil {
 		return &pkg.ParseError{
 			Args: args,

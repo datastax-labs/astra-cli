@@ -33,7 +33,8 @@ var startingAfter string
 var listFmt string
 
 func init() {
-	ListCmd.Flags().IntVarP(&limit, "limit", "l", 10, "limit of databases retrieved")
+	defaultLimit := 10
+	ListCmd.Flags().IntVarP(&limit, "limit", "l", defaultLimit, "limit of databases retrieved")
 	ListCmd.Flags().StringVarP(&include, "include", "i", "", "the type of filter to apply")
 	ListCmd.Flags().StringVarP(&provider, "provider", "p", "", "provider to filter by")
 	ListCmd.Flags().StringVarP(&startingAfter, "startingAfter", "a", "", "timestamp filter, ie only show databases created after this timestamp")

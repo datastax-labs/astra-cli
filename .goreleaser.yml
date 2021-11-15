@@ -5,23 +5,23 @@ before:
     # You may remove this if you don't use go modules.
     - go mod tidy
 builds:
-  - id: astra-cli
+  - id: astra
     goos:
       - windows
       - linux
     goarch:
       - amd64
       - arm64
-  - id: astra-cli-osx-amd
-    binary: astra-cli
+  - id: astra-osx-amd
+    binary: astra
     goos:
       - darwin
     goarch:
       - amd64
     hooks:
       post: gon gon_osx_darwin_amd64.hcl
-  - id: astra-cli-osx-arm
-    binary: astra-cli
+  - id: astra-osx-arm
+    binary: astra
     goos:
       - darwin
     goarch:

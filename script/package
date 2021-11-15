@@ -21,12 +21,12 @@ VERSION=$(git describe --abbrev=0 --tags)
 ORIG=$(git branch --show-current)
 echo "packaging $VERSION$"
 git checkout $VERSION
-GOOS=darwin GOARCH=amd64 go build -o bin/astra-cli .
-tar czvf ./bin/astra-cli-$VERSION-darwin-amd64.tgz ./bin/astra-cli
-GOOS=darwin GOARCH=arm64 go build -o bin/astra-cli .
-tar czvf ./bin/astra-cli-$VERSION-darwin-arm64.tgz ./bin/astra-cli
-GOOS=linux GOARCH=amd64 go build -o bin/astra-cli .
-tar czvf ./bin/astra-cli-$VERSION-linux-amd64.tgz ./bin/astra-cli
-GOOS=linux GOARCH=arm64 go build -o bin/astra-cli .
-tar czvf ./bin/astra-cli-$VERSION-linux-arm64.tgz ./bin/astra-cli
+GOOS=darwin GOARCH=amd64 go build -o bin/astra .
+tar czvf ./bin/astra-$VERSION-darwin-amd64.tgz ./bin/astra
+GOOS=darwin GOARCH=arm64 go build -o bin/astra .
+tar czvf ./bin/astra-$VERSION-darwin-arm64.tgz ./bin/astra
+GOOS=linux GOARCH=amd64 go build -o bin/astra .
+tar czvf ./bin/astra-$VERSION-linux-amd64.tgz ./bin/astra
+GOOS=linux GOARCH=arm64 go build -o bin/astra .
+tar czvf ./bin/astra-$VERSION-linux-arm64.tgz ./bin/astra
 git checkout $ORIG

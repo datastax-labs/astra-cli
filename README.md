@@ -12,6 +12,19 @@ Apache 2.0 licensed Astra Cloud Management CLI
 
 Ready for production
 
+## How to install - install script
+
+* /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/rsds143/astra-cli/main/script/install-astra.sh)"
+* astra login
+
+## How to install - docker
+
+Instead of downloading the binary this trusts that you have docker installed
+
+* make sure docker is installed
+* /bin/bash -c "$(curl -fsSL  https://raw.githubusercontent.com/rsds143/astra-cli/main/script/install-astra-docker.sh)"
+* astra.sh login
+
 ## How to install - Homebrew for Mac and Linux
 
 * [install homebrew](https://brew.sh/) if you have not
@@ -22,13 +35,13 @@ Ready for production
 * download a [release](https://github.com/rsds143/astra-cli/releases)
 * tar zxvf <download>
 * cd <extracted folder>
-* ./astra-cli
+* ./astra
 
 ## How to install - From Source
 
-* Install [Go 1.16](https://golang.org/dl/)
+* Install [Go 1.17](https://golang.org/dl/)
 * run `git clone git@github.com:rsds143/astra-cli.git`
-* run `./scripts/build` or `go build -o ./bin/astra-cli .`
+* run `./scripts/build` or `go build -o ./bin/astra .`
 
 ## How to use
 
@@ -40,7 +53,7 @@ Ready for production
 After creating a token with rights to use the devops api 
 
 ```
-./bin/astra-cli login --token "changed"
+astra login --token "changed"
 Login information saved
 ```
 ### login service account
@@ -48,14 +61,14 @@ Login information saved
 After creating a service account on the Astra page 
 
 ```
-./bin/astra-cli login --id "changed" --name "changed" --secret "changed"
+astra login --id "changed" --name "changed" --secret "changed"
 Login information saved
 ```
 
 ## login service account with json
 
 ```
-./bin/astra-cli login --json '{"clientId":"changed","clientName":"change@me.com","clientSecret":"changed"}'
+astra login --json '{"clientId":"changed","clientName":"change@me.com","clientSecret":"changed"}'
 Login information saved
 
 ```
@@ -63,35 +76,28 @@ Login information saved
 ### creating database
 
 ```
-./bin/astra-cli db create -v --keyspace myks --name mydb 
-2021/02/24 18:23:24 db 2c3bc0d6-5e3e-4d77-81c8-d95a35bdc58b in state PENDING but expected ACTIVE trying again 19 more times
-2021/02/24 18:23:29 db 2c3bc0d6-5e3e-4d77-81c8-d95a35bdc58b in state PENDING but expected ACTIVE trying again 18 more times
-2021/02/24 18:23:35 db 2c3bc0d6-5e3e-4d77-81c8-d95a35bdc58b in state PENDING but expected ACTIVE trying again 17 more times
-2021/02/24 18:23:40 db 2c3bc0d6-5e3e-4d77-81c8-d95a35bdc58b in state PENDING but expected ACTIVE trying again 16 more times
-2021/02/24 18:23:45 db 2c3bc0d6-5e3e-4d77-81c8-d95a35bdc58b in state PENDING but expected ACTIVE trying again 15 more times
-2021/02/24 18:23:50 db 2c3bc0d6-5e3e-4d77-81c8-d95a35bdc58b in state PENDING but expected ACTIVE trying again 14 more times
-2021/02/24 18:23:55 db 2c3bc0d6-5e3e-4d77-81c8-d95a35bdc58b in state PENDING but expected ACTIVE trying again 13 more times
-2021/02/24 18:24:00 db 2c3bc0d6-5e3e-4d77-81c8-d95a35bdc58b in state PENDING but expected ACTIVE trying again 12 more times
+astra db create -v --keyspace myks --name mydb 
+............
 database 2c3bc0d6-5e3e-4d77-81c8-d95a35bdc58b created
 ```
 
 ### get secure connection bundle
 
 ```
-./bin/astra-cli db secBundle 3c577e51-4ff5-4551-86a4-41d475c61822 -d external -l external.zip            
+astra db secBundle 3c577e51-4ff5-4551-86a4-41d475c61822 -d external -l external.zip            
 file external.zip saved 12072 bytes written
-./bin/astra-cli db secBundle 3c577e51-4ff5-4551-86a4-41d475c61822 -d internal -l internal.zip            
+astra db secBundle 3c577e51-4ff5-4551-86a4-41d475c61822 -d internal -l internal.zip            
 file internal.zip saved 12066 bytes written
-./bin/astra-cli db secBundle 3c577e51-4ff5-4551-86a4-41d475c61822 -d proxy-internal -l proxy-internal.zip 
+astra db secBundle 3c577e51-4ff5-4551-86a4-41d475c61822 -d proxy-internal -l proxy-internal.zip 
 file proxy-internal.zip saved 348 bytes written
-./bin/astra-cli db secBundle 3c577e51-4ff5-4551-86a4-41d475c61822 -d proxy-external -l proxy-external.zip 
+astra db secBundle 3c577e51-4ff5-4551-86a4-41d475c61822 -d proxy-external -l proxy-external.zip 
 file proxy-external.zip saved 339 bytes written
 ```
 
 ### get secure connection bundle URLs
 
 ```
-./bin/astra-cli db secBundle 3c577e51-4ff5-4551-86a4-41d475c61822 -o list         
+astra db secBundle 3c577e51-4ff5-4551-86a4-41d475c61822 -o list         
   external bundle: changed
   internal bundle: changed
   external proxy: changed
@@ -101,7 +107,7 @@ file proxy-external.zip saved 339 bytes written
 ### listing databases
 
 ```
-./bin/astra-cli db list                                                             
+astra db list                                                             
 name id                                   status
 mydb 2c3bc0d6-5e3e-4d77-81c8-d95a35bdc58b ACTIVE
 ```
@@ -109,7 +115,7 @@ mydb 2c3bc0d6-5e3e-4d77-81c8-d95a35bdc58b ACTIVE
 ### listing databases in json
 
 ```
-./bin/astra-cli db list -o json
+astra db list -o json
 [
   {
     "id": "2c3bc0d6-5e3e-4d77-81c8-d95a35bdc58b",
@@ -157,7 +163,7 @@ mydb 2c3bc0d6-5e3e-4d77-81c8-d95a35bdc58b ACTIVE
 ### getting database by id
 
 ```
-./bin/astra-cli db get 2c3bc0d6-5e3e-4d77-81c8-d95a35bdc58b
+astra db get 2c3bc0d6-5e3e-4d77-81c8-d95a35bdc58b
 name id                                   status
 mydb 2c3bc0d6-5e3e-4d77-81c8-d95a35bdc58b ACTIVE
 ```
@@ -165,7 +171,7 @@ mydb 2c3bc0d6-5e3e-4d77-81c8-d95a35bdc58b ACTIVE
 ### getting database by id in json
 
 ```
-./bin/astra-cli db get 2c3bc0d6-5e3e-4d77-81c8-d95a35bdc58b -o json 
+astra db get 2c3bc0d6-5e3e-4d77-81c8-d95a35bdc58b -o json 
 {
   "id": "2c3bc0d6-5e3e-4d77-81c8-d95a35bdc58b",
   "orgId": "changed",
@@ -212,49 +218,30 @@ mydb 2c3bc0d6-5e3e-4d77-81c8-d95a35bdc58b ACTIVE
 
 ### parking database
 
-Does not work on serverless
+NOTE: Does not work on serverless
 
 ```
-./bin/astra-cli db park -v 2c3bc0d6-5e3e-4d77-81c8-d95a35bdc58b         
+astra db park -v 2c3bc0d6-5e3e-4d77-81c8-d95a35bdc58b         
 starting to park database 2c3bc0d6-5e3e-4d77-81c8-d95a35bdc58b
-2021/02/24 18:31:26 db 2c3bc0d6-5e3e-4d77-81c8-d95a35bdc58b in state PARKING but expected PARKED trying again 29 more times
-2021/02/24 18:31:56 db 2c3bc0d6-5e3e-4d77-81c8-d95a35bdc58b in state PARKING but expected PARKED trying again 28 more times
-2021/02/24 18:32:26 db 2c3bc0d6-5e3e-4d77-81c8-d95a35bdc58b in state PARKING but expected PARKED trying again 27 more times
-2021/02/24 18:32:57 db 2c3bc0d6-5e3e-4d77-81c8-d95a35bdc58b in state PARKING but expected PARKED trying again 26 more times
-2021/02/24 18:33:27 db 2c3bc0d6-5e3e-4d77-81c8-d95a35bdc58b in state PARKING but expected PARKED trying again 25 more times
+...........
 database 2c3bc0d6-5e3e-4d77-81c8-d95a35bdc58b parked
 ```
 
 ### unparking database
 
-Does not work on serverless
+NOTE: Does not work on serverless
 
 ```
-./bin/astra-cli db unpark -v 2c3bc0d6-5e3e-4d77-81c8-d95a35bdc58b
+astra db unpark -v 2c3bc0d6-5e3e-4d77-81c8-d95a35bdc58b
 starting to unpark database 2c3bc0d6-5e3e-4d77-81c8-d95a35bdc58b
-2021/02/25 08:41:02 db 2c3bc0d6-5e3e-4d77-81c8-d95a35bdc58b in state UNPARKING but expected ACTIVE trying again 59 more times
-2021/02/25 08:41:32 db 2c3bc0d6-5e3e-4d77-81c8-d95a35bdc58b in state UNPARKING but expected ACTIVE trying again 58 more times
-2021/02/25 08:42:02 db 2c3bc0d6-5e3e-4d77-81c8-d95a35bdc58b in state UNPARKING but expected ACTIVE trying again 57 more times
-2021/02/25 08:42:32 db 2c3bc0d6-5e3e-4d77-81c8-d95a35bdc58b in state UNPARKING but expected ACTIVE trying again 56 more times
-2021/02/25 08:43:02 db 2c3bc0d6-5e3e-4d77-81c8-d95a35bdc58b in state UNPARKING but expected ACTIVE trying again 55 more times
-2021/02/25 08:43:32 db 2c3bc0d6-5e3e-4d77-81c8-d95a35bdc58b in state UNPARKING but expected ACTIVE trying again 54 more times
-2021/02/25 08:44:02 db 2c3bc0d6-5e3e-4d77-81c8-d95a35bdc58b in state UNPARKING but expected ACTIVE trying again 53 more times
-2021/02/25 08:44:32 db 2c3bc0d6-5e3e-4d77-81c8-d95a35bdc58b in state UNPARKING but expected ACTIVE trying again 52 more times
-2021/02/25 08:45:03 db 2c3bc0d6-5e3e-4d77-81c8-d95a35bdc58b in state UNPARKING but expected ACTIVE trying again 51 more times
-2021/02/25 08:45:33 db 2c3bc0d6-5e3e-4d77-81c8-d95a35bdc58b in state UNPARKING but expected ACTIVE trying again 50 more times
-2021/02/25 08:46:03 db 2c3bc0d6-5e3e-4d77-81c8-d95a35bdc58b in state UNPARKING but expected ACTIVE trying again 49 more times
-2021/02/25 08:46:33 db 2c3bc0d6-5e3e-4d77-81c8-d95a35bdc58b in state UNPARKING but expected ACTIVE trying again 48 more times
-2021/02/25 08:47:03 db 2c3bc0d6-5e3e-4d77-81c8-d95a35bdc58b in state UNPARKING but expected ACTIVE trying again 47 more times
-2021/02/25 08:47:33 db 2c3bc0d6-5e3e-4d77-81c8-d95a35bdc58b in state UNPARKING but expected ACTIVE trying again 46 more times
-2021/02/25 08:48:03 db 2c3bc0d6-5e3e-4d77-81c8-d95a35bdc58b in state UNPARKING but expected ACTIVE trying again 45 more times
-2021/02/25 08:48:33 db 2c3bc0d6-5e3e-4d77-81c8-d95a35bdc58b in state UNPARKING but expected ACTIVE trying again 44 more times
+...........
 database 2c3bc0d6-5e3e-4d77-81c8-d95a35bdc58b unparked
 ```
 
 ### deleting database
 
 ```
-./bin/astra-cli db delete -v 2c3bc0d6-5e3e-4d77-81c8-d95a35bdc58b
+astra db delete -v 2c3bc0d6-5e3e-4d77-81c8-d95a35bdc58b
 starting to delete database 2c3bc0d6-5e3e-4d77-81c8-d95a35bdc58b
 database 2c3bc0d6-5e3e-4d77-81c8-d95a35bdc58b deleted
 ```
@@ -264,7 +251,7 @@ database 2c3bc0d6-5e3e-4d77-81c8-d95a35bdc58b deleted
 I did not have a paid account to verify this works, but you can see it succesfully starts the process
 
 ```
-./bin/astra-cli db resize -v 72c4d35b-1875-495a-b5f1-97329d90b6c5 2                    
+astra db resize -v 72c4d35b-1875-495a-b5f1-97329d90b6c5 2                    
 unable to unpark '72c4d35b-1875-495a-b5f1-97329d90b6c5' with error expected status code 2xx but had: 400 error was [map[ID:2.000009e+06 message:resizing is not supported for this database tier]]
 ```
 
