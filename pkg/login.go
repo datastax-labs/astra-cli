@@ -19,8 +19,8 @@ import (
 	"fmt"
 	"os"
 
+	astraops "github.com/datastax/astra-client-go/v2/astra"
 	"github.com/rsds143/astra-cli/pkg/env"
-	"github.com/rsds143/astra-devops-sdk-go/astraops"
 )
 
 // LoginService provides interface to implement logins and produce an Client
@@ -30,15 +30,15 @@ type LoginService interface {
 
 // Client is the abstraction for client interactions. Allows alternative db management clients
 type Client interface {
-	CreateDb(astraops.CreateDb) (astraops.Database, error)
+	CreateDb(astraops.DatabaseInfoCreate) (astraops.Database, error)
 	Terminate(string, bool) error
 	FindDb(string) (astraops.Database, error)
 	ListDb(string, string, string, int32) ([]astraops.Database, error)
 	Park(string) error
 	Unpark(string) error
 	Resize(string, int32) error
-	GetSecureBundle(string) (astraops.SecureBundle, error)
-	GetTierInfo() ([]astraops.TierInfo, error)
+	GetSecureBundle(string) (astraops.CredsURL, error)
+	GetTierInfo() ([]astraops.AvailableRegionCombination, error)
 }
 
 // Creds knows how handle and store credentials
@@ -54,34 +54,34 @@ func (c *Creds) Login() (Client, error) {
 	}
 	confDir, confFile, err := GetHome(getHome)
 	if err != nil {
-		return &astraops.AuthenticatedClient{}, fmt.Errorf("unable to read conf dir with error '%v'", err)
+		return &AuthenticatedClient{}, fmt.Errorf("unable to read conf dir with error '%v'", err)
 	}
 	hasToken, err := confFile.HasToken()
 	if err != nil {
-		return &astraops.AuthenticatedClient{}, fmt.Errorf("unable to read token file '%v' with error '%v'", confFile.TokenPath, err)
+		return &AuthenticatedClient{}, fmt.Errorf("unable to read token file '%v' with error '%v'", confFile.TokenPath, err)
 	}
-	var client *astraops.AuthenticatedClient
+	var client *AuthenticatedClient
 	if hasToken {
 		token, err := ReadToken(confFile.TokenPath)
 		if err != nil {
-			return &astraops.AuthenticatedClient{}, fmt.Errorf("found token at '%v' but unable to read token with error '%v'", confFile.TokenPath, err)
+			return &AuthenticatedClient{}, fmt.Errorf("found token at '%v' but unable to read token with error '%v'", confFile.TokenPath, err)
 		}
-		return astraops.AuthenticateToken(token, env.Verbose), nil
+		return AuthenticateToken(token, env.Verbose), nil
 	}
 	hasSa, err := confFile.HasServiceAccount()
 	if err != nil {
-		return &astraops.AuthenticatedClient{}, fmt.Errorf("unable to read service account file '%v' with error '%v'", confFile.SaPath, err)
+		return &AuthenticatedClient{}, fmt.Errorf("unable to read service account file '%v' with error '%v'", confFile.SaPath, err)
 	}
 	if !hasSa {
-		return &astraops.AuthenticatedClient{}, fmt.Errorf("unable to access any file for directory `%v`, run astra-cli login first", confDir)
+		return &AuthenticatedClient{}, fmt.Errorf("unable to access any file for directory `%v`, run astra-cli login first", confDir)
 	}
 	clientInfo, err := ReadLogin(confFile.SaPath)
 	if err != nil {
-		return &astraops.AuthenticatedClient{}, err
+		return &AuthenticatedClient{}, err
 	}
 	client, err = astraops.Authenticate(clientInfo, env.Verbose)
 	if err != nil {
-		return &astraops.AuthenticatedClient{}, fmt.Errorf("authenticate failed with error %v", err)
+		return &AuthenticatedClient{}, fmt.Errorf("authenticate failed with error %v", err)
 	}
 	return client, nil
 }

@@ -20,9 +20,10 @@ import (
 	"fmt"
 	"os"
 
+	astraops "github.com/datastax/astra-client-go/v2/astra"
 	"github.com/rsds143/astra-cli/pkg"
 	"github.com/rsds143/astra-cli/pkg/httputils"
-	"github.com/rsds143/astra-devops-sdk-go/astraops"
+
 	"github.com/spf13/cobra"
 )
 
@@ -59,7 +60,7 @@ func executeSecBundle(args []string, login func() (pkg.Client, error)) (string, 
 		return "", fmt.Errorf("unable to login with error %v", err)
 	}
 	id := args[0]
-	var secBundle astraops.SecureBundle
+	var secBundle astraops.CredsURL
 	if secBundle, err = client.GetSecureBundle(id); err != nil {
 		return "", fmt.Errorf("unable to get '%s' with error %v", id, err)
 	}
@@ -70,11 +71,11 @@ func executeSecBundle(args []string, login func() (pkg.Client, error)) (string, 
 		case "external":
 			urlToDownload = secBundle.DownloadURL
 		case "internal":
-			urlToDownload = secBundle.DownloadURLInternal
+			urlToDownload = *secBundle.DownloadURLInternal
 		case "proxy-external":
-			urlToDownload = secBundle.DownloadURLMigrationProxy
+			urlToDownload = *secBundle.DownloadURLMigrationProxy
 		case "proxy-internal":
-			urlToDownload = secBundle.DownloadURLMigrationProxyInternal
+			urlToDownload = *secBundle.DownloadURLMigrationProxyInternal
 		default:
 			return "", fmt.Errorf("invalid download type %s passed. valid options are 'external', 'internal', 'proxy-external', 'proxy-internal'", secBundleDownloadType)
 		}
@@ -95,7 +96,7 @@ func executeSecBundle(args []string, login func() (pkg.Client, error)) (string, 
 		internal bundle: %s
 		external proxy: %s
 		internal proxy: %s
-		`, secBundle.DownloadURL, secBundle.DownloadURLInternal, secBundle.DownloadURLMigrationProxy, secBundle.DownloadURLMigrationProxyInternal), nil
+		`, secBundle.DownloadURL, *secBundle.DownloadURLInternal, *secBundle.DownloadURLMigrationProxy, *secBundle.DownloadURLMigrationProxyInternal), nil
 	default:
 		return "", fmt.Errorf("-o %q is not valid option", secBundleFmt)
 	}

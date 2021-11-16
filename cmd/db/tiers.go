@@ -21,8 +21,9 @@ import (
 	"fmt"
 	"os"
 
+	astraops "github.com/datastax/astra-client-go/v2/astra"
 	"github.com/rsds143/astra-cli/pkg"
-	"github.com/rsds143/astra-devops-sdk-go/astraops"
+
 	"github.com/spf13/cobra"
 )
 
@@ -49,7 +50,7 @@ var TiersCmd = &cobra.Command{
 }
 
 func executeTiers(login func() (pkg.Client, error)) (string, error) {
-	var tiers []astraops.TierInfo
+	var tiers []astraops.AvailableRegionCombination
 	client, err := login()
 	if err != nil {
 		return "", fmt.Errorf("unable to login with error %v", err)
@@ -62,12 +63,9 @@ func executeTiers(login func() (pkg.Client, error)) (string, error) {
 		var rows [][]string
 		rows = append(rows, []string{"name", "cloud", "region", "db (used)/(limit)", "cap (used)/(limit)", "cost per month", "cost per minute"})
 		for _, tier := range tiers {
-			var costMonthRaw float64
-			var costMinRaw float64
-			if tier.Cost != nil {
-				costMonthRaw = tier.Cost.CostPerMonthCents
-				costMinRaw = tier.Cost.CostPerMinCents
-			}
+			var costMonthRaw float64 = *tier.Cost.CostPerMonthCents
+			var costMinRaw float64 = *tier.Cost.CostPerMinCents
+
 			divisor := 100.0
 			var costMonth float64
 			if costMonthRaw > 0.0 {
