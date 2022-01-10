@@ -19,7 +19,7 @@ import (
 	"errors"
 	"testing"
 
-	"github.com/rsds143/astra-devops-sdk-go/astraops"
+	astraops "github.com/datastax/astra-client-go/v2/astra"
 )
 
 func TestGetError(t *testing.T) {
@@ -51,24 +51,24 @@ func TestGetError(t *testing.T) {
 func TestGetDB(t *testing.T) {
 	client := &MockClient{
 		Databases: []astraops.Database{
-			{ID: "1"},
-			{ID: "2"},
-			{ID: "3"},
+			{Id: "1"},
+			{Id: "2"},
+			{Id: "3"},
 		},
 	}
-	id := client.getDb().ID
+	id := client.getDb().Id
 	if id != "1" {
 		t.Errorf("expected '1' but was '%v'", id)
 	}
-	id = client.getDb().ID
+	id = client.getDb().Id
 	if id != "2" {
 		t.Errorf("expected '2' but was '%v'", id)
 	}
-	id = client.getDb().ID
+	id = client.getDb().Id
 	if id != "3" {
 		t.Errorf("expected '3' but was '%v'", id)
 	}
-	id = client.getDb().ID
+	id = client.getDb().Id
 	if id != "" {
 		t.Errorf("expected '' but was '%v'", id)
 	}
@@ -122,7 +122,7 @@ func TestTerminate(t *testing.T) {
 func TestGetSecurteBundleId(t *testing.T) {
 	url := "myurl"
 	client := &MockClient{
-		Bundle: astraops.SecureBundle{
+		Bundle: astraops.CredsURL{
 			DownloadURL: url,
 		},
 	}
@@ -147,16 +147,16 @@ func TestFindDb(t *testing.T) {
 
 	client := &MockClient{
 		Databases: []astraops.Database{
-			{ID: id},
-			{ID: "fakeid"},
+			{Id: id},
+			{Id: "fakeid"},
 		},
 	}
 	db, err := client.FindDb(id)
 	if err != nil {
 		t.Fatal("unexpected error")
 	}
-	if db.ID != id {
-		t.Errorf("expected '%v' but was '%v'", id, db.ID)
+	if db.Id != id {
+		t.Errorf("expected '%v' but was '%v'", id, db.Id)
 	}
 	if client.Call(0) != id {
 		t.Errorf("expected '%v' but was '%v'", id, client.Call(0))
@@ -171,21 +171,21 @@ func TestCreateDb(t *testing.T) {
 
 	client := &MockClient{
 		Databases: []astraops.Database{
-			{ID: id},
-			{ID: "fakeid"},
+			{Id: id},
+			{Id: "fakeid"},
 		},
 	}
-	db, err := client.CreateDb(astraops.CreateDb{
+	db, err := client.CreateDb(astraops.DatabaseInfoCreate{
 		Name: "myname",
 	})
 	if err != nil {
 		t.Fatal("unexpected error")
 	}
-	if db.ID != id {
-		t.Errorf("expected '%v' but was '%v'", id, db.ID)
+	if db.Id != id {
+		t.Errorf("expected '%v' but was '%v'", id, db.Id)
 	}
-	if client.Call(0).(astraops.CreateDb).Name != "myname" {
-		t.Errorf("expected '%v' but was '%v'", "myname", client.Call(0).(astraops.CreateDb).Name)
+	if client.Call(0).(astraops.DatabaseInfoCreate).Name != "myname" {
+		t.Errorf("expected '%v' but was '%v'", "myname", client.Call(0).(astraops.DatabaseInfoCreate).Name)
 	}
 	if len(client.Calls()) != 1 {
 		t.Errorf("expected '%v' but was '%v'", 1, len(client.Calls()))
@@ -214,7 +214,7 @@ func TestResize(t *testing.T) {
 
 func TestTiers(t *testing.T) {
 	client := &MockClient{
-		Tiers: []astraops.TierInfo{
+		Tiers: []astraops.AvailableRegionCombination{
 			{Tier: "abc"},
 		},
 	}
@@ -241,8 +241,8 @@ func TestListdDb(t *testing.T) {
 	var limit int32 = 1000
 	client := &MockClient{
 		Databases: []astraops.Database{
-			{ID: id1},
-			{ID: id2},
+			{Id: id1},
+			{Id: id2},
 		},
 	}
 	dbs, err := client.ListDb(include, provider, starting, limit)

@@ -21,8 +21,9 @@ import (
 	"fmt"
 	"os"
 
+	astraops "github.com/datastax/astra-client-go/v2/astra"
 	"github.com/rsds143/astra-cli/pkg"
-	"github.com/rsds143/astra-devops-sdk-go/astraops"
+
 	"github.com/spf13/cobra"
 )
 
@@ -71,7 +72,7 @@ func executeList(login func() (pkg.Client, error)) (string, error) {
 		var rows [][]string
 		rows = append(rows, []string{"name", "id", "status"})
 		for _, db := range dbs {
-			rows = append(rows, []string{db.Info.Name, db.ID, string(db.Status)})
+			rows = append(rows, []string{*db.Info.Name, db.Id, string(db.Status)})
 		}
 		var out bytes.Buffer
 		err = pkg.WriteRows(&out, rows)

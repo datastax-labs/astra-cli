@@ -23,7 +23,7 @@ import (
 	"os"
 
 	"github.com/rsds143/astra-cli/pkg"
-	"github.com/rsds143/astra-devops-sdk-go/astraops"
+
 	"github.com/spf13/cobra"
 )
 
@@ -141,7 +141,7 @@ func executeLogin(args []string, getHome func() (string, pkg.ConfFiles, error), 
 }
 
 func executeLoginJSON(args []string, confDir string, confFiles pkg.ConfFiles) (int, error) {
-	var clientInfo astraops.ClientInfo
+	var clientInfo pkg.ClientInfo
 	err := json.Unmarshal([]byte(clientJSON), &clientInfo)
 	if err != nil {
 		return JSONError, fmt.Errorf("unable to serialize the json into a valid login due to error %s", err)

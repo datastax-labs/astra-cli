@@ -15,7 +15,7 @@
 // Package test is for test utilies and mocks
 package test
 
-import "github.com/rsds143/astra-devops-sdk-go/astraops"
+import astraops "github.com/datastax/astra-client-go/v2/astra"
 
 // LoginError is a pretty common error message
 const LoginError = "unable to login with error no db"
@@ -25,8 +25,8 @@ type MockClient struct {
 	ErrorQueue []error
 	calls      []interface{}
 	Databases  []astraops.Database
-	Tiers      []astraops.TierInfo
-	Bundle     astraops.SecureBundle
+	Tiers      []astraops.AvailableRegionCombination
+	Bundle     astraops.CredsURL
 }
 
 // getError pops the next error stored off the stack
@@ -61,7 +61,7 @@ func (c *MockClient) Calls() []interface{} {
 }
 
 // CreateDb returns the next error and the next db created
-func (c *MockClient) CreateDb(db astraops.CreateDb) (astraops.Database, error) {
+func (c *MockClient) CreateDb(db astraops.DatabaseInfoCreate) (astraops.Database, error) {
 	c.calls = append(c.calls, db)
 	return c.getDb(), c.getError()
 }
@@ -108,12 +108,12 @@ func (c *MockClient) Resize(id string, size int32) error {
 }
 
 // GetSecureBundle returns the next error, the secured bundle stored, and the id call is stored
-func (c *MockClient) GetSecureBundle(id string) (astraops.SecureBundle, error) {
+func (c *MockClient) GetSecureBundle(id string) (astraops.CredsURL, error) {
 	c.calls = append(c.calls, id)
 	return c.Bundle, c.getError()
 }
 
 // GetTierInfo returns the next error, and the tierinfo objects stored
-func (c *MockClient) GetTierInfo() ([]astraops.TierInfo, error) {
+func (c *MockClient) GetTierInfo() ([]astraops.AvailableRegionCombination, error) {
 	return c.Tiers, c.getError()
 }

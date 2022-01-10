@@ -19,8 +19,8 @@ import (
 	"fmt"
 	"os"
 
+	astraops "github.com/datastax/astra-client-go/v2/astra"
 	"github.com/rsds143/astra-cli/pkg"
-	"github.com/rsds143/astra-devops-sdk-go/astraops"
 	"github.com/spf13/cobra"
 )
 
@@ -64,22 +64,20 @@ func executeCreate(makeClient func() (pkg.Client, error)) error {
 	if err != nil {
 		return fmt.Errorf("unable to login with error %v", err)
 	}
-	capacity := int32(createDbCapacityUnit)
-	createDb := astraops.CreateDb{
+	createDb := astraops.DatabaseInfoCreate{
 		Name:          createDbName,
 		Keyspace:      createDbKeyspace,
-		CapacityUnits: capacity,
+		CapacityUnits: createDbCapacityUnit,
 		Region:        createDbRegion,
-		User:          createDbUser,
-		Password:      createDbPassword,
-		Tier:          createDbTier,
-		CloudProvider: createDbCloudProvider,
+		User:          &createDbUser,
+		Password:      &createDbPassword,
+		Tier:          astraops.Tier(createDbTier),
+		CloudProvider: astraops.CloudProvider(createDbCloudProvider),
 	}
 	db, err := client.CreateDb(createDb)
 	if err != nil {
 		return fmt.Errorf("unable to create '%v' with error %v", createDb, err)
 	}
-	id := db.ID
-	fmt.Printf("database %v created\n", id)
+	fmt.Printf("database %v created\n", db.Id)
 	return nil
 }

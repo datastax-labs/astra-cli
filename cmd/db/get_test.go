@@ -21,16 +21,16 @@ import (
 	"strings"
 	"testing"
 
+	astraops "github.com/datastax/astra-client-go/v2/astra"
 	"github.com/rsds143/astra-cli/pkg"
 	tests "github.com/rsds143/astra-cli/pkg/tests"
-	"github.com/rsds143/astra-devops-sdk-go/astraops"
 )
 
 func TestGet(t *testing.T) {
 	getFmt = pkg.JSONFormat
 	dbs := []astraops.Database{
-		{ID: "1"},
-		{ID: "2"},
+		{Id: "1"},
+		{Id: "2"},
 	}
 	jsonTxt, err := executeGet([]string{"1"}, func() (pkg.Client, error) {
 		return &tests.MockClient{
@@ -45,8 +45,8 @@ func TestGet(t *testing.T) {
 	if err != nil {
 		t.Fatalf("unexpected error with json %v with text %v", err, jsonTxt)
 	}
-	if fromServer.ID != dbs[0].ID {
-		t.Errorf("expected '%v' but was '%v'", dbs[0].ID, fromServer.ID)
+	if fromServer.Id != dbs[0].Id {
+		t.Errorf("expected '%v' but was '%v'", dbs[0].Id, fromServer.Id)
 	}
 }
 
@@ -96,18 +96,18 @@ func TestGetText(t *testing.T) {
 	getFmt = pkg.TextFormat
 	dbs := []astraops.Database{
 		{
-			ID: "1",
+			Id: "1",
 			Info: astraops.DatabaseInfo{
-				Name: "A",
+				Name: astraops.StringPtr("A"),
 			},
-			Status: astraops.ACTIVE,
+			Status: astraops.StatusEnumACTIVE,
 		},
 		{
-			ID: "2",
+			Id: "2",
 			Info: astraops.DatabaseInfo{
-				Name: "B",
+				Name: astraops.StringPtr("B"),
 			},
-			Status: astraops.TERMINATING,
+			Status: astraops.StatusEnumTERMINATING,
 		},
 	}
 	txt, err := executeGet([]string{"1"}, func() (pkg.Client, error) {

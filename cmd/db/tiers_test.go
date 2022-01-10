@@ -22,22 +22,22 @@ import (
 	"strings"
 	"testing"
 
+	astraops "github.com/datastax/astra-client-go/v2/astra"
 	"github.com/rsds143/astra-cli/pkg"
 	tests "github.com/rsds143/astra-cli/pkg/tests"
-	"github.com/rsds143/astra-devops-sdk-go/astraops"
 )
 
 func TestTiers(t *testing.T) {
 	tiersFmt = "json"
-	tier1 := astraops.TierInfo{
+	tier1 := astraops.AvailableRegionCombination{
 		Tier: "abd",
 	}
-	tier2 := astraops.TierInfo{
+	tier2 := astraops.AvailableRegionCombination{
 		Tier: "xyz",
 	}
 	jsonTxt, err := executeTiers(func() (pkg.Client, error) {
 		return &tests.MockClient{
-			Tiers: []astraops.TierInfo{
+			Tiers: []astraops.AvailableRegionCombination{
 				tier1,
 				tier2,
 			},
@@ -46,12 +46,12 @@ func TestTiers(t *testing.T) {
 	if err != nil {
 		t.Fatalf("unexpected error %v", err)
 	}
-	var fromServer []astraops.TierInfo
+	var fromServer []astraops.AvailableRegionCombination
 	err = json.Unmarshal([]byte(jsonTxt), &fromServer)
 	if err != nil {
 		t.Fatalf("unexpected error with json %v", err)
 	}
-	expected := []astraops.TierInfo{
+	expected := []astraops.AvailableRegionCombination{
 		tier1,
 		tier2,
 	}
@@ -62,33 +62,37 @@ func TestTiers(t *testing.T) {
 
 func TestTiersText(t *testing.T) {
 	tiersFmt = "text"
-	tier1 := astraops.TierInfo{
+	var costPerMonthCents = 10.0
+	var costPerMinCents = 1.0
+	tier1 := astraops.AvailableRegionCombination{
 		Tier:               "tier1",
 		CloudProvider:      "cloud1",
 		Region:             "region1",
 		DatabaseCountUsed:  1,
 		DatabaseCountLimit: 1,
-		Cost: &astraops.Costs{
-			CostPerMonthCents: 10,
-			CostPerMinCents:   1,
+		Cost: astraops.Costs{
+			CostPerMonthCents: &costPerMonthCents,
+			CostPerMinCents:   &costPerMinCents,
 		},
 		CapacityUnitsUsed:  1,
 		CapacityUnitsLimit: 1,
 	}
-	tier2 := astraops.TierInfo{
+	var costPerMonthCents2 = 20.0
+	var costPerMinCents2 = 2.0
+	tier2 := astraops.AvailableRegionCombination{
 		Tier:          "tier2",
 		CloudProvider: "cloud2",
 		Region:        "region2",
-		Cost: &astraops.Costs{
-			CostPerMonthCents: 20,
-			CostPerMinCents:   2,
+		Cost: astraops.Costs{
+			CostPerMonthCents: &costPerMonthCents2,
+			CostPerMinCents:   &costPerMinCents2,
 		},
 		CapacityUnitsUsed:  2,
 		CapacityUnitsLimit: 2,
 	}
 	msg, err := executeTiers(func() (pkg.Client, error) {
 		return &tests.MockClient{
-			Tiers: []astraops.TierInfo{
+			Tiers: []astraops.AvailableRegionCombination{
 				tier1,
 				tier2,
 			},
@@ -109,7 +113,7 @@ func TestTiersText(t *testing.T) {
 
 func TestTiersTextWithNoCost(t *testing.T) {
 	tiersFmt = "text"
-	tier1 := astraops.TierInfo{
+	tier1 := astraops.AvailableRegionCombination{
 		Tier:               "tier1",
 		CloudProvider:      "cloud1",
 		Region:             "region1",
@@ -118,7 +122,7 @@ func TestTiersTextWithNoCost(t *testing.T) {
 		CapacityUnitsUsed:  1,
 		CapacityUnitsLimit: 1,
 	}
-	tier2 := astraops.TierInfo{
+	tier2 := astraops.AvailableRegionCombination{
 		Tier:               "tier2",
 		CloudProvider:      "cloud2",
 		Region:             "region2",
@@ -127,7 +131,7 @@ func TestTiersTextWithNoCost(t *testing.T) {
 	}
 	msg, err := executeTiers(func() (pkg.Client, error) {
 		return &tests.MockClient{
-			Tiers: []astraops.TierInfo{
+			Tiers: []astraops.AvailableRegionCombination{
 				tier1,
 				tier2,
 			},

@@ -22,9 +22,14 @@ import (
 	"os"
 	"path"
 	"strings"
-
-	"github.com/rsds143/astra-devops-sdk-go/astraops"
 )
+
+// ClientInfo provides access to
+type ClientInfo struct {
+	ClientSecret string
+	ClientName   string
+	ClientID     string
+}
 
 // ConfFiles supports both formats of credentials and will say if the token one is present
 type ConfFiles struct {
@@ -101,10 +106,10 @@ func ReadToken(tokenFile string) (string, error) {
 }
 
 // ReadLogin retrieves the login from the specified json file
-func ReadLogin(saJSONFile string) (astraops.ClientInfo, error) {
+func ReadLogin(saJSONFile string) (ClientInfo, error) {
 	f, err := os.Open(saJSONFile)
 	if err != nil {
-		return astraops.ClientInfo{}, &FileNotFoundError{
+		return ClientInfo{}, &FileNotFoundError{
 			Path: saJSONFile,
 			Err:  fmt.Errorf("unable to read login file with error %w", err),
 		}
@@ -116,24 +121,24 @@ func ReadLogin(saJSONFile string) (astraops.ClientInfo, error) {
 	}()
 	b, err := io.ReadAll(f)
 	if err != nil {
-		return astraops.ClientInfo{}, fmt.Errorf("unable to read login file %s with error %w", saJSONFile, err)
+		return ClientInfo{}, fmt.Errorf("unable to read login file %s with error %w", saJSONFile, err)
 	}
-	var clientInfo astraops.ClientInfo
+	var clientInfo ClientInfo
 	err = json.Unmarshal(b, &clientInfo)
 	if err != nil {
-		return astraops.ClientInfo{}, &JSONParseError{
+		return ClientInfo{}, &JSONParseError{
 			Original: string(b),
 			Err:      fmt.Errorf("unable to parse json from login file %s with error %s", saJSONFile, err),
 		}
 	}
 	if clientInfo.ClientID == "" {
-		return astraops.ClientInfo{}, fmt.Errorf("Invalid service account: Client ID for service account is empty for file '%v'", saJSONFile)
+		return ClientInfo{}, fmt.Errorf("Invalid service account: Client ID for service account is empty for file '%v'", saJSONFile)
 	}
 	if clientInfo.ClientName == "" {
-		return astraops.ClientInfo{}, fmt.Errorf("Invalid service account: Client name for service account is empty for file '%v'", saJSONFile)
+		return ClientInfo{}, fmt.Errorf("Invalid service account: Client name for service account is empty for file '%v'", saJSONFile)
 	}
 	if clientInfo.ClientSecret == "" {
-		return astraops.ClientInfo{}, fmt.Errorf("Invalid service account: Client secret for service account is empty for file '%v'", saJSONFile)
+		return ClientInfo{}, fmt.Errorf("Invalid service account: Client secret for service account is empty for file '%v'", saJSONFile)
 	}
 	return clientInfo, err
 }
