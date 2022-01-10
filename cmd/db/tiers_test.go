@@ -62,8 +62,8 @@ func TestTiers(t *testing.T) {
 
 func TestTiersText(t *testing.T) {
 	tiersFmt = "text"
-	var costPerMonthCents float64 = 10.0
-	var costPerMinCents float64 = 1.0
+	var costPerMonthCents = 10.0
+	var costPerMinCents = 1.0
 	tier1 := astraops.AvailableRegionCombination{
 		Tier:               "tier1",
 		CloudProvider:      "cloud1",
@@ -77,8 +77,8 @@ func TestTiersText(t *testing.T) {
 		CapacityUnitsUsed:  1,
 		CapacityUnitsLimit: 1,
 	}
-	var costPerMonthCents2 float64 = 20.0
-	var costPerMinCents2 float64 = 2.0
+	var costPerMonthCents2 = 20.0
+	var costPerMinCents2 = 2.0
 	tier2 := astraops.AvailableRegionCombination{
 		Tier:          "tier2",
 		CloudProvider: "cloud2",

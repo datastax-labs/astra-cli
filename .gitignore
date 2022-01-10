@@ -18,3 +18,8 @@ bin/
 .DS_Store
 
 dist/
+
+.vagrant
+
+*.swp
+Vagrantfile

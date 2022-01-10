@@ -66,7 +66,7 @@ func (c *Creds) Login() (Client, error) {
 		if err != nil {
 			return &AuthenticatedClient{}, fmt.Errorf("found token at '%v' but unable to read token with error '%v'", confFile.TokenPath, err)
 		}
-		return AuthenticateToken(token, env.Verbose), nil
+		return AuthenticateToken(token, env.Verbose)
 	}
 	hasSa, err := confFile.HasServiceAccount()
 	if err != nil {
@@ -79,7 +79,7 @@ func (c *Creds) Login() (Client, error) {
 	if err != nil {
 		return &AuthenticatedClient{}, err
 	}
-	client, err = astraops.Authenticate(clientInfo, env.Verbose)
+	client, err = Authenticate(clientInfo, env.Verbose)
 	if err != nil {
 		return &AuthenticatedClient{}, fmt.Errorf("authenticate failed with error %v", err)
 	}

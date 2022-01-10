@@ -48,13 +48,14 @@ func TestSecBundle(t *testing.T) {
 	if err != nil {
 		t.Fatalf("unexpected error %v", err)
 	}
-	var fromServer astraops.CredsURL
-	err = json.Unmarshal([]byte(jsonTxt), &fromServer)
+	// after we went to the newer api with it's heavy use of pointers we lost easy comparison, here I convert
+	// the struct into json text for comparison
+	bundleTxt, err := json.MarshalIndent(bundle, "", "  ")
 	if err != nil {
 		t.Fatalf("unexpected error with json %v", err)
 	}
-	if fromServer != bundle {
-		t.Errorf("expected '%v' but was '%v'", bundle, fromServer)
+	if string(bundleTxt) != jsonTxt {
+		t.Errorf("expected '%v' but was '%v", string(bundleTxt), jsonTxt)
 	}
 }
 

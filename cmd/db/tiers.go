@@ -63,8 +63,14 @@ func executeTiers(login func() (pkg.Client, error)) (string, error) {
 		var rows [][]string
 		rows = append(rows, []string{"name", "cloud", "region", "db (used)/(limit)", "cap (used)/(limit)", "cost per month", "cost per minute"})
 		for _, tier := range tiers {
-			var costMonthRaw float64 = *tier.Cost.CostPerMonthCents
-			var costMinRaw float64 = *tier.Cost.CostPerMinCents
+			var costMonthRaw float64
+			if tier.Cost.CostPerMonthCents != nil {
+				costMonthRaw = *tier.Cost.CostPerMonthCents
+			}
+			var costMinRaw float64
+			if tier.Cost.CostPerMinCents != nil {
+				costMinRaw = *tier.Cost.CostPerMinCents
+			}
 
 			divisor := 100.0
 			var costMonth float64
@@ -76,8 +82,8 @@ func executeTiers(login func() (pkg.Client, error)) (string, error) {
 				costMin = costMinRaw / divisor
 			}
 			rows = append(rows, []string{
-				tier.Tier,
-				tier.CloudProvider,
+				string(tier.Tier),
+				string(tier.CloudProvider),
 				tier.Region,
 				fmt.Sprintf("%v/%v", tier.DatabaseCountUsed, tier.DatabaseCountLimit),
 				fmt.Sprintf("%v/%v", tier.CapacityUnitsUsed, tier.CapacityUnitsLimit),

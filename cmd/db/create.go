@@ -69,10 +69,10 @@ func executeCreate(makeClient func() (pkg.Client, error)) error {
 		Keyspace:      createDbKeyspace,
 		CapacityUnits: createDbCapacityUnit,
 		Region:        createDbRegion,
-		User:          createDbUser,
-		Password:      createDbPassword,
-		Tier:          astraops.DatabaseInfoCreateTier(createDbTier),
-		CloudProvider: astraops.DatabaseInfoCreateCloudProvider(createDbCloudProvider),
+		User:          &createDbUser,
+		Password:      &createDbPassword,
+		Tier:          astraops.Tier(createDbTier),
+		CloudProvider: astraops.CloudProvider(createDbCloudProvider),
 	}
 	db, err := client.CreateDb(createDb)
 	if err != nil {

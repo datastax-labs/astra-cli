@@ -497,4 +497,3 @@ func TestMakeConfWithNonMakeableDir(t *testing.T) {
 		t.Errorf("expected '%v' but was '%v'", expected, err.Error())
 	}
 }
-

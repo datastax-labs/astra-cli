@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
+	"net"
 	"net/http"
 	"os"
 	"strings"
@@ -67,14 +68,97 @@ func FormatErrors(es []Error) string {
 
 // AuthenticatedClient has a token and the methods to query the Astra DevOps API
 type AuthenticatedClient struct {
-	token       string
-	client      *http.Client
-	astraclient *astra.ClientWithResponses
-	ctx         context.Context
-	verbose     bool
+	token          string
+	client         *http.Client
+	astraclient    *astra.ClientWithResponses
+	timeoutSeconds int
+	verbose        bool
+}
+
+func newHTTPClient() *http.Client {
+	expectTimeout := 1
+	defaultTimeout := 10
+	connections := 10
+	return &http.Client{
+		Timeout: time.Duration(defaultTimeout) * time.Second,
+		Transport: &http.Transport{
+			MaxIdleConns:        connections,
+			MaxConnsPerHost:     connections,
+			MaxIdleConnsPerHost: connections,
+			Dial: (&net.Dialer{
+				Timeout:   time.Duration(defaultTimeout) * time.Second,
+				KeepAlive: time.Duration(defaultTimeout) * time.Second,
+			}).Dial,
+			TLSHandshakeTimeout:   time.Duration(defaultTimeout) * time.Second,
+			ResponseHeaderTimeout: time.Duration(defaultTimeout) * time.Second,
+			ExpectContinueTimeout: time.Duration(expectTimeout) * time.Second,
+		},
+	}
+}
+
+func timeoutContext(timeSeconds int) (context.Context, context.CancelFunc) {
+	return context.WithDeadline(
+		context.Background(),
+		time.Now().Add(time.Duration(timeSeconds)*time.Second),
+	)
+}
+
+func AuthenticateToken(token string, verbose bool) (*AuthenticatedClient, error) {
+	astraClient, err := astra.NewClientWithResponses(serviceURL)
+	if err != nil {
+		return &AuthenticatedClient{}, fmt.Errorf("unexpected error setting up devops api client: %v", err)
+	}
+	timeout := 10
+	authenticatedClient := &AuthenticatedClient{
+		verbose:        verbose,
+		timeoutSeconds: timeout,
+		astraclient:    astraClient,
+		client:         newHTTPClient(),
+		token:          fmt.Sprintf("Bearer %s", token),
+	}
+	return authenticatedClient, nil
+}
+
+func Authenticate(clientInfo ClientInfo, verbose bool) (*AuthenticatedClient, error) {
+	timeout := 10
+	tokenInput := astra.AuthenticateServiceAccountTokenJSONRequestBody{
+		ClientId:     clientInfo.ClientID,
+		ClientName:   clientInfo.ClientName,
+		ClientSecret: clientInfo.ClientSecret,
+	}
+	astraClient, err := astra.NewClientWithResponses(serviceURL)
+	if err != nil {
+		return &AuthenticatedClient{}, fmt.Errorf("unexpected error setting up devops api client: %v", err)
+	}
+	ctx, cancel := timeoutContext(timeout)
+	defer cancel()
+	response, err := astraClient.AuthenticateServiceAccountTokenWithResponse(ctx, tokenInput)
+	if err != nil {
+		return &AuthenticatedClient{}, fmt.Errorf("unexpected error logging into devops api client: %v", err)
+	}
+	if response.StatusCode() != http.StatusOK {
+		return &AuthenticatedClient{}, fmt.Errorf("unexpected error logging into devops api client: %v - %v", response.StatusCode(), response.Status())
+	}
+	token := response.JSON200.Token
+	authenticatedClient := &AuthenticatedClient{
+		token:          fmt.Sprintf("Bearer %s", *token),
+		verbose:        verbose,
+		timeoutSeconds: timeout,
+		astraclient:    astraClient,
+		client:         newHTTPClient(),
+	}
+	if err != nil {
+		return &AuthenticatedClient{}, fmt.Errorf("unexpected error authenticating: %v", err)
+	}
+
+	return authenticatedClient, nil
 }
 
 const serviceURL = "https://api.astra.datastax.com/v2/databases"
+
+func (a *AuthenticatedClient) ctx() (context.Context, context.CancelFunc) {
+	return timeoutContext(a.timeoutSeconds)
+}
 
 func (a *AuthenticatedClient) setHeaders(req *http.Request) {
 	req.Header.Set("Accept", "application/json")
@@ -117,9 +201,9 @@ func (a *AuthenticatedClient) WaitUntil(id string, tries int, intervalSeconds in
 // * @param "include" (optional.string) -  Allows filtering so that databases in listed states are returned
 // * @param "provider" (optional.string) -  Allows filtering so that databases from a given provider are returned
 // * @param "startingAfter" (optional.string) -  Optional parameter for pagination purposes. Used as this value for starting retrieving a specific page of results
-// * @param "limit" (optional.int) -  Optional parameter for pagination purposes. Specify the number of items for one page of data
+// * @param "limit" (optional.int32) -  Optional parameter for pagination purposes. Specify the number of items for one page of data
 // @return ([]Database, error)
-func (a *AuthenticatedClient) ListDb(include string, provider string, startingAfter string, limit int) ([]astra.Database, error) {
+func (a *AuthenticatedClient) ListDb(include string, provider string, startingAfter string, limit int32) ([]astra.Database, error) {
 	var params astra.ListDatabasesParams
 	if len(include) > 0 {
 		astraInclude := astra.ListDatabasesParamsInclude(include)
@@ -133,14 +217,17 @@ func (a *AuthenticatedClient) ListDb(include string, provider string, startingAf
 		params.StartingAfter = astra.StringPtr(startingAfter)
 	}
 	if limit > 0 {
-		params.Limit = &limit
+		limitInt := int(limit)
+		params.Limit = &limitInt
 	}
-	dbs, err := a.astraclient.ListDatabasesWithResponse(a.ctx, &params)
+	ctx, cancel := a.ctx()
+	defer cancel()
+	dbs, err := a.astraclient.ListDatabasesWithResponse(ctx, &params)
 	if err != nil {
 		return []astra.Database{}, fmt.Errorf("unexpected error listing databases '%v'", err)
 	}
-	if dbs.StatusCode() != 200 {
-		return []astra.Database{}, readErrorFromResponse(dbs.HTTPResponse, 200)
+	if dbs.StatusCode() != http.StatusOK {
+		return []astra.Database{}, readErrorFromResponse(dbs.HTTPResponse, http.StatusOK)
 	}
 
 	return *dbs.JSON200, nil
@@ -150,15 +237,20 @@ func (a *AuthenticatedClient) ListDb(include string, provider string, startingAf
 // * @param createDb Definition of new database
 // @return (Database, error)
 func (a *AuthenticatedClient) CreateDb(createDb astra.DatabaseInfoCreate) (astra.Database, error) {
-	response, err := a.astraclient.CreateDatabaseWithResponse(a.ctx, astra.CreateDatabaseJSONRequestBody(createDb))
+	ctx, cancel := a.ctx()
+	defer cancel()
+	response, err := a.astraclient.CreateDatabaseWithResponse(ctx, astra.CreateDatabaseJSONRequestBody(createDb))
 	if err != nil {
 		return astra.Database{}, err
 	}
-	if response.StatusCode() != 201 {
-		return astra.Database{}, readErrorFromResponse(response.HTTPResponse, 201)
+	if response.StatusCode() != http.StatusCreated {
+		return astra.Database{}, readErrorFromResponse(response.HTTPResponse, http.StatusCreated)
 	}
-	response.HTTPResponse.Header.Get("location")
-	db, err := a.WaitUntil(id, 30, 30, astra.StatusEnumACTIVE)
+	id := response.HTTPResponse.Header.Get("location")
+
+	tries := 30
+	interval := 30
+	db, err := a.WaitUntil(id, tries, interval, astra.StatusEnumACTIVE)
 	if err != nil {
 		return db, fmt.Errorf("create db failed because '%v'", err)
 	}
@@ -169,12 +261,14 @@ func (a *AuthenticatedClient) CreateDb(createDb astra.DatabaseInfoCreate) (astra
 // * @param databaseID string representation of the database ID
 // @return (Database, error)
 func (a *AuthenticatedClient) FindDb(databaseID string) (astra.Database, error) {
-	dbs, err := a.astraclient.GetDatabaseWithResponse(a.ctx, astra.DatabaseIdParam(databaseID))
+	ctx, cancel := a.ctx()
+	defer cancel()
+	dbs, err := a.astraclient.GetDatabaseWithResponse(ctx, astra.DatabaseIdParam(databaseID))
 	if err != nil {
-		return *&astra.Database{}, fmt.Errorf("failed creating request to find db with id %s with: %w", databaseID, err)
+		return astra.Database{}, fmt.Errorf("failed creating request to find db with id %s with: %w", databaseID, err)
 	}
-	if dbs.StatusCode() != 200 {
-		return *&astra.Database{}, readErrorFromResponse(dbs.HTTPResponse, 200)
+	if dbs.StatusCode() != http.StatusOK {
+		return astra.Database{}, readErrorFromResponse(dbs.HTTPResponse, http.StatusOK)
 	}
 	return *dbs.JSON200, nil
 }
@@ -184,12 +278,14 @@ func (a *AuthenticatedClient) FindDb(databaseID string) (astra.Database, error) 
 // * @param keyspaceName Name of database keyspace
 // @return error
 func (a *AuthenticatedClient) AddKeyspaceToDb(databaseID string, keyspaceName string) error {
-	res, err := a.astraclient.AddKeyspaceWithResponse(a.ctx, astra.DatabaseIdParam(databaseID), astra.KeyspaceNameParam(keyspaceName))
+	ctx, cancel := a.ctx()
+	defer cancel()
+	res, err := a.astraclient.AddKeyspaceWithResponse(ctx, astra.DatabaseIdParam(databaseID), astra.KeyspaceNameParam(keyspaceName))
 	if err != nil {
 		return fmt.Errorf("failed creating request to add keyspace to db with id %s with: %w", databaseID, err)
 	}
-	if res.StatusCode() != 200 {
-		return readErrorFromResponse(res.HTTPResponse, 200)
+	if res.StatusCode() != http.StatusOK {
+		return readErrorFromResponse(res.HTTPResponse, http.StatusOK)
 	}
 	return nil
 }
@@ -199,13 +295,15 @@ func (a *AuthenticatedClient) AddKeyspaceToDb(databaseID string, keyspaceName st
 // * @param databaseID string representation of the database ID
 // @return (SecureBundle, error)
 func (a *AuthenticatedClient) GetSecureBundle(databaseID string) (astra.CredsURL, error) {
-	res, err := a.astraclient.GenerateSecureBundleURLWithResponse(a.ctx, astra.DatabaseIdParam(databaseID))
+	ctx, cancel := a.ctx()
+	defer cancel()
+	res, err := a.astraclient.GenerateSecureBundleURLWithResponse(ctx, astra.DatabaseIdParam(databaseID))
 
 	if err != nil {
 		return astra.CredsURL{}, fmt.Errorf("failed get secure bundle for database id %s with: %w", databaseID, err)
 	}
-	if res.StatusCode() != 200 {
-		return astra.CredsURL{}, readErrorFromResponse(res.HTTPResponse, 200)
+	if res.StatusCode() != http.StatusOK {
+		return astra.CredsURL{}, readErrorFromResponse(res.HTTPResponse, http.StatusOK)
 	}
 	return *res.JSON200, nil
 }
@@ -215,10 +313,13 @@ func (a *AuthenticatedClient) GetSecureBundle(databaseID string) (astra.CredsURL
 // * @param "PreparedStateOnly" -  For internal use only.  Used to safely terminate prepared databases
 // @return error
 func (a *AuthenticatedClient) Terminate(id string, preparedStateOnly bool) error {
-	err := a.TerminateAsync(id, preparedStateOnly)
+	ctx, cancel := a.ctx()
+	defer cancel()
+	res, err := a.astraclient.TerminateDatabase(ctx, astra.DatabaseIdParam(id), nil)
 	if err != nil {
 		return err
 	}
+	closeBody(res)
 	tries := 30
 	intervalSeconds := 10
 	var lastResponse string
@@ -231,16 +332,15 @@ func (a *AuthenticatedClient) Terminate(id string, preparedStateOnly bool) error
 		}
 		a.setHeaders(req)
 		res, err := a.client.Do(req)
-		maybeTrace(req, res, a.trace)
 		if err != nil {
 			return fmt.Errorf("failed get database id %s with: %w", id, err)
 		}
 		defer closeBody(res)
 		lastStatusCode = res.StatusCode
-		if res.StatusCode == 401 {
+		if res.StatusCode == http.StatusUnauthorized {
 			return nil
 		}
-		if res.StatusCode == 200 {
+		if res.StatusCode == http.StatusOK {
 			var db astra.Database
 			err = json.NewDecoder(res.Body).Decode(&db)
 			if err != nil {
@@ -253,15 +353,15 @@ func (a *AuthenticatedClient) Terminate(id string, preparedStateOnly bool) error
 				return nil
 			}
 			if a.verbose {
-				log.Printf("db %s not deleted yet expected status code 401 or a 200 with a db Status of %v or %v but was 200 with a db status of %v. trying again", id, TERMINATED, TERMINATING, db.Status)
+				log.Printf("db %s not deleted yet expected status code 401 or a 200 with a db Status of %v or %v but was 200 with a db status of %v. trying again", id, astra.StatusEnumTERMINATED, astra.StatusEnumTERMINATING, db.Status)
 			} else {
 				log.Printf("waiting")
 			}
 			continue
 		}
-		lastResponse = fmt.Sprintf("%v", readErrorFromResponse(res, 200, 401))
+		lastResponse = fmt.Sprintf("%v", readErrorFromResponse(res, http.StatusOK, http.StatusUnauthorized))
 		if a.verbose {
-			log.Printf("db %s not deleted yet expected status code 401 or a 200 with a db Status of %v or %v but was: %v and error was '%v'. trying again", id, TERMINATED, TERMINATING, res.StatusCode, lastResponse)
+			log.Printf("db %s not deleted yet expected status code 401 or a 200 with a db Status of %v or %v but was: %v and error was '%v'. trying again", id, astra.StatusEnumTERMINATED, astra.StatusEnumTERMINATING, res.StatusCode, lastResponse)
 		} else {
 			log.Printf("waiting")
 		}
@@ -279,13 +379,12 @@ func (a *AuthenticatedClient) ParkAsync(databaseID string) error {
 	}
 	a.setHeaders(req)
 	res, err := a.client.Do(req)
-	maybeTrace(req, res, a.trace)
 	if err != nil {
 		return fmt.Errorf("failed to park database id %s with: %w", databaseID, err)
 	}
 	defer closeBody(res)
-	if res.StatusCode != 202 {
-		return readErrorFromResponse(res, 202)
+	if res.StatusCode != http.StatusAccepted {
+		return readErrorFromResponse(res, http.StatusAccepted)
 	}
 	return nil
 }
@@ -298,7 +397,9 @@ func (a *AuthenticatedClient) Park(databaseID string) error {
 	if err != nil {
 		return fmt.Errorf("park db failed because '%v'", err)
 	}
-	_, err = a.WaitUntil(databaseID, 30, 30, PARKED)
+	tries := 30
+	interval := 30
+	_, err = a.WaitUntil(databaseID, tries, interval, astra.StatusEnumPARKED)
 	if err != nil {
 		return fmt.Errorf("unable to check status for park db because of error '%v'", err)
 	}
@@ -315,13 +416,12 @@ func (a *AuthenticatedClient) UnparkAsync(databaseID string) error {
 	}
 	a.setHeaders(req)
 	res, err := a.client.Do(req)
-	maybeTrace(req, res, a.trace)
 	if err != nil {
 		return fmt.Errorf("failed to unpark database id %s with: %w", databaseID, err)
 	}
 	defer closeBody(res)
-	if res.StatusCode != 202 {
-		return readErrorFromResponse(res, 202)
+	if res.StatusCode != http.StatusAccepted {
+		return readErrorFromResponse(res, http.StatusAccepted)
 	}
 	return nil
 }
@@ -334,7 +434,9 @@ func (a *AuthenticatedClient) Unpark(databaseID string) error {
 	if err != nil {
 		return fmt.Errorf("unpark db failed because '%v'", err)
 	}
-	_, err = a.WaitUntil(databaseID, 60, 30, ACTIVE)
+	tries := 60
+	interval := 30
+	_, err = a.WaitUntil(databaseID, tries, interval, astra.StatusEnumACTIVE)
 	if err != nil {
 		return fmt.Errorf("unable to check status for unpark db because of error '%v'", err)
 	}
@@ -353,12 +455,13 @@ func (a *AuthenticatedClient) Resize(databaseID string, capacityUnits int32) err
 	}
 	a.setHeaders(req)
 	res, err := a.client.Do(req)
-	maybeTrace(req, res, a.trace)
 	if err != nil {
 		return fmt.Errorf("failed to unpark database id %s with: %w", databaseID, err)
 	}
 	defer res.Body.Close()
-	if res.StatusCode > 299 {
+	// treating everything that is not 2xx as failure
+	last200StatusCode := 299
+	if res.StatusCode > last200StatusCode {
 		var resObj ErrorResponse
 		err = json.NewDecoder(res.Body).Decode(&resObj)
 		if err != nil {
@@ -375,15 +478,17 @@ func (a *AuthenticatedClient) Resize(databaseID string, capacityUnits int32) err
 // * @param password string containing password. The specified password will be updated for the specified database user
 // @return error
 func (a *AuthenticatedClient) ResetPassword(databaseID, username, password string) error {
-	res, err := a.astraclient.ResetPasswordWithResponse(a.ctx, astra.DatabaseIdParam(databaseID), astra.ResetPasswordJSONRequestBody{
+	ctx, cancel := a.ctx()
+	defer cancel()
+	res, err := a.astraclient.ResetPasswordWithResponse(ctx, astra.DatabaseIdParam(databaseID), astra.ResetPasswordJSONRequestBody{
 		Username: astra.StringPtr(username),
 		Password: astra.StringPtr(password),
 	})
 	if err != nil {
 		return fmt.Errorf("failed to reset password for database id %s with: %w", databaseID, err)
 	}
-	if res.StatusCode() != 200 {
-		return readErrorFromResponse(res.HTTPResponse, 200)
+	if res.StatusCode() != http.StatusOK {
+		return readErrorFromResponse(res.HTTPResponse, http.StatusOK)
 	}
 	return nil
 }
@@ -391,13 +496,15 @@ func (a *AuthenticatedClient) ResetPassword(databaseID, username, password strin
 // GetTierInfo Returns all supported tier, cloud, region, count, and capacitity combinations
 // @return ([]TierInfo, error)
 func (a *AuthenticatedClient) GetTierInfo() ([]astra.AvailableRegionCombination, error) {
-	res, err := a.astraclient.ListAvailableRegionsWithResponse(a.ctx)
+	ctx, cancel := a.ctx()
+	defer cancel()
+	res, err := a.astraclient.ListAvailableRegionsWithResponse(ctx)
 	if err != nil {
 		return []astra.AvailableRegionCombination{}, fmt.Errorf("failed listing tier info with: %w", err)
 	}
 
-	if res.StatusCode() != 200 {
-		return []astra.AvailableRegionCombination{}, readErrorFromResponse(res.HTTPResponse, 200)
+	if res.StatusCode() != http.StatusOK {
+		return []astra.AvailableRegionCombination{}, readErrorFromResponse(res.HTTPResponse, http.StatusOK)
 	}
 	return *res.JSON200, nil
 }
