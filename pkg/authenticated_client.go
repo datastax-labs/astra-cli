@@ -39,7 +39,7 @@ func readErrorFromResponse(res *http.Response, expectedCodes ...int) error {
 	var resObj ErrorResponse
 	err := json.NewDecoder(res.Body).Decode(&resObj)
 	if err != nil {
-		return fmt.Errorf("unable to decode error response with error: '%v'. status code was %v", err, res.StatusCode)
+		return fmt.Errorf("CRITIAL ERROR unable to decode error response with error: '%v'. status code was %v for request URL %v", err, res.StatusCode, res.Request.URL)
 	}
 	var statusSuffix string
 	if len(expectedCodes) > 0 {
@@ -104,7 +104,13 @@ func timeoutContext(timeSeconds int) (context.Context, context.CancelFunc) {
 }
 
 func AuthenticateToken(token string, verbose bool) (*AuthenticatedClient, error) {
-	astraClient, err := astra.NewClientWithResponses(serviceURL)
+	astraClient, err := astra.NewClientWithResponses(apiURL, func(c *astra.Client) error {
+		c.RequestEditors = append(c.RequestEditors, func(ctx context.Context, req *http.Request) error {
+			req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", token))
+			return nil
+		})
+		return nil
+	})
 	if err != nil {
 		return &AuthenticatedClient{}, fmt.Errorf("unexpected error setting up devops api client: %v", err)
 	}
@@ -126,13 +132,13 @@ func Authenticate(clientInfo ClientInfo, verbose bool) (*AuthenticatedClient, er
 		ClientName:   clientInfo.ClientName,
 		ClientSecret: clientInfo.ClientSecret,
 	}
-	astraClient, err := astra.NewClientWithResponses(serviceURL)
+	astraClientTmp, err := astra.NewClientWithResponses(apiURL)
 	if err != nil {
 		return &AuthenticatedClient{}, fmt.Errorf("unexpected error setting up devops api client: %v", err)
 	}
 	ctx, cancel := timeoutContext(timeout)
 	defer cancel()
-	response, err := astraClient.AuthenticateServiceAccountTokenWithResponse(ctx, tokenInput)
+	response, err := astraClientTmp.AuthenticateServiceAccountTokenWithResponse(ctx, tokenInput)
 	if err != nil {
 		return &AuthenticatedClient{}, fmt.Errorf("unexpected error logging into devops api client: %v", err)
 	}
@@ -140,6 +146,17 @@ func Authenticate(clientInfo ClientInfo, verbose bool) (*AuthenticatedClient, er
 		return &AuthenticatedClient{}, fmt.Errorf("unexpected error logging into devops api client: %v - %v", response.StatusCode(), response.Status())
 	}
 	token := response.JSON200.Token
+	astraClient, err := astra.NewClientWithResponses(apiURL, func(c *astra.Client) error {
+		c.RequestEditors = append(c.RequestEditors, func(ctx context.Context, req *http.Request) error {
+			req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", *token))
+			return nil
+		})
+		return nil
+	})
+
+	if err != nil {
+		return &AuthenticatedClient{}, fmt.Errorf("unexpected error logging into devops api client: %v", err)
+	}
 	authenticatedClient := &AuthenticatedClient{
 		token:          fmt.Sprintf("Bearer %s", *token),
 		verbose:        verbose,
@@ -154,7 +171,8 @@ func Authenticate(clientInfo ClientInfo, verbose bool) (*AuthenticatedClient, er
 	return authenticatedClient, nil
 }
 
-const serviceURL = "https://api.astra.datastax.com/v2/databases"
+const apiURL = "https://api.astra.datastax.com"
+const dbURL = "https://api.astra.datastax.com/v2/databases"
 
 func (a *AuthenticatedClient) ctx() (context.Context, context.CancelFunc) {
 	return timeoutContext(a.timeoutSeconds)
@@ -315,7 +333,9 @@ func (a *AuthenticatedClient) GetSecureBundle(databaseID string) (astra.CredsURL
 func (a *AuthenticatedClient) Terminate(id string, preparedStateOnly bool) error {
 	ctx, cancel := a.ctx()
 	defer cancel()
-	res, err := a.astraclient.TerminateDatabase(ctx, astra.DatabaseIdParam(id), nil)
+	res, err := a.astraclient.TerminateDatabase(ctx, astra.DatabaseIdParam(id), &astra.TerminateDatabaseParams{
+		PreparedStateOnly: &preparedStateOnly,
+	})
 	if err != nil {
 		return err
 	}
@@ -326,7 +346,7 @@ func (a *AuthenticatedClient) Terminate(id string, preparedStateOnly bool) error
 	var lastStatusCode int
 	for i := 0; i < tries; i++ {
 		time.Sleep(time.Duration(intervalSeconds) * time.Second)
-		req, err := http.NewRequest("GET", fmt.Sprintf("%s/%s", serviceURL, id), http.NoBody)
+		req, err := http.NewRequest("GET", fmt.Sprintf("%s/%s", dbURL, id), http.NoBody)
 		if err != nil {
 			return fmt.Errorf("failed creating request to find db with id %s with: %w", id, err)
 		}
@@ -373,7 +393,7 @@ func (a *AuthenticatedClient) Terminate(id string, preparedStateOnly bool) error
 // * @param databaseID string representation of the database ID
 // @return error
 func (a *AuthenticatedClient) ParkAsync(databaseID string) error {
-	req, err := http.NewRequest("POST", fmt.Sprintf("%s/%s/park", serviceURL, databaseID), http.NoBody)
+	req, err := http.NewRequest("POST", fmt.Sprintf("%s/%s/park", dbURL, databaseID), http.NoBody)
 	if err != nil {
 		return fmt.Errorf("failed creating request to park db with id %s with: %w", databaseID, err)
 	}
@@ -410,7 +430,7 @@ func (a *AuthenticatedClient) Park(databaseID string) error {
 // * @param databaseID String representation of the database ID
 // @return error
 func (a *AuthenticatedClient) UnparkAsync(databaseID string) error {
-	req, err := http.NewRequest("POST", fmt.Sprintf("%s/%s/unpark", serviceURL, databaseID), http.NoBody)
+	req, err := http.NewRequest("POST", fmt.Sprintf("%s/%s/unpark", dbURL, databaseID), http.NoBody)
 	if err != nil {
 		return fmt.Errorf("failed creating request to unpark db with id %s with: %w", databaseID, err)
 	}
@@ -449,7 +469,7 @@ func (a *AuthenticatedClient) Unpark(databaseID string) error {
 // @return error
 func (a *AuthenticatedClient) Resize(databaseID string, capacityUnits int32) error {
 	body := fmt.Sprintf("{\"capacityUnits\":%d}", capacityUnits)
-	req, err := http.NewRequest("POST", fmt.Sprintf("%s/%s/resize", serviceURL, databaseID), bytes.NewBufferString(body))
+	req, err := http.NewRequest("POST", fmt.Sprintf("%s/%s/resize", dbURL, databaseID), bytes.NewBufferString(body))
 	if err != nil {
 		return fmt.Errorf("failed creating request to unpark db with id %s with: %w", databaseID, err)
 	}
