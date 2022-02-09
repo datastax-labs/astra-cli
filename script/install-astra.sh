@@ -29,11 +29,7 @@ VERSION_SHORT=${VERSION:1}
 echo "installing $OS $ARCH $VERSION"
 ARC_FOLDER=$EXE-cli-${VERSION_SHORT}_${OS}_${ARCH}
 ARC=$(echo "${ARC_FOLDER}.tar.gz")
-if [ "$OS" = "darwin" ]; then
-    ARC_FOLDER="$EXE-cli-osx-$ARCH-signed"
-    ARC=$(echo "${ARC_FOLDER}.zip")
-    UNARC="unzip $ARC"
-fi
+
 url=https://github.com/rsds143/astra-cli/releases/download/$VERSION/$ARC
 curl -O -L $url
 if [ "$OS" = "darwin" ]; then
