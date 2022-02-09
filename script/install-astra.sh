@@ -27,13 +27,12 @@ VERSION=$(curl --silent "https://api.github.com/repos/rsds143/astra-cli/releases
 VERSION_SHORT=${VERSION:1}
 
 echo "installing $OS $ARCH $VERSION"
-ARC_FOLDER=$EXE-cli-${VERSION_SHORT}_${OS}_${ARCH}
+ARC_FOLDER=$EXE-cli_${VERSION_SHORT}_${OS}_${ARCH}
 ARC=$(echo "${ARC_FOLDER}.tar.gz")
 
 url=https://github.com/rsds143/astra-cli/releases/download/$VERSION/$ARC
-curl -O -L $url
-
-tar zxvf $ARC
+curl -o $ARC -L $url
+tar zxvf $ARC  -C $ARC_FOLDER
 sudo mv $ARC_FOLDER/$EXE /usr/local/bin/$EXE
 
 rm -fr $ARC
