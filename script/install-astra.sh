@@ -32,7 +32,9 @@ ARC=$(echo "${ARC_FOLDER}.tar.gz")
 
 url=https://github.com/rsds143/astra-cli/releases/download/$VERSION/$ARC
 curl -o $ARC -L $url
+mkdir -p $ARC_FOLDER
 tar zxvf $ARC  -C $ARC_FOLDER
 sudo mv $ARC_FOLDER/$EXE /usr/local/bin/$EXE
 
 rm -fr $ARC
+rm -fr $ARC_FOLDER
