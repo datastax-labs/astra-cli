@@ -270,7 +270,7 @@ func (a *AuthenticatedClient) CreateDb(createDb astra.DatabaseInfoCreate) (astra
 	interval := 30
 	db, err := a.WaitUntil(id, tries, interval, astra.StatusEnumACTIVE)
 	if err != nil {
-		return db, fmt.Errorf("create db failed because '%v'", err)
+		return db, fmt.Errorf("waiting for status check on create db failed because '%v'", err)
 	}
 	return db, nil
 }
