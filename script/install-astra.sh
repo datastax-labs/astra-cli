@@ -32,11 +32,8 @@ ARC=$(echo "${ARC_FOLDER}.tar.gz")
 
 url=https://github.com/rsds143/astra-cli/releases/download/$VERSION/$ARC
 curl -O -L $url
-if [ "$OS" = "darwin" ]; then
-    unzip $ARC
-    sudo mv $EXE /usr/local/bin/$EXE
-else 
-    tar zxvf $ARC
-    sudo mv $ARC_FOLDER/$EXE /usr/local/bin/$EXE
-fi
+
+tar zxvf $ARC
+sudo mv $ARC_FOLDER/$EXE /usr/local/bin/$EXE
+
 rm -fr $ARC
