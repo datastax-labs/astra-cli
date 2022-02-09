@@ -18,16 +18,12 @@ builds:
       - darwin
     goarch:
       - amd64
-    hooks:
-      post: gon gon_osx_darwin_amd64.hcl
   - id: astra-osx-arm
     binary: astra
     goos:
       - darwin
     goarch:
       - arm64
-    hooks:
-      post: gon gon_osx_darwin_arm64.hcl
 changelog:
   sort: asc
   filters:
