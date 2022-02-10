@@ -13,6 +13,7 @@ import (
 	"time"
 
 	"github.com/datastax/astra-client-go/v2/astra"
+	"github.com/rsds143/astra-cli/pkg/env"
 )
 
 // Error when the api has an error this is the structure
@@ -95,7 +96,7 @@ func timeoutContext(timeSeconds int) (context.Context, context.CancelFunc) {
 }
 
 func AuthenticateToken(token string, verbose bool) (*AuthenticatedClient, error) {
-	astraClient, err := astra.NewClientWithResponses(apiURL, func(c *astra.Client) error {
+	astraClient, err := astra.NewClientWithResponses(apiURL(), func(c *astra.Client) error {
 		c.RequestEditors = append(c.RequestEditors, func(ctx context.Context, req *http.Request) error {
 			req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", token))
 			return nil
@@ -123,7 +124,7 @@ func Authenticate(clientInfo ClientInfo, verbose bool) (*AuthenticatedClient, er
 		ClientName:   clientInfo.ClientName,
 		ClientSecret: clientInfo.ClientSecret,
 	}
-	astraClientTmp, err := astra.NewClientWithResponses(apiURL)
+	astraClientTmp, err := astra.NewClientWithResponses(apiURL())
 	if err != nil {
 		return &AuthenticatedClient{}, fmt.Errorf("unexpected error setting up devops api client: %v", err)
 	}
@@ -137,7 +138,7 @@ func Authenticate(clientInfo ClientInfo, verbose bool) (*AuthenticatedClient, er
 		return &AuthenticatedClient{}, fmt.Errorf("unexpected error logging into devops api client: %v - %v", response.StatusCode(), response.Status())
 	}
 	token := response.JSON200.Token
-	astraClient, err := astra.NewClientWithResponses(apiURL, func(c *astra.Client) error {
+	astraClient, err := astra.NewClientWithResponses(apiURL(), func(c *astra.Client) error {
 		c.RequestEditors = append(c.RequestEditors, func(ctx context.Context, req *http.Request) error {
 			req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", *token))
 			return nil
@@ -162,8 +163,29 @@ func Authenticate(clientInfo ClientInfo, verbose bool) (*AuthenticatedClient, er
 	return authenticatedClient, nil
 }
 
-const apiURL = "https://api.astra.datastax.com"
-const dbURL = "https://api.astra.datastax.com/v2/databases"
+func apiURL() string {
+	if env.Verbose {
+		log.Printf("env is %v", Env)
+	}
+	switch Env {
+	case "dev":
+		return "https://api.dev.cloud.datastax.com"
+	case "test":
+		return "https://api.test.cloud.datastax.com"
+	default:
+		return "https://api.astra.datastax.com"
+	}
+}
+
+func dbURL() string {
+	url := fmt.Sprintf("%v/v2/databases", apiURL())
+	if env.Verbose {
+		log.Printf("db url is %v", url)
+	}
+	return url
+}
+
+var Env = "prod"
 
 func (a *AuthenticatedClient) ctx() (context.Context, context.CancelFunc) {
 	return timeoutContext(a.timeoutSeconds)
@@ -337,7 +359,7 @@ func (a *AuthenticatedClient) Terminate(id string, preparedStateOnly bool) error
 	var lastStatusCode int
 	for i := 0; i < tries; i++ {
 		time.Sleep(time.Duration(intervalSeconds) * time.Second)
-		req, err := http.NewRequest("GET", fmt.Sprintf("%s/%s", dbURL, id), http.NoBody)
+		req, err := http.NewRequest("GET", fmt.Sprintf("%s/%s", dbURL(), id), http.NoBody)
 		if err != nil {
 			return fmt.Errorf("failed creating request to find db with id %s with: %w", id, err)
 		}
@@ -384,7 +406,7 @@ func (a *AuthenticatedClient) Terminate(id string, preparedStateOnly bool) error
 // * @param databaseID string representation of the database ID
 // @return error
 func (a *AuthenticatedClient) ParkAsync(databaseID string) error {
-	req, err := http.NewRequest("POST", fmt.Sprintf("%s/%s/park", dbURL, databaseID), http.NoBody)
+	req, err := http.NewRequest("POST", fmt.Sprintf("%s/%s/park", dbURL(), databaseID), http.NoBody)
 	if err != nil {
 		return fmt.Errorf("failed creating request to park db with id %s with: %w", databaseID, err)
 	}
@@ -421,7 +443,7 @@ func (a *AuthenticatedClient) Park(databaseID string) error {
 // * @param databaseID String representation of the database ID
 // @return error
 func (a *AuthenticatedClient) UnparkAsync(databaseID string) error {
-	req, err := http.NewRequest("POST", fmt.Sprintf("%s/%s/unpark", dbURL, databaseID), http.NoBody)
+	req, err := http.NewRequest("POST", fmt.Sprintf("%s/%s/unpark", dbURL(), databaseID), http.NoBody)
 	if err != nil {
 		return fmt.Errorf("failed creating request to unpark db with id %s with: %w", databaseID, err)
 	}
@@ -460,7 +482,7 @@ func (a *AuthenticatedClient) Unpark(databaseID string) error {
 // @return error
 func (a *AuthenticatedClient) Resize(databaseID string, capacityUnits int32) error {
 	body := fmt.Sprintf("{\"capacityUnits\":%d}", capacityUnits)
-	req, err := http.NewRequest("POST", fmt.Sprintf("%s/%s/resize", dbURL, databaseID), bytes.NewBufferString(body))
+	req, err := http.NewRequest("POST", fmt.Sprintf("%s/%s/resize", dbURL(), databaseID), bytes.NewBufferString(body))
 	if err != nil {
 		return fmt.Errorf("failed creating request to unpark db with id %s with: %w", databaseID, err)
 	}

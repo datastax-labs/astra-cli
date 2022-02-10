@@ -19,12 +19,14 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/rsds143/astra-cli/pkg"
 	"github.com/rsds143/astra-cli/pkg/env"
 	"github.com/spf13/cobra"
 )
 
 func init() {
 	RootCmd.PersistentFlags().BoolVarP(&env.Verbose, "verbose", "v", false, "turns on verbose logging")
+	RootCmd.PersistentFlags().StringVarP(&pkg.Env, "env", "e", "prod", "environment to automate, other options are test and dev")
 	RootCmd.AddCommand(loginCmd)
 	RootCmd.AddCommand(dbCmd)
 }
