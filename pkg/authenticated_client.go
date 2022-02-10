@@ -167,14 +167,19 @@ func apiURL() string {
 	if env.Verbose {
 		log.Printf("env is %v", Env)
 	}
+	var url string
 	switch Env {
 	case "dev":
-		return "https://api.dev.cloud.datastax.com"
+		url = "https://api.dev.cloud.datastax.com"
 	case "test":
-		return "https://api.test.cloud.datastax.com"
+		url = "https://api.test.cloud.datastax.com"
 	default:
-		return "https://api.astra.datastax.com"
+		url = "https://api.astra.datastax.com"
 	}
+	if env.Verbose {
+		log.Printf("api url is %v", url)
+	}
+	return url
 }
 
 func dbURL() string {
