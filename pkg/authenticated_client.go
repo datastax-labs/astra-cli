@@ -36,25 +36,16 @@ func closeBody(res *http.Response) {
 
 func readErrorFromResponse(res *http.Response, expectedCodes ...int) error {
 	defer closeBody(res)
-	var resObj ErrorResponse
-	err := json.NewDecoder(res.Body).Decode(&resObj)
-	if err != nil {
-		return fmt.Errorf("CRITIAL ERROR unable to decode error response with error: '%v'. status code was %v for request URL %v", err, res.StatusCode, res.Request.URL)
-	}
 	var statusSuffix string
-	if len(expectedCodes) > 0 {
+	if len(expectedCodes) > 1 {
 		statusSuffix = "s"
-	}
-	var errorSuffix string
-	if len(resObj.Errors) > 0 {
-		errorSuffix = "s"
 	}
 	var codeString []string
 	for _, c := range expectedCodes {
 		codeString = append(codeString, fmt.Sprintf("%v", c))
 	}
 	formattedCodes := strings.Join(codeString, ", ")
-	return fmt.Errorf("expected status code%v %v but had: %v error with error%v - %v", statusSuffix, formattedCodes, res.StatusCode, errorSuffix, FormatErrors(resObj.Errors))
+	return fmt.Errorf("expected status code%v %v but had: %v", statusSuffix, formattedCodes, res.Status)
 }
 
 // FormatErrors puts the API errors into a well formatted text output
@@ -266,7 +257,7 @@ func (a *AuthenticatedClient) CreateDb(createDb astra.DatabaseInfoCreate) (astra
 	}
 	id := response.HTTPResponse.Header.Get("location")
 
-	tries := 30
+	tries := 90
 	interval := 30
 	db, err := a.WaitUntil(id, tries, interval, astra.StatusEnumACTIVE)
 	if err != nil {
@@ -375,7 +366,7 @@ func (a *AuthenticatedClient) Terminate(id string, preparedStateOnly bool) error
 			if a.verbose {
 				log.Printf("db %s not deleted yet expected status code 401 or a 200 with a db Status of %v or %v but was 200 with a db status of %v. trying again", id, astra.StatusEnumTERMINATED, astra.StatusEnumTERMINATING, db.Status)
 			} else {
-				log.Printf("waiting")
+				log.Printf(".")
 			}
 			continue
 		}
@@ -383,7 +374,7 @@ func (a *AuthenticatedClient) Terminate(id string, preparedStateOnly bool) error
 		if a.verbose {
 			log.Printf("db %s not deleted yet expected status code 401 or a 200 with a db Status of %v or %v but was: %v and error was '%v'. trying again", id, astra.StatusEnumTERMINATED, astra.StatusEnumTERMINATING, res.StatusCode, lastResponse)
 		} else {
-			log.Printf("waiting")
+			log.Printf(".")
 		}
 	}
 	return fmt.Errorf("delete of db %s not complete. Last response from finding db was '%v' and last status code was %v", id, lastResponse, lastStatusCode)

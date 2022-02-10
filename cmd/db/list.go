@@ -34,7 +34,7 @@ var startingAfter string
 var listFmt string
 
 func init() {
-	defaultLimit := 10
+	defaultLimit := 1000
 	ListCmd.Flags().IntVarP(&limit, "limit", "l", defaultLimit, "limit of databases retrieved")
 	ListCmd.Flags().StringVarP(&include, "include", "i", "", "the type of filter to apply")
 	ListCmd.Flags().StringVarP(&provider, "provider", "p", "", "provider to filter by")
