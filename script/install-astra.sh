@@ -27,20 +27,14 @@ VERSION=$(curl --silent "https://api.github.com/repos/rsds143/astra-cli/releases
 VERSION_SHORT=${VERSION:1}
 
 echo "installing $OS $ARCH $VERSION"
-ARC_FOLDER=$EXE-${VERSION_SHORT}_${OS}_${ARCH}
+ARC_FOLDER=$EXE-cli_${VERSION_SHORT}_${OS}_${ARCH}
 ARC=$(echo "${ARC_FOLDER}.tar.gz")
-if [ "$OS" = "darwin" ]; then
-    ARC_FOLDER="$EXE-osx-$ARCH-signed"
-    ARC=$(echo "${ARC_FOLDER}.zip")
-    UNARC="unzip $ARC"
-fi
+
 url=https://github.com/rsds143/astra-cli/releases/download/$VERSION/$ARC
-curl -O -L $url
-if [ "$OS" = "darwin" ]; then
-    unzip $ARC
-    sudo mv $EXE /usr/local/bin/$EXE
-else 
-    tar zxvf $ARC
-    sudo mv $ARC_FOLDER/$EXE /usr/local/bin/$EXE
-fi
+curl -o $ARC -L $url
+mkdir -p $ARC_FOLDER
+tar zxvf $ARC  -C $ARC_FOLDER
+sudo mv $ARC_FOLDER/$EXE /usr/local/bin/$EXE
+
 rm -fr $ARC
+rm -fr $ARC_FOLDER
