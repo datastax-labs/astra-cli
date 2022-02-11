@@ -6,6 +6,7 @@ before:
     - go mod tidy
 builds:
   - id: astra
+    binary: astra
     goos:
       - windows
       - linux
