@@ -60,7 +60,7 @@ func executeResize(args []string, makeClient func() (pkg.Client, error)) error {
 			Err:  fmt.Errorf("unable to parse capacity unit '%s' with error %v", capacityUnitRaw, err),
 		}
 	}
-	if err := client.Resize(id, int32(capacityUnit)); err != nil {
+	if err := client.Resize(id, int(capacityUnit)); err != nil {
 		return fmt.Errorf("unable to resize '%s' with error %v", id, err)
 	}
 	fmt.Printf("resize database %v submitted with size %v\n", id, capacityUnit)

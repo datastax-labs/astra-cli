@@ -33,10 +33,10 @@ type Client interface {
 	CreateDb(astraops.DatabaseInfoCreate) (astraops.Database, error)
 	Terminate(string, bool) error
 	FindDb(string) (astraops.Database, error)
-	ListDb(string, string, string, int32) ([]astraops.Database, error)
+	ListDb(string, string, string, int) ([]astraops.Database, error)
 	Park(string) error
 	Unpark(string) error
-	Resize(string, int32) error
+	Resize(string, int) error
 	GetSecureBundle(string) (astraops.CredsURL, error)
 	GetTierInfo() ([]astraops.AvailableRegionCombination, error)
 }

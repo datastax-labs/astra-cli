@@ -111,21 +111,6 @@ func TestCreateSetsKeyspace(t *testing.T) {
 	}
 }
 
-func TestCreateSetsCapacityUnit(t *testing.T) {
-	mockClient := &tests.MockClient{}
-	createDbCapacityUnit = 10000
-	err := executeCreate(func() (pkg.Client, error) {
-		return mockClient, nil
-	})
-	if err != nil {
-		t.Fatalf("unexpected error '%v'", err)
-	}
-	arg0 := mockClient.Call(0).(astraops.DatabaseInfoCreate)
-	if arg0.CapacityUnits != createDbCapacityUnit {
-		t.Errorf("expected '%v' but was '%v'", arg0.CapacityUnits, createDbCapacityUnit)
-	}
-}
-
 func TestCreateSetsRegion(t *testing.T) {
 	mockClient := &tests.MockClient{}
 	createDbRegion = "EU-West1"
@@ -138,39 +123,6 @@ func TestCreateSetsRegion(t *testing.T) {
 	arg0 := mockClient.Call(0).(astraops.DatabaseInfoCreate)
 	if arg0.Region != createDbRegion {
 		t.Errorf("expected '%v' but was '%v'", arg0.Region, createDbRegion)
-	}
-}
-
-func TestCreateSetsUser(t *testing.T) {
-	mockClient := &tests.MockClient{}
-	// sets createDbUser on the package variable in cmd/db/create.go
-	createDbUser = "john@james.com"
-	err := executeCreate(func() (pkg.Client, error) {
-		return mockClient, nil
-	})
-	if err != nil {
-		t.Fatalf("unexpected error '%v'", err)
-	}
-	arg0 := mockClient.Call(0).(astraops.DatabaseInfoCreate)
-	if arg0.User != &createDbUser {
-		user := *arg0.User
-		t.Errorf("expected '%v' but was '%v'", user, createDbUser)
-	}
-}
-
-func TestCreateSetsPass(t *testing.T) {
-	mockClient := &tests.MockClient{}
-	// sets createDbPassword on the package variable in cmd/db/create.go
-	createDbPassword = "afdfdf"
-	err := executeCreate(func() (pkg.Client, error) {
-		return mockClient, nil
-	})
-	if err != nil {
-		t.Fatalf("unexpected error '%v'", err)
-	}
-	arg0 := mockClient.Call(0).(astraops.DatabaseInfoCreate)
-	if arg0.Password != &createDbPassword {
-		t.Errorf("expected '%v' but was '%v'", *arg0.Password, createDbPassword)
 	}
 }
 

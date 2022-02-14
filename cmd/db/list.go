@@ -64,7 +64,7 @@ func executeList(login func() (pkg.Client, error)) (string, error) {
 		return "", fmt.Errorf("unable to login with error '%v'", err)
 	}
 	var dbs []astraops.Database
-	if dbs, err = client.ListDb(include, provider, startingAfter, int32(limit)); err != nil {
+	if dbs, err = client.ListDb(include, provider, startingAfter, limit); err != nil {
 		return "", fmt.Errorf("unable to get list of dbs with error '%v'", err)
 	}
 	switch listFmt {

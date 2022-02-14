@@ -79,7 +79,7 @@ func (c *MockClient) FindDb(id string) (astraops.Database, error) {
 }
 
 // ListDb returns all databases and stores the arguments as an interface array
-func (c *MockClient) ListDb(include string, provider string, startingAfter string, limit int32) ([]astraops.Database, error) {
+func (c *MockClient) ListDb(include string, provider string, startingAfter string, limit int) ([]astraops.Database, error) {
 	c.calls = append(c.calls, []interface{}{
 		include,
 		provider,
@@ -102,7 +102,7 @@ func (c *MockClient) Park(id string) error {
 }
 
 // Resize returns the next error, the id call and size is stored
-func (c *MockClient) Resize(id string, size int32) error {
+func (c *MockClient) Resize(id string, size int) error {
 	c.calls = append(c.calls, []interface{}{id, size})
 	return c.getError()
 }

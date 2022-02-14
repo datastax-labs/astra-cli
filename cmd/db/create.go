@@ -26,21 +26,15 @@ import (
 
 var createDbName string
 var createDbKeyspace string
-var createDbUser string
-var createDbPassword string
 var createDbRegion string
 var createDbTier string
-var createDbCapacityUnit int
 var createDbCloudProvider string
 
 func init() {
 	CreateCmd.Flags().StringVarP(&createDbName, "name", "n", "", "name to give to the Astra Database")
 	CreateCmd.Flags().StringVarP(&createDbKeyspace, "keyspace", "k", "", "keyspace user to give to the Astra Database")
-	CreateCmd.Flags().StringVarP(&createDbUser, "user", "u", "", "user password to give to the Astra Database")
-	CreateCmd.Flags().StringVarP(&createDbPassword, "password", "p", "", "db password to give to the Astra Database")
 	CreateCmd.Flags().StringVarP(&createDbRegion, "region", "r", "us-east1", "region to give to the Astra Database")
 	CreateCmd.Flags().StringVarP(&createDbTier, "tier", "t", "serverless", "tier to give to the Astra Database")
-	CreateCmd.Flags().IntVarP(&createDbCapacityUnit, "capacityUnit", "c", 1, "capacityUnit flag to give to the Astra Database")
 	CreateCmd.Flags().StringVarP(&createDbCloudProvider, "cloudProvider", "l", "GCP", "cloud provider flag to give to the Astra Database")
 }
 
@@ -67,10 +61,8 @@ func executeCreate(makeClient func() (pkg.Client, error)) error {
 	createDb := astraops.DatabaseInfoCreate{
 		Name:          createDbName,
 		Keyspace:      createDbKeyspace,
-		CapacityUnits: createDbCapacityUnit,
+		CapacityUnits: 1, // we only support 1 CU on initial creation as of Feb 14 2022
 		Region:        createDbRegion,
-		User:          &createDbUser,
-		Password:      &createDbPassword,
 		Tier:          astraops.Tier(createDbTier),
 		CloudProvider: astraops.CloudProvider(createDbCloudProvider),
 	}
