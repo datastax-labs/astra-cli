@@ -475,12 +475,6 @@ func (a *AuthenticatedClient) Resize(databaseID string, capacityUnits int) error
 	if res.StatusCode() != http.StatusAccepted {
 		return handleErrors(res.Body, res.Status())
 	}
-	tries := 60
-	interval := 30
-	_, err = a.WaitUntil(databaseID, tries, interval, astra.StatusEnumACTIVE)
-	if err != nil {
-		return fmt.Errorf("unable to check status for resize due to error '%v'", err)
-	}
 	return nil
 }
 
