@@ -107,7 +107,7 @@ func executeLogin(args []string, getHome func() (string, pkg.ConfFiles, error), 
 	}
 	switch {
 	case authToken != "":
-		if err := makeConf(confDir, pkg.PathWithEnv(confFiles.TokenPath), authToken); err != nil {
+		if err := makeConf(confDir, confFiles.TokenPath, authToken); err != nil {
 			return WriteError, err
 		}
 		return 0, nil
@@ -133,7 +133,7 @@ func executeLogin(args []string, getHome func() (string, pkg.ConfFiles, error), 
 			}
 		}
 		clientJSON = fmt.Sprintf("{\"clientId\":\"%v\",\"clientName\":\"%v\",\"clientSecret\":\"%v\"}", clientID, clientName, clientSecret)
-		if err := makeConf(confDir, pkg.PathWithEnv(confFiles.SaPath), clientJSON); err != nil {
+		if err := makeConf(confDir, confFiles.SaPath, clientJSON); err != nil {
 			return WriteError, err
 		}
 		return 0, nil

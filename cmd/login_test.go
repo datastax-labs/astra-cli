@@ -127,7 +127,7 @@ func TestArgs(t *testing.T) {
 	if exitCode != 0 {
 		t.Fatalf("unexpected exit code %v", exitCode)
 	}
-	fd, err := os.Open(pkg.PathWithEnv(f))
+	fd, err := os.Open(f)
 	if err != nil {
 		t.Fatalf("unexpected error %v", err)
 	}
@@ -175,7 +175,7 @@ func TestArgsWithNoPermission(t *testing.T) {
 	if exitCode != WriteError {
 		t.Errorf("unexpected exit code %v", exitCode)
 	}
-	expected := fmt.Sprintf("unable to create the login file due to error open %v: permission denied", pkg.PathWithEnv(f))
+	expected := fmt.Sprintf("unable to create the login file due to error open %v: permission denied", f)
 	if err.Error() != expected {
 		t.Errorf("expected '%v' but was '%v'", expected, err.Error())
 	}
@@ -390,7 +390,7 @@ func TestLoginToken(t *testing.T) {
 	if exitCode != 0 {
 		t.Fatalf("unexpected exit code %v", exitCode)
 	}
-	fd, err := os.Open(pkg.PathWithEnv(f))
+	fd, err := os.Open(f)
 	if err != nil {
 		t.Fatalf("unexpected error %v", err)
 	}
@@ -431,7 +431,7 @@ func TestLoginTokenInvalidPerms(t *testing.T) {
 	if exitCode != WriteError {
 		t.Errorf("unexpected exit code %v", exitCode)
 	}
-	expected := fmt.Sprintf("unable to create the login file due to error open %v: permission denied", pkg.PathWithEnv(f))
+	expected := fmt.Sprintf("unable to create the login file due to error open %v: permission denied", f)
 	if err.Error() != expected {
 		t.Errorf("expected '%v' but was '%v'", expected, err.Error())
 	}
