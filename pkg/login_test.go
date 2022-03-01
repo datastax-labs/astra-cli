@@ -59,7 +59,7 @@ func TestLoginWithInvalidTokenFile(t *testing.T) {
 	if err == nil {
 		t.Fatal("expected an error on an empty path")
 	}
-	expected := "found token at 'testdata/with_invalid_token/.config/astra/token' but unable to read token with error 'missing prefix 'AstraCS' in token file 'testdata/with_invalid_token/.config/astra/token''"
+	expected := "found token at 'testdata/with_invalid_token/.config/astra/prod_token' but unable to read token with error 'missing prefix 'AstraCS' in token file 'testdata/with_invalid_token/.config/astra/prod_token''"
 	if err.Error() != expected {
 		t.Errorf("expected '%v' but was '%v'", expected, err.Error())
 	}
@@ -74,7 +74,7 @@ func TestLoginWithEmptyTokenFile(t *testing.T) {
 	if err == nil {
 		t.Fatal("expected an error on an empty path")
 	}
-	expected := "found token at 'testdata/with_empty_token/.config/astra/token' but unable to read token with error 'token file 'testdata/with_empty_token/.config/astra/token' is empty'"
+	expected := "found token at 'testdata/with_empty_token/.config/astra/prod_token' but unable to read token with error 'token file 'testdata/with_empty_token/.config/astra/prod_token' is empty'"
 	if err.Error() != expected {
 		t.Errorf("expected '%v' but was '%v'", expected, err.Error())
 	}
@@ -100,7 +100,7 @@ func TestLoginWithInvalidSA(t *testing.T) {
 	if err == nil {
 		t.Fatal("expected an error on an empty path")
 	}
-	expected := "Invalid service account: Client ID for service account is empty for file 'testdata/with_invalid_sa/.config/astra/sa.json'"
+	expected := "Invalid service account: Client ID for service account is empty for file 'testdata/with_invalid_sa/.config/astra/prod_sa.json'"
 	if err.Error() != expected {
 		t.Errorf("expected '%v' but was '%v'", expected, err.Error())
 	}

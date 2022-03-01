@@ -69,12 +69,25 @@ func GetHome(getHome func() (string, error)) (confDir string, confFiles ConfFile
 	}
 	confDir = path.Join(home, ".config", "astra")
 
-	tokenFile := path.Join(confDir, "token")
-	saFile := path.Join(confDir, "sa.json")
+	tokenFile := path.Join(confDir, PathWithEnv("token"))
+	saFile := path.Join(confDir, PathWithEnv("sa.json"))
 	return confDir, ConfFiles{
 		TokenPath: tokenFile,
 		SaPath:    saFile,
 	}, nil
+}
+
+func PathWithEnv(f string) string {
+	if strings.Contains(f, string(os.PathSeparator)) {
+		tokens := strings.Split(f, string(os.PathSeparator))
+		tokenLen := len(tokens)
+		if tokenLen > 0 {
+			last := tokens[tokenLen-1]
+			tokens[tokenLen-1] = Env + "_" + last
+			return strings.Join(tokens, string(os.PathSeparator))
+		}
+	}
+	return Env + "_" + f
 }
 
 // ReadToken retrieves the login from the specified json file

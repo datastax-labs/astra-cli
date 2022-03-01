@@ -20,6 +20,20 @@ import (
 	"testing"
 )
 
+func TestPathWithEnvWhenPath(t *testing.T) {
+	newPath := PathWithEnv("/test/sa.json")
+	if newPath != "/test/prod_sa.json" {
+		t.Errorf("expected path of /test/prod_sa.json but was %v", newPath)
+	}
+}
+
+func TestPathWithEnvWhenNoPath(t *testing.T) {
+	newPath := PathWithEnv("sa.json")
+	if newPath != "prod_sa.json" {
+		t.Errorf("expected path of prod_sa.json but was %v", newPath)
+	}
+}
+
 func TestReadLogin(t *testing.T) {
 	c, err := ReadLogin("testdata/sa.json")
 	if err != nil {
