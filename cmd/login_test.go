@@ -1,4 +1,4 @@
-//  Copyright 2021 Ryan Svihla
+//  Copyright 2022 DataStax
 //
 //  Licensed under the Apache License, Version 2.0 (the "License");
 //  you may not use this file except in compliance with the License.
@@ -22,7 +22,7 @@ import (
 	"path"
 	"testing"
 
-	"github.com/rsds143/astra-cli/pkg"
+	"github.com/datastax-labs/astra-cli/pkg"
 )
 
 const testJSON = `{"clientId":"deeb55bd-2a55-4988-a345-d8fdddd0e0c9","clientName":"me@example.com","clientSecret":"6ae15bff-1435-430f-975b-9b3d9914b698"}`

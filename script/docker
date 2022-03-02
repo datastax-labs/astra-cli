@@ -1,1 +1,1 @@
- podman build -t ghcr.io/rsds143/astra-cli:latest .                                                              
+ podman build -t ghcr.io/datastax-labs/astra-cli:latest .                                                              

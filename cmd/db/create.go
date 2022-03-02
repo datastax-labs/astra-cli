@@ -1,4 +1,4 @@
-//  Copyright 2021 Ryan Svihla
+//  Copyright 2022 DataStax
 //
 //  Licensed under the Apache License, Version 2.0 (the "License");
 //  you may not use this file except in compliance with the License.
@@ -19,8 +19,8 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/datastax-labs/astra-cli/pkg"
 	astraops "github.com/datastax/astra-client-go/v2/astra"
-	"github.com/rsds143/astra-cli/pkg"
 	"github.com/spf13/cobra"
 )
 

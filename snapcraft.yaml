@@ -9,7 +9,7 @@ base: core18
 parts:
   astra-cli:
     plugin: go
-    go-importpath: github.com/rsds143/astra-cli
+    go-importpath: github.com/datastax-labs/astra-cli
     source: .
     source-type: git
     build-packages:

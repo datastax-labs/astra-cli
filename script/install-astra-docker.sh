@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Copyright 2021 Ryan Svihla
+# Copyright 2022 DataStax
 #
 #   Licensed under the Apache License, Version 2.0 (the « License »);
 #   you may not use this file except in compliance with the License.
@@ -16,5 +16,5 @@
 # script/install-astra-docker.sh: create a bash script that wraps the astra-cli docker image
 
 sudo echo '#!/usr/bin/env bash' > /usr/local/bin/astra.sh
-sudo echo 'docker run -it -v $HOME:/root ghcr.io/rsds143/astra-cli /astra "$@"' >> /usr/local/bin/astra.sh
+sudo echo 'docker run -it -v $HOME:/root ghcr.io/datastax-labs/astra-cli /astra "$@"' >> /usr/local/bin/astra.sh
 sudo chmod +x /usr/local/bin/astra.sh
