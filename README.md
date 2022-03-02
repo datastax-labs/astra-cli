@@ -14,7 +14,7 @@ Ready for production
 
 ## How to install - install script
 
-* /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/rsds143/astra-cli/main/script/install-astra.sh)"
+* /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/datastax-labs/astra-cli/main/script/install-astra.sh)"
 * astra login
 
 ## How to install - docker
@@ -22,7 +22,7 @@ Ready for production
 Instead of downloading the binary this trusts that you have docker installed
 
 * make sure docker is installed
-* /bin/bash -c "$(curl -fsSL  https://raw.githubusercontent.com/rsds143/astra-cli/main/script/install-astra-docker.sh)"
+* /bin/bash -c "$(curl -fsSL  https://raw.githubusercontent.com/datastax-labs/astra-cli/main/script/install-astra-docker.sh)"
 * astra.sh login
 
 ## How to install - Homebrew for Mac and Linux
@@ -32,7 +32,7 @@ Instead of downloading the binary this trusts that you have docker installed
 
 ## How to install - Release Binaries
 
-* download a [release](https://github.com/rsds143/astra-cli/releases)
+* download a [release](https://github.com/datastax-labs/astra-cli/releases)
 * tar zxvf <download>
 * cd <extracted folder>
 * ./astra
@@ -40,7 +40,7 @@ Instead of downloading the binary this trusts that you have docker installed
 ## How to install - From Source
 
 * Install [Go 1.17](https://golang.org/dl/)
-* run `git clone git@github.com:rsds143/astra-cli.git`
+* run `git clone git@github.com:datastax-labs/astra-cli.git`
 * run `./scripts/build` or `go build -o ./bin/astra .`
 
 ## How to use
