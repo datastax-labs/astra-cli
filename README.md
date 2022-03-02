@@ -25,11 +25,6 @@ Instead of downloading the binary this trusts that you have docker installed
 * /bin/bash -c "$(curl -fsSL  https://raw.githubusercontent.com/rsds143/astra-cli/main/script/install-astra-docker.sh)"
 * astra.sh login
 
-## How to install - Homebrew for Mac and Linux
-
-* [install homebrew](https://brew.sh/) if you have not
-* `brew tap rsds143/rsds && brew install astra-cli`
-
 ## How to install - Release Binaries
 
 * download a [release](https://github.com/rsds143/astra-cli/releases)
