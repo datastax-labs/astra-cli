@@ -2,7 +2,7 @@
 
 Apache 2.0 licensed Astra Cloud Management CLI 
 
-[![.github/workflows/go.yaml](https://github.com/datastax/astra-cli/actions/workflows/go.yaml/badge.svg)](https://github.com/datastax-labs/astra-cli/actions/workflows/go.yaml)
+[![.github/workflows/go.yaml](https://github.com/datastax-labs/astra-cli/actions/workflows/go.yaml/badge.svg)](https://github.com/datastax-labs/astra-cli/actions/workflows/go.yaml)
 [![Go Report Card](https://goreportcard.com/badge/github.com/datastax-labs/astra-cli)](https://goreportcard.com/report/github.com/datastax-labs/astra-cli)
 [![GitHub go.mod Go version of a Go module](https://img.shields.io/github/go-mod/go-version/datastax-labs/astra-cli)](https://img.shields.io/github/go-mod/go-version/datastax-labs/astra-cli)
 [![Latest Version](https://img.shields.io/github/v/release/datastax-labs/astra-cli?include_prereleases)](https://github.com/datastax-labs/astra-cli/releases)
