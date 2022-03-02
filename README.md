@@ -2,11 +2,11 @@
 
 Apache 2.0 licensed Astra Cloud Management CLI 
 
-[![.github/workflows/go.yaml](https://github.com/rsds143/astra-cli/actions/workflows/go.yaml/badge.svg)](https://github.com/rsds143/astra-cli/actions/workflows/go.yaml)
-[![Go Report Card](https://goreportcard.com/badge/github.com/rsds143/astra-cli)](https://goreportcard.com/report/github.com/rsds143/astra-cli)
-[![GitHub go.mod Go version of a Go module](https://img.shields.io/github/go-mod/go-version/rsds143/astra-cli)](https://img.shields.io/github/go-mod/go-version/rsds143/astra-cli)
-[![Latest Version](https://img.shields.io/github/v/release/rsds143/astra-cli?include_prereleases)](https://github.com/rsds143/astra-cli/releases)
-[![Coverage Status](https://coveralls.io/repos/github/rsds143/astra-cli/badge.svg)](https://coveralls.io/github/rsds143/astra-cli)
+[![.github/workflows/go.yaml](https://github.com/datastax/astra-cli/actions/workflows/go.yaml/badge.svg)](https://github.com/datastax-labs/astra-cli/actions/workflows/go.yaml)
+[![Go Report Card](https://goreportcard.com/badge/github.com/datastax-labs/astra-cli)](https://goreportcard.com/report/github.com/datastax-labs/astra-cli)
+[![GitHub go.mod Go version of a Go module](https://img.shields.io/github/go-mod/go-version/datastax-labs/astra-cli)](https://img.shields.io/github/go-mod/go-version/datastax-labs/astra-cli)
+[![Latest Version](https://img.shields.io/github/v/release/datastax-labs/astra-cli?include_prereleases)](https://github.com/datastax-labs/astra-cli/releases)
+[![Coverage Status](https://coveralls.io/repos/github/datastax-labs/astra-cli/badge.svg)](https://coveralls.io/github/datastax-labs/astra-cli)
 
 ## status
 
@@ -16,14 +16,6 @@ Ready for production
 
 * /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/datastax-labs/astra-cli/main/script/install-astra.sh)"
 * astra login
-
-## How to install - docker
-
-Instead of downloading the binary this trusts that you have docker installed
-
-* make sure docker is installed
-* /bin/bash -c "$(curl -fsSL  https://raw.githubusercontent.com/datastax-labs/astra-cli/main/script/install-astra-docker.sh)"
-* astra.sh login
 
 ## How to install - Release Binaries
 

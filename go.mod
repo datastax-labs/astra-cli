@@ -1,4 +1,4 @@
-module github.com/rsds143/astra-cli
+module github.com/datastax-labs/astra-cli
 
 go 1.17
 

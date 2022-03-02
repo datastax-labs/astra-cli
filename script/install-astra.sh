@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Copyright 2021 Ryan Svihla
+# Copyright 2022 DataStax
 #
 #   Licensed under the Apache License, Version 2.0 (the « License »);
 #   you may not use this file except in compliance with the License.
@@ -23,14 +23,14 @@ if [ "$ARCH" = "x86_64" ]; then
     ARCH="amd64"
 fi
 
-VERSION=$(curl --silent "https://api.github.com/repos/rsds143/astra-cli/releases/latest" |  grep tag_name | sed -nr 's/"tag_name": "(.+)",/\1/p'  | xargs)
+VERSION=$(curl --silent "https://api.github.com/repos/datastax-labs/astra-cli/releases/latest" |  grep tag_name | sed -nr 's/"tag_name": "(.+)",/\1/p'  | xargs)
 VERSION_SHORT=${VERSION:1}
 
 echo "installing $OS $ARCH $VERSION"
 ARC_FOLDER=$EXE-cli_${VERSION_SHORT}_${OS}_${ARCH}
 ARC=$(echo "${ARC_FOLDER}.tar.gz")
 
-url=https://github.com/rsds143/astra-cli/releases/download/$VERSION/$ARC
+url=https://github.com/datastax-labs/astra-cli/releases/download/$VERSION/$ARC
 curl -o $ARC -L $url
 mkdir -p $ARC_FOLDER
 tar zxvf $ARC  -C $ARC_FOLDER

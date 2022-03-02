@@ -1,4 +1,4 @@
-//  Copyright 2021 Ryan Svihla
+//  Copyright 2022 DataStax
 //
 //  Licensed under the Apache License, Version 2.0 (the "License");
 //  you may not use this file except in compliance with the License.
@@ -19,7 +19,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/rsds143/astra-cli/cmd/db"
+	"github.com/datastax-labs/astra-cli/cmd/db"
 	"github.com/spf13/cobra"
 )
 
