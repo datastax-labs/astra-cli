@@ -17,14 +17,6 @@ Ready for production
 * /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/datastax-labs/astra-cli/main/script/install-astra.sh)"
 * astra login
 
-## How to install - docker
-
-Instead of downloading the binary this trusts that you have docker installed
-
-* make sure docker is installed
-* /bin/bash -c "$(curl -fsSL  https://raw.githubusercontent.com/datastax-labs/astra-cli/main/script/install-astra-docker.sh)"
-* astra.sh login
-
 ## How to install - Release Binaries
 
 * download a [release](https://github.com/datastax-labs/astra-cli/releases)
