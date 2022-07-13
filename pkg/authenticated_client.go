@@ -308,7 +308,7 @@ func (a *AuthenticatedClient) CreateDb(createDb astra.DatabaseInfoCreate) (astra
 	}
 	id := response.HTTPResponse.Header.Get("location")
 
-	tries := 90
+	tries := 120
 	interval := 30
 	db, err := a.WaitUntil(id, tries, interval, astra.StatusEnumACTIVE)
 	if err != nil {
